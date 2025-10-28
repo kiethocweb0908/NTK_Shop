@@ -178,8 +178,8 @@ const NewArrivals = () => {
       <div className="container mx-auto text-center mb-10 relative">
         <h2 className="text-3xl font-bold mb-4">Khám phá sản phẩm mới</h2>
         <p className="text-lg text-gray-600 mb-8">
-          Discover the latest styles straight off the runway, freshly added to
-          keep your wardrobe on the cutting edge of fashion.
+          Khám phá xu hướng mới nhất – những thiết kế vừa ra mắt giúp tủ đồ của
+          bạn luôn bắt kịp đỉnh cao thời trang.
         </p>
 
         {/* Scroll buttons */}
@@ -213,7 +213,7 @@ const NewArrivals = () => {
       <div
         ref={scrollRef}
         className={`container mx-auto overflow-x-scroll flex space-x-6 relative
-          
+          no-scrollbar
           ${isDragging ? ' cursor-grabbing' : 'cursor-grab'}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
