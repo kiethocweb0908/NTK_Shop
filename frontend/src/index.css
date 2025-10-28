@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+/* @import 'tw-animate-css'; */
+@config "../tailwind.config.js";
+
+#root {
+  font-family: 'Inter', sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+@layer base {
+  :root {
+    /* Beautiful gradient colors */
+    --primary-100: #ffbb94;
+    --primary-200: #fb9590;
+    --primary-300: #dc586d;
+    --primary-400: #a33757;
+    --primary-500: #852e4e;
+    --primary-600: #4c1d3d;
+  }
+}
+
+.active-navbar {
+  border-color: var(--primary-300);
+  color: var(--primary-300);
+}
