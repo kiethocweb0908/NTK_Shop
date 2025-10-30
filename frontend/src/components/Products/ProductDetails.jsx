@@ -1,4 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
+//
+
+('use client');
+import Autoplay from 'embla-carousel-autoplay';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
+
+//
 
 const selectedProduct = {
   name: 'Stylish Jacket',
@@ -35,94 +49,96 @@ const selectedProduct = {
 
 const ProductDetails = () => {
   const [mainImage, setMainImage] = useState(0);
-  const imageRef = useRef();
+  const [emblaApi, setEmblaApi] = useState(null); // Lưu api
+  const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: false }));
 
-  // console.log(imageRef.current.scrollLeft);
-
-  const startScroll = (index) => {
-    setMainImage(index);
-    scroll(index);
-  };
-
-  const scroll = (index) => {
-    const container = imageRef.current;
-    const width = container.clientWidth;
-    const scrollLeft = Math.round(container.scrollLeft);
-    if (index === mainImage) return;
-
-    const scrollAmout =
-      index < mainImage
-        ? -(mainImage - index) * width
-        : (index - mainImage) * width;
-
-    imageRef.current.scrollBy({ left: scrollAmout, behavior: 'smooth' });
-  };
-
+  // Khi carousel thay đổi slide
   useEffect(() => {
-    if (selectedProduct?.images?.length > 0) {
-      setMainImage(0);
+    if (!emblaApi) return;
 
-      // const interval = setInterval(() => {
-      //   setMainImage((prev) => (prev + 1) % selectedProduct.images.length);
-      // }, 3000); // 3 giây
+    const onSelect = () => {
+      setMainImage(emblaApi.selectedScrollSnap());
+    };
 
-      // return () => clearInterval(interval); // clear khi unmount
+    onSelect(); // Gọi lần đầu
+    emblaApi.on('select', onSelect);
+
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi]);
+
+  // Hàm nhảy đến slide khi click thumbnail
+  const scrollTo = (index) => {
+    if (emblaApi) {
+      emblaApi.scrollTo(index);
     }
-  }, [selectedProduct]);
+  };
 
   return (
     <div className="p-4">
-      <div className="max-w-6xl mx-auto bg-white p-8 rounded-lg">
-        <div className="flex flex-col md:flex-row">
-          {/* left Thumbnails */}
-          <div className="hidden md:flex flex-col space-y-4 mr-6">
-            {selectedProduct.images.map((image, index) => (
-              <img
-                key={index}
-                src={image.url}
-                alt={image.altText || `Thumbnails ${index}`}
-                className={`w-20 h-20 object-cover rounded-lg cursor-pointer border
-                  transition-all duration-550 ease-in
-                  ${mainImage === index ? 'border-black' : 'border-gray-300'}`}
-                onClick={() => {
-                  startScroll(index);
-                }}
-              />
-            ))}
-          </div>
-
-          {/* main image */}
-          <div className="md:w-1/2 w-full">
-            <div
-              ref={imageRef}
-              className="mb-4 flex rounded-lg overflow-x-scroll "
-            >
+      <div className="max-w-6xl mx-auto bg-white p4-8 sm:p-8  rounded-lg">
+        <div className="flex flex-col md:grid md:grid-cols-12">
+          {/* left */}
+          <div className="flex flex-col sm:flex-row  md:col-span-8 lg:col-span-6">
+            {/* Thumbnails */}
+            <div className="hidden sm:flex flex-col space-y-4 min-w-[60px] mr-5">
               {selectedProduct.images.map((image, index) => (
                 <img
                   key={index}
                   src={image.url}
-                  alt="Main Product"
-                  className={`w-full h-auto object-cover
-                    `}
+                  alt={image.altText || `Thumbnails ${index}`}
+                  className={`w-20 h-20 object-cover rounded-lg cursor-pointer border-2
+                  transition-all duration-550 ease-in
+                  ${mainImage === index ? 'border-black' : 'border-gray-300'}`}
+                  onClick={() => scrollTo(index)}
+                />
+              ))}
+            </div>
+
+            {/* main image */}
+            <div className="sm:col-span-6">
+              <Carousel
+                setApi={setEmblaApi} // Nhận api
+                plugins={[plugin.current]}
+                className="mb-4 sm:mb-0 rounded-xl overflow-hidden border border-gray-200"
+                // onMouseEnter={plugin.current.stop}
+                onMouseLeave={plugin.current.reset}
+              >
+                <CarouselContent>
+                  {selectedProduct.images.map((image, index) => (
+                    <CarouselItem key={index}>
+                      <img
+                        src={image.url}
+                        alt="Main Product"
+                        className={`w-full h-auto object-cover`}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {/* <CarouselPrevious />
+              <CarouselNext /> */}
+              </Carousel>
+            </div>
+
+            {/* mobile thumbnail */}
+            <div className="sm:hidden grid grid-cols-5 gap-2 mb-4">
+              {selectedProduct.images.map((image, index) => (
+                <img
+                  key={index}
+                  src={image.url}
+                  alt={image.altText || `Thumbnails ${index}`}
+                  className={`w-20 h-20 object-cover rounded-lg cursor-pointer
+                  border-2
+                  transition-all duration-550 ease-in
+                  ${mainImage === index ? 'border-black' : 'border-gray-300'}`}
+                  onClick={() => scrollTo(index)}
                 />
               ))}
             </div>
           </div>
-
-          {/* mobile thumbnail */}
-          <div className="md:hidden flex overscroll-x-auto space-x-4 mb-4">
-            {selectedProduct.images.map((image, index) => (
-              <img
-                key={index}
-                src={image.url}
-                alt={image.altText || `Thumbnails ${index}`}
-                className="w-20 h-20 object-cover rounded-lg cursor-pointer border"
-              />
-            ))}
-          </div>
-
           {/* Right Side*/}
-          <div className="md:w-1/2 md:ml-10">
+          <div className="sm:mt-10 md:mt-0 md:ml-10 md:col-span-4 lg:col-span-6">
             {/* Tên giá mô tả */}
             <h1 className="text-2xl md:text-3xl font-semibold mb-2">
               {selectedProduct.name}

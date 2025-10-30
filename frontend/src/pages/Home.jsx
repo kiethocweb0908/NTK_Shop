@@ -4,6 +4,7 @@ import GenderCollectionSection from '../components/Products/GenderCollectionSect
 import NewArriivals from '../components/Products/NewArrivals';
 import NewArrivals from '../components/Products/NewArrivals';
 import ProductDetails from '../components/Products/ProductDetails';
+import { Button } from '@/components/ui/button';
 
 const Home = () => {
   return (
