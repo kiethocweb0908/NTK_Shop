@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 
 import { connectDB } from "./config/db.js";
 
+import userRoutes from "./routes/userRoutes.js";
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -23,3 +25,6 @@ connectDB().then(() => {
 app.get("/", (req, res) => {
   res.send("WELCOME TO NTK API!");
 });
+
+// API Routes
+app.use("/api/users", userRoutes);
