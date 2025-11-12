@@ -1,6 +1,6 @@
 export const navType = {
-  man: 'Nam',
-  woman: 'Nữ',
-  shirt: 'Áo',
-  pants: 'Quần',
+  all: 'Tất cả',
+  tops: 'Áo',
+  bottoms: 'Quần',
+  outerwears: 'Áo khoác',
 };

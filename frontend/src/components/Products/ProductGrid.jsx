@@ -15,7 +15,10 @@ const ProductGrid = ({ products }) => {
             </div>
             <h3 className="text-sm mb-2">{product.name}</h3>
             <p className="text-gray-500 font-medium text-sm tracking-tighter">
-              {product.price} vnđ
+              {product.price.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+              })}{' '}
             </p>
           </div>
         </Link>
