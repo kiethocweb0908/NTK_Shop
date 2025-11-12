@@ -1,0 +1,9 @@
+# .gitignore
+# Ignore node_modules
+backend/node_modules/
+frontend/node_modules/
+
+# Ignore environment files
+backend/.env
+frontend/.env
+NTK_Shop.git/
