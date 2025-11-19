@@ -1,8 +1,12 @@
 import express from "express";
 
 import {
+  //public
   getAllProducts,
   getProduct,
+  getSimilarProduct,
+  getBestSellerProduct,
+  //Private
   createProduct,
   updateProduct,
   deleteProduct,
@@ -23,6 +27,8 @@ const router = express.Router();
 
 // Public router
 router.get("/", getAllProducts);
+router.get("/best-seller", getBestSellerProduct);
+router.get("/similar/:productId", getSimilarProduct);
 router.get("/:id", getProduct);
 
 // Protected admin router

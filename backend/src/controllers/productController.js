@@ -11,19 +11,37 @@ export const getAllProducts = async (req, res) => {
       category, // Lọc theo danh mục
       productCollection, // Lọc theo bộ sưu tập
       gender, // Lọc theo giới tính
+      material,
+      sizes,
+      colors,
       minPrice, // Giá tối thiểu
       maxPrice, // Giá tối đa
+      search,
       page = 1, // Trang hiện tại (mặc định trang 1)
       limit = 12, // Số sản phẩm mỗi trang (mặc định 12)
-      sort = "-createdAt", // Sắp xếp (mặc định mới nhất trước)
+      sort = "default", // Sắp xếp (mặc định mới nhất trước)
     } = req.query;
 
     let filter = { isPublished: true };
+    let sortOptions = {};
 
     // Thêm điều kiện lọc nếu có trong query
     if (category) filter.category = category;
     if (productCollection) filter.productCollection = productCollection;
     if (gender) filter.gender = gender;
+    if (material) filter.material = { $in: material.split(",") };
+
+    // 🎯 LỌC THEO NHIỀU SIZES
+    if (sizes) {
+      const sizeArray = sizes.split(","); // ["S", "M", "L"]
+      filter["variants.sizes.name"] = { $in: sizeArray };
+    }
+
+    // 🎯 LỌC THEO NHIỀU COLORS
+    if (colors) {
+      const colorArray = colors.split(","); // ["den", "do", "xanh"]
+      filter["variants.colorSlug"] = { $in: colorArray };
+    }
 
     // Lọc theo khoảng giá
     if (minPrice || maxPrice) {
@@ -32,11 +50,40 @@ export const getAllProducts = async (req, res) => {
       if (maxPrice) filter.price.$lte = Number(maxPrice); // Giá <= maxPrice
     }
 
+    // Lọc theo từ khoá
+    if (search)
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { tags: { $in: [new RegExp(search, "i")] } },
+      ];
+
+    // Sắp xếp
+    if (sort) {
+      switch (sort) {
+        case "priceAsc":
+          sortOptions = { price: 1 };
+          break;
+        case "priceDesc":
+          sortOptions = { price: -1 };
+          break;
+        case "popularity":
+          sortOptions = { rating: -1 };
+          break;
+        case "oldest":
+          sortOptions = { createdAt: 1 };
+          break;
+        default:
+          sortOptions = { createdAt: -1 };
+          break;
+      }
+    }
+
     const products = await Product.find(filter)
       .populate("category", "name slug")
       .populate("productCollection", "name slug")
       .populate("user", "name email")
-      .sort(sort)
+      .sort(sortOptions)
       .limit(limit * 1) // Giới hạn số lượng (limit * 1 để chuyển string thành number)
       .skip((page - 1) * limit); // Bỏ qua các sản phẩm của trang trước
 
@@ -47,7 +94,7 @@ export const getAllProducts = async (req, res) => {
     res.json({
       products, // Danh sách sản phẩm
       totalPages: Math.ceil(total / limit), // Tổng số trang
-      currentPage: page, // Trang hiện tại
+      currentPage: Number(page), // Trang hiện tại
       total, // Tổng số sản phẩm
     });
   } catch (error) {
@@ -75,6 +122,69 @@ export const getProduct = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// @route GET /api/products/similar/:productId
+// @desc Retrieve similar products based on the current product gender and category
+// @access Public
+export const getSimilarProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+
+    if (!product)
+      return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
+
+    const similarProduct = await Product.find({
+      _id: { $ne: productId },
+      gender: product.gender,
+      category: product.category,
+    }).limit(4);
+
+    res.json(similarProduct);
+  } catch (error) {
+    console.error("Lỗi khi gọi getSimilarProduct: ", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// @route GET /api/products/best-seller/
+// @desc Retrieve the product with highest rating
+// @access Public
+export const getBestSellerProduct = async (req, res) => {
+  try {
+    const bestSellerproduct = await Product.findOne().sort({ rating: -1 });
+
+    if (!bestSellerproduct)
+      return res
+        .status(404)
+        .json({ message: "Hiện không tìm thấy sản phẩm best seller!" });
+
+    res.json(bestSellerproduct);
+  } catch (error) {
+    console.error("Lỗi khi gọi getBestSellerProduct: ", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// @route GET /api/products/new-arrivals
+// @desc Retrieve latest 8 products - Creation date
+// @access Public
+export const getNewProduct = async (req, res) => {
+  try {
+    const newProduct = await Product.find().sort({ createdAt: -1 }).limit(8);
+
+    if (!newProduct)
+      return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+
+    res.json(newProduct);
+  } catch (error) {
+    console.error("Lỗi khi gọi getNewProduct: ", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ------------------------------------------------
 
 // @route POST /api/products
 // @desc Create products

@@ -49,3 +49,28 @@ export const admin = (req, res, next) => {
     });
   }
 };
+
+export const optionalAuth = async (req, res, next) => {
+  try {
+    let token;
+
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+
+      // Verify token nếu có
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Get user từ token
+      req.user = await User.findById(decoded.user.id).select("-password");
+    }
+
+    // Nếu không có token, vẫn cho đi tiếp (req.user sẽ là undefined)
+    next();
+  } catch (error) {
+    // Nếu token không hợp lệ, vẫn cho đi tiếp (không throw error)
+    console.error("Optional auth error:", error);
+    next();
+  }
+};

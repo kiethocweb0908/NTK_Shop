@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import Cart from "../models/Cart.js";
 
 //Register User
 export const registerUser = async (req, res) => {
@@ -71,7 +72,7 @@ export const registerUser = async (req, res) => {
 //Login User
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, guestId } = req.body;
 
     //Find the user by email
     let user = await User.findOne({ email });
@@ -86,6 +87,23 @@ export const loginUser = async (req, res) => {
 
     if (!isMatch)
       return res.status(400).json({ message: "Mật khẩu không đúng!" });
+
+    // 🎯 MERGE CARTS TRƯỚC KHI TẠO TOKEN
+    // const guestId = req.cookies?.guestId;
+    let mergedItems = 0;
+    let result = {};
+
+    if (guestId) {
+      try {
+        const mergeResult = await Cart.mergeCarts(guestId, user._id);
+        mergedItems = mergeResult.cart ? mergeResult.cart.products.length : 0;
+        result = { ...mergeResult };
+        res.clearCookie("guestId"); // Xóa guestId sau khi merge
+      } catch (mergeError) {
+        console.error("Merge cart error:", mergeError);
+        // Không throw error để không ảnh hưởng login
+      }
+    }
 
     //Create JWT Payload
     const payload = { user: { id: user._id, role: user.role } };
@@ -103,10 +121,12 @@ export const loginUser = async (req, res) => {
         role: user.role,
       },
       token,
+      mergedItems,
+      result,
     });
   } catch (error) {
     console.error("Lỗi khi gọi loginUser: ", error);
-    res.status(500).send("Server Error");
+    res.status(500).json("Server Error");
   }
 };
 

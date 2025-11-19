@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import collectionRoutes from "./routes/collectionRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 
 const app = express();
 app.use(express.json());
@@ -34,3 +35,4 @@ app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
