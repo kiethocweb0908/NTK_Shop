@@ -1,6 +1,9 @@
+import axios from 'axios';
+import { BASE_URL } from '@/lib/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 const NewArrivals = () => {
   const scrollRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -9,96 +12,112 @@ const NewArrivals = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const newArrivals = [
-    {
-      _id: 1,
-      name: 'Stylish Jacket',
-      price: 350000,
-      images: [
-        {
-          url: 'https://picsum.photos/500/500?random=1',
-          altText: 'Stylish',
-        },
-      ],
-    },
-    {
-      _id: 2,
-      name: 'Gile',
-      price: 350000,
-      images: [
-        {
-          url: 'https://picsum.photos/500/500?random=1',
-          altText: 'Stylish',
-        },
-      ],
-    },
-    {
-      _id: 3,
-      name: 'Bomber',
-      price: 350000,
-      images: [
-        {
-          url: 'https://picsum.photos/500/500?random=1',
-          altText: 'Stylish',
-        },
-      ],
-    },
-    {
-      _id: 4,
-      name: 'T-shirt',
-      price: 350000,
-      images: [
-        {
-          url: 'https://picsum.photos/500/500?random=1',
-          altText: 'Stylish',
-        },
-      ],
-    },
-    {
-      _id: 5,
-      name: 'Pants',
-      price: 350000,
-      images: [
-        {
-          url: 'https://picsum.photos/500/500?random=1',
-          altText: 'Stylish',
-        },
-      ],
-    },
-    {
-      _id: 6,
-      name: 'Sweater',
-      price: 350000,
-      images: [
-        {
-          url: 'https://picsum.photos/500/500?random=1',
-          altText: 'Stylish',
-        },
-      ],
-    },
-    {
-      _id: 7,
-      name: 'Stylish',
-      price: 350000,
-      images: [
-        {
-          url: 'https://picsum.photos/500/500?random=1',
-          altText: 'Stylish',
-        },
-      ],
-    },
-    {
-      _id: 8,
-      name: 'Jacket',
-      price: 350000,
-      images: [
-        {
-          url: 'https://picsum.photos/500/500?random=1',
-          altText: 'Stylish',
-        },
-      ],
-    },
-  ];
+  const [newArrivals, setNewArrivals] = useState([]);
+
+  useEffect(() => {
+    const fetchNewArrivals = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/products/new-arrivals`);
+        setNewArrivals(response.data);
+      } catch (error) {
+        console.error('Lỗi xảy ra khi truy xuất fetchNewArrivals: ', error);
+        toast.error('Lỗi xảy ra khi truy xuất fetchNewArrivals.');
+      }
+    };
+    fetchNewArrivals();
+  }, []);
+
+  // const newArrivals = [
+
+  //   {
+  //     _id: 1,
+  //     name: 'Stylish Jacket',
+  //     price: 350000,
+  //     images: [
+  //       {
+  //         url: 'https://picsum.photos/500/500?random=1',
+  //         altText: 'Stylish',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     _id: 2,
+  //     name: 'Gile',
+  //     price: 350000,
+  //     images: [
+  //       {
+  //         url: 'https://picsum.photos/500/500?random=1',
+  //         altText: 'Stylish',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     _id: 3,
+  //     name: 'Bomber',
+  //     price: 350000,
+  //     images: [
+  //       {
+  //         url: 'https://picsum.photos/500/500?random=1',
+  //         altText: 'Stylish',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     _id: 4,
+  //     name: 'T-shirt',
+  //     price: 350000,
+  //     images: [
+  //       {
+  //         url: 'https://picsum.photos/500/500?random=1',
+  //         altText: 'Stylish',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     _id: 5,
+  //     name: 'Pants',
+  //     price: 350000,
+  //     images: [
+  //       {
+  //         url: 'https://picsum.photos/500/500?random=1',
+  //         altText: 'Stylish',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     _id: 6,
+  //     name: 'Sweater',
+  //     price: 350000,
+  //     images: [
+  //       {
+  //         url: 'https://picsum.photos/500/500?random=1',
+  //         altText: 'Stylish',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     _id: 7,
+  //     name: 'Stylish',
+  //     price: 350000,
+  //     images: [
+  //       {
+  //         url: 'https://picsum.photos/500/500?random=1',
+  //         altText: 'Stylish',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     _id: 8,
+  //     name: 'Jacket',
+  //     price: 350000,
+  //     images: [
+  //       {
+  //         url: 'https://picsum.photos/500/500?random=1',
+  //         altText: 'Stylish',
+  //       },
+  //     ],
+  //   },
+  // ];
 
   //chuột
 
@@ -171,7 +190,7 @@ const NewArrivals = () => {
       updateScrollButtons();
       return () => container.removeEventListener('scroll', updateScrollButtons);
     }
-  }, []);
+  }, [newArrivals]);
 
   return (
     <section className="px-4 md:px-0">
@@ -229,15 +248,24 @@ const NewArrivals = () => {
             className="min-w-full sm:min-w-[50%] lg:min-w-[30%] relative select-none"
           >
             <img
-              src={product.images[0]?.url}
-              alt={product.images[0].altText || product.name}
+              src={product.variants[0]?.images[0].url}
+              alt={product.variants[0]?.images[0].altText || product.name}
               className="w-full h-[500px] object-cover rounded-lg"
               draggable="false"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-black/50 backdrop-blur-md text-white p-4 rounded-b-lg">
               <Link to={`/product/${product._id}`} className="block">
                 <h4 className="font-medium">{product.name}</h4>
-                <p className="mt-1">{product.price} vnđ</p>
+                <p className="mt-1">
+                  {product.discountPrice.toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND',
+                  }) ||
+                    product.price.toLocaleString('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND',
+                    })}
+                </p>
               </Link>
             </div>
           </div>

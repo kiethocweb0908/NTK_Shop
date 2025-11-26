@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import Category from "../models/Category.js";
 import Collection from "../models/Collection.js";
@@ -128,16 +129,20 @@ export const getProduct = async (req, res) => {
 // @access Public
 export const getSimilarProduct = async (req, res) => {
   try {
-    const { productId } = req.params;
+    const { id } = req.params;
 
-    const product = await Product.findById(productId);
+    // THÊM DÒNG NÀY ĐỂ TRÁNH CRASH
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid product ID" });
+    }
+
+    const product = await Product.findById(id);
 
     if (!product)
       return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
 
     const similarProduct = await Product.find({
-      _id: { $ne: productId },
-      gender: product.gender,
+      _id: { $ne: id },
       category: product.category,
     }).limit(4);
 

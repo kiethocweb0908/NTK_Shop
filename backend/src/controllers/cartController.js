@@ -9,13 +9,22 @@ export const getCart = async (req, res) => {
   try {
     const cart = req.cart;
 
+    console.log("🛒 getCart - Cart data:", {
+      cartId: cart?._id,
+      user: cart?.user,
+      guestId: cart?.guestId,
+      productsCount: cart?.products?.length,
+      totalItems: cart?.totalItems,
+    });
+
     res.json({
-      user: cart.user,
-      guestId: cart.guestId,
-      products: cart.products,
-      totalItems: cart.totalItems,
-      totalPrice: cart.totalPrice,
+      // user: cart.user,
+      // guestId: cart.guestId,
+      // products: cart.products,
+      // totalItems: cart.totalItems,
+      // totalPrice: cart.totalPrice,
       //   isEmpty: cart.products.length === 0,
+      cart,
     });
   } catch (error) {
     console.error("Lỗi khi gọi getCart:", error);
@@ -45,9 +54,24 @@ export const addProductToCart = async (req, res) => {
 
     // Chưa đăng nhập / guest user
     if (!currentCart) {
-      currentCart = new Cart({
-        [req.user ? "user" : "guestId"]: req.user ? req.user._id : guestId,
-      });
+      // Nếu có user → tạo cart với user
+      if (req.user) {
+        currentCart = new Cart({
+          user: req.user._id,
+        });
+      }
+      // Nếu có guestId → tạo cart với guestId
+      else if (guestId) {
+        currentCart = new Cart({
+          guestId: guestId,
+        });
+      }
+      // 🚨 Nếu không có cả user lẫn guestId → lỗi (trường hợp này không nên xảy ra)
+      else {
+        return res
+          .status(400)
+          .json({ message: "Không thể xác định người dùng" });
+      }
     }
 
     // tạo cart item
@@ -72,6 +96,10 @@ export const addProductToCart = async (req, res) => {
         return res.status(400).json({ message: err.message });
       }
       throw err; // để catch ngoài cùng xử lý
+    }
+
+    if (!cart) {
+      await currentCart.save();
     }
 
     if (currentCart.user) {
@@ -144,7 +172,7 @@ export const updateQuantityOfProductInCart = async (req, res) => {
     await cart.populate("user", "name email");
 
     res.json({
-      message: "Đã cập nhật giỏ hàng",
+      message: "Đã cập nhật số lượng!",
       cart: {
         _id: cart._id,
         user: cart.user,
@@ -187,7 +215,7 @@ export const removeProductFromCart = async (req, res) => {
         guestId: cart.guestId,
         totalItems: cart.totalItems,
         totalPrice: cart.totalPrice,
-        products: cart.products,
+        products: cart.products || [],
       },
     });
   } catch (error) {

@@ -6,16 +6,23 @@ export const validateAndGetCart = async (req, res, next) => {
   try {
     const { productId, color, size } = req.body;
 
+    // console.log("✅ Headers:", req.headers);
+    // console.log("✅ Cookies:", req.cookies);
+    // console.log("✅ Body:", req.body);
+
     if (!productId || !color || !size) {
       return res.status(400).json({ message: "Thiếu thông tin sản phẩm!" });
     }
 
     let guestId = req.cookies?.guestId;
+
     if (!req.user && !guestId) {
       guestId = "guest_" + new mongoose.Types.ObjectId().toString();
       res.cookie("guestId", guestId, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // localhost thì false
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // quan trọng!
       });
       req.newGuestId = guestId; // Đánh dấu guestId mới tạo
     }
@@ -65,13 +72,25 @@ export const validateAndGetCart = async (req, res, next) => {
 
 export const getCartMiddleware = async (req, res, next) => {
   try {
+    let guestId = req.cookies?.guestId;
+
+    // SIÊU QUAN TRỌNG: TẠO guestId NGAY KHI CHƯA CÓ – CHO CẢ LẦN GET CART!
+    if (!req.user && !guestId) {
+      guestId = "guest_" + new mongoose.Types.ObjectId().toString();
+      res.cookie("guestId", guestId, {
+        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 NĂM – KHÔNG BAO GIỜ HẾT HẠN!
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      });
+    }
+
     let cart;
 
     if (req.user) {
       cart = await Cart.findOne({ user: req.user._id });
-    } else {
-      const guestId = req.cookies?.guestId;
-      if (guestId) cart = await Cart.findOne({ guestId });
+    } else if (guestId) {
+      cart = await Cart.findOne({ guestId });
     }
 
     if (!cart) {

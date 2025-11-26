@@ -61,7 +61,10 @@ const cartSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
-    products: [cartItemSchema],
+    products: {
+      type: [cartItemSchema],
+      default: [],
+    },
     totalPrice: {
       type: Number,
       required: true,

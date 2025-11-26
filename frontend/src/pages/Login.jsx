@@ -2,10 +2,18 @@ import { Button } from '@/components/ui/button';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import login from '@/assets/login.webp';
+import { loginUser } from '../redux/slices/authSlice';
+import { useDispatch } from 'react-redux';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(loginUser({ email, password }));
+  };
 
   return (
     <div className="flex flex-row container mx-auto px-4 lg:px-0">
@@ -21,9 +29,10 @@ const Login = () => {
           </p>
           {/* email */}
           <div className="mb-4">
-            <lable className="block text-sm font-semibold mb-2">Email</lable>
+            <label className="block text-sm font-semibold mb-2">Email</label>
             <input
-              type="enmail"
+              type="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-2 border rounded"
@@ -32,10 +41,11 @@ const Login = () => {
           </div>
           {/* password */}
           <div className="mb-4">
-            <lable className="block text-sm font-semibold mb-2">Password</lable>
+            <label className="block text-sm font-semibold mb-2">Password</label>
             <input
               type="password"
               value={password}
+              autoComplete="password"
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-2 border rounded"
               placeholder="Nhập mật khẩu của bạn"
@@ -44,7 +54,13 @@ const Login = () => {
           {/* button */}
           {/* <button type='submit' className='w-full bg-black text-white p-2 rounded-lg font-semibold
           hover:bg-pri'></button> */}
-          <Button variant="primary" size="full" type="submit" className="">
+          <Button
+            variant="primary"
+            size="full"
+            type="submit"
+            className=""
+            onClick={(e) => handleSubmit(e)}
+          >
             Đăng nhập
           </Button>
           <p className="mt-6 text-center text-sm">

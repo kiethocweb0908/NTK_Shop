@@ -1,10 +1,16 @@
-import { useState } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { useDispatch } from 'react-redux';
+import store from './redux/store';
+
+import { fetchCurrentUser } from './redux/slices/authSlice';
+import { fetchCart } from './redux/slices/cartSlice';
+
+// Components
+import NotFound from './pages/NotFound';
 import UserLayout from './components/Layout/UserLayout';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
-import { Toaster } from 'sonner';
-import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -21,16 +27,53 @@ import ProductManagement from './components/Admin/ProductManagement';
 import EditProdcutPage from './components/Admin/EditProdcutPage';
 import OrderManagement from './components/Admin/OrderManagement';
 import Aa from './components/Admin/AccordionItem ';
+import { useEffect } from 'react';
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'instant', // hoặc 'smooth' cho hiệu ứng mượt
+  });
+
+  return null;
+};
 
 function App() {
-  const [count, setCount] = useState(0);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Luôn gọi /me khi app khởi động để check authentication
+    dispatch(fetchCurrentUser())
+      .unwrap()
+      .then((user) => {
+        // Nếu có user → fetch cart từ server
+        if (user) {
+          dispatch(fetchCart());
+        }
+      })
+      .catch((error) => {
+        // QUAN TRỌNG: Chỉ log error nếu không phải "chưa đăng nhập"
+        if (error?.type !== 'NOT_LOGGED_IN') {
+          console.error('❌ Lỗi khi lấy user info:', error?.message);
+        } else {
+          console.log('🔐 Chưa đăng nhập - chuyển sang guest mode');
+        }
+
+        // Không có user hoặc token expired → vẫn fetch cart (sẽ dùng guestId)
+        dispatch(fetchCart());
+      });
+  }, [dispatch]);
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Toaster position="top-right" closeButton richColors />
+
       <Routes>
+        {/* User Layout */}
         <Route path="/" element={<UserLayout />}>
-          {/* User Layout */}
           <Route index element={<Home />} />
           <Route path="shop" element={<Shop />} />
           <Route path="login" element={<Login />} />
@@ -44,8 +87,8 @@ function App() {
           <Route path="my-orders" element={<MyOrdersPage />} />
         </Route>
 
+        {/* Admin Layout */}
         <Route path="/admin" element={<AdminLayout />}>
-          {/* Admin Layout */}
           <Route index element={<AdminHomePage />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="products" element={<ProductManagement />} />

@@ -6,6 +6,7 @@ import {
   getProduct,
   getSimilarProduct,
   getBestSellerProduct,
+  getNewProduct,
   //Private
   createProduct,
   updateProduct,
@@ -28,7 +29,8 @@ const router = express.Router();
 // Public router
 router.get("/", getAllProducts);
 router.get("/best-seller", getBestSellerProduct);
-router.get("/similar/:productId", getSimilarProduct);
+router.get("/similar/:id", getSimilarProduct);
+router.get("/new-arrivals", getNewProduct);
 router.get("/:id", getProduct);
 
 // Protected admin router

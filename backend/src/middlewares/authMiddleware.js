@@ -5,7 +5,14 @@ export const protect = async (req, res, next) => {
   try {
     let token;
 
+    // 1. Ưu tiên lấy token từ httpOnly cookie
+    if (req.cookies?.token) {
+      token = req.cookies.token;
+    }
+
+    // 2. Nếu không có → fallback đọc từ header (cho trường hợp cũ)
     if (
+      !token &&
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
@@ -27,7 +34,6 @@ export const protect = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Auth middleware error:", error);
-    // res.status(401).json({ message: "Token không hợp lệ" });
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "Token không hợp lệ" });
     }
@@ -54,12 +60,20 @@ export const optionalAuth = async (req, res, next) => {
   try {
     let token;
 
+    // Ưu tiên cookie
+    if (req.cookies?.token) {
+      token = req.cookies.token;
+    }
+
     if (
+      !token &&
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
+    }
 
+    if (token) {
       // Verify token nếu có
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       // Get user từ token

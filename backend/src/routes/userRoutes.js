@@ -3,26 +3,17 @@ import {
   registerUser,
   loginUser,
   getUser,
+  logoutUser,
 } from "../controllers/userController.js";
 
 import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// @route POST /api/users/register
-// @desc Register a new user
-// @access Public
 router.post("/register", registerUser);
-
-// @route POST /api/users/login
-// @desc Autheticate user
-// @access Public
 router.post("/login", loginUser);
-
-// @route GET /api/users/profile
-// @desc Get logged-in user's profile (Protected Route)
-// @access Private
-router.get("/profile", protect, getUser);
+router.get("/me", protect, getUser);
+router.post("/logout", logoutUser);
 
 // module.exports = router;
 export default router;

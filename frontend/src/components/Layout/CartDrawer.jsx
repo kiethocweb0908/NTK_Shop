@@ -31,7 +31,7 @@ const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
       </div>
 
       {/* Thanh toán */}
-      <div className="p-4 bg-white sticky bottom-0">
+      <div className="p-4 bg-white fixed right-0 left-0 bottom-0">
         <button
           onClick={handleCheckout}
           className="w-full text-white bg-primary-400 border-2 border-primary-400 py-3 rounded-lg font-semibold

@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import register from '@/assets/register.webp';
 import { Button } from '@/components/ui/button';
+import { registerUser } from '../redux/slices/authSlice';
+import { useDispatch } from 'react-redux';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  const dispatch = useDispatch();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Kiểm tra mật khẩu trùng nhau
+    if (password !== confirmPassword) {
+      setError('Mật khẩu nhập lại không khớp');
+      return; // dừng lại, không gửi lên server
+    }
+
+    dispatch(registerUser({ name, email, password, confirmPassword }));
+  };
 
   return (
     <div className="flex flex-row container mx-auto px-4 lg:px-0">
@@ -70,7 +86,13 @@ const Register = () => {
           {/* button */}
           {/* <button type='submit' className='w-full bg-black text-white p-2 rounded-lg font-semibold
           hover:bg-pri'></button> */}
-          <Button variant="primary" size="full" type="submit" className="">
+          <Button
+            variant="primary"
+            size="full"
+            type="submit"
+            className=""
+            onClick={(e) => handleSubmit(e)}
+          >
             Đăng ký
           </Button>
           <p className="mt-6 text-center text-sm">

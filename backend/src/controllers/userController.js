@@ -2,13 +2,21 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import Cart from "../models/Cart.js";
 
+// Helper function to set token cookie
+const setTokenCookie = (res, token) => {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 40 * 60 * 60 * 1000, // 40 hours
+  });
+};
+
 //Register User
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    //Registration logic
-    // res.send({ name, email, password });
     let user = await User.findOne({ email });
 
     if (user) {
@@ -54,6 +62,8 @@ export const registerUser = async (req, res) => {
       expiresIn: "40h",
     });
 
+    setTokenCookie(res, token);
+
     res.status(201).json({
       user: {
         _id: user._id,
@@ -61,7 +71,7 @@ export const registerUser = async (req, res) => {
         email: user.email,
         role: user.role,
       },
-      token,
+      // token,
     });
   } catch (error) {
     console.error("Lỗi khi gọi registerUser: ", error);
@@ -72,7 +82,7 @@ export const registerUser = async (req, res) => {
 //Login User
 export const loginUser = async (req, res) => {
   try {
-    const { email, password, guestId } = req.body;
+    const { email, password } = req.body;
 
     //Find the user by email
     let user = await User.findOne({ email });
@@ -89,7 +99,7 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Mật khẩu không đúng!" });
 
     // 🎯 MERGE CARTS TRƯỚC KHI TẠO TOKEN
-    // const guestId = req.cookies?.guestId;
+    const guestId = req.cookies?.guestId;
     let mergedItems = 0;
     let result = {};
 
@@ -113,6 +123,8 @@ export const loginUser = async (req, res) => {
       expiresIn: "40h",
     });
 
+    setTokenCookie(res, token);
+
     res.json({
       user: {
         _id: user._id,
@@ -120,7 +132,7 @@ export const loginUser = async (req, res) => {
         email: user.email,
         role: user.role,
       },
-      token,
+      // token,
       mergedItems,
       result,
     });
@@ -136,6 +148,22 @@ export const getUser = async (req, res) => {
     res.json(req.user);
   } catch (error) {
     console.error("Lỗi khi gọi getUser: ", error);
+    res.status(500).send("Server Error");
+  }
+};
+
+// Logout User
+export const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
+
+    res.json({ message: "Đã đăng xuất thành công!" });
+  } catch (error) {
+    console.error("Lỗi khi gọi logoutUser: ", error);
     res.status(500).send("Server Error");
   }
 };

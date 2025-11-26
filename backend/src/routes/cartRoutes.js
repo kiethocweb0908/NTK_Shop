@@ -16,16 +16,11 @@ const router = express.Router();
 router.get("/", optionalAuth, getCartMiddleware, getCart);
 router.post("/", optionalAuth, validateAndGetCart, addProductToCart);
 router.patch(
-  "/products",
+  "/",
   optionalAuth,
   validateAndGetCart,
   updateQuantityOfProductInCart
 );
-router.delete(
-  "/products",
-  optionalAuth,
-  validateAndGetCart,
-  removeProductFromCart
-);
+router.delete("/", optionalAuth, validateAndGetCart, removeProductFromCart);
 
 export default router;
