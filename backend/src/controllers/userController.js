@@ -126,6 +126,7 @@ export const loginUser = async (req, res) => {
     setTokenCookie(res, token);
 
     res.json({
+      message: "Đăng nhập thành công!",
       user: {
         _id: user._id,
         name: user.name,

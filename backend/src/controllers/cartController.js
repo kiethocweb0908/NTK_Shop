@@ -9,15 +9,8 @@ export const getCart = async (req, res) => {
   try {
     const cart = req.cart;
 
-    console.log("🛒 getCart - Cart data:", {
-      cartId: cart?._id,
-      user: cart?.user,
-      guestId: cart?.guestId,
-      productsCount: cart?.products?.length,
-      totalItems: cart?.totalItems,
-    });
-
     res.json({
+      message: "Lấy giỏ hàng thành công!",
       // user: cart.user,
       // guestId: cart.guestId,
       // products: cart.products,

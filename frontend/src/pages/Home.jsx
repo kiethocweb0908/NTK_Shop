@@ -74,10 +74,11 @@ const Home = () => {
     dispatch(
       fetchProductsByFilters({
         gender: 'Unisex',
-        category: '6915a790acc063bc839feab9',
+        // category: '6915a790acc063bc839feab9',
         limit: 8,
       })
     );
+
     const fetchBestSeller = async () => {
       try {
         const response = await axiosInstance.get(`api/products/best-seller`);

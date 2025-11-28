@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  HiOutlineUser,
-  HiOutlineShoppingBag,
-  HiBars3BottomRight,
-} from 'react-icons/hi2';
+import { HiOutlineUser, HiOutlineShoppingBag, HiBars3BottomRight } from 'react-icons/hi2';
 import SearchBar from './SearchBar';
 import CartDrawer from '../Layout/CartDrawer';
 import { navType } from '../../lib/data';
@@ -43,10 +39,7 @@ const Navbar = () => {
       <nav className="container mx-auto flex items-center justify-between al py-4 px-4 md:px-0 ">
         {/* Logo */}
         <div onClick={() => setNavActive('')}>
-          <Link
-            to="/"
-            className="text-2xl font-medium text-black hover:text-primary-300"
-          >
+          <Link to="/" className="text-2xl font-medium text-black hover:text-primary-300">
             NTK Clothing
           </Link>
         </div>
@@ -56,7 +49,7 @@ const Navbar = () => {
           {Object.keys(navType).map((type, index) => (
             <Link
               key={index}
-              to="/collections/all"
+              to="/shop"
               className={`block min-w-[72px] text-center h-full p-5 
                 rounded-tl-3xl rounded-tr-3xl rounded-bl-3xl rounded-br-lg
                 text-sm font-bold border-2 border-white
@@ -102,10 +95,7 @@ const Navbar = () => {
           </button>
         </div>
       </nav>
-      <CartDrawer
-        cartDrawerOpen={cartDrawerOpen}
-        tonggleCartDrawer={tonggleCartDrawer}
-      />
+      <CartDrawer cartDrawerOpen={cartDrawerOpen} tonggleCartDrawer={tonggleCartDrawer} />
       {/* mobile */}
       <div
         className={`md:hidden fixed top-0 left-0 w-4/5 sm:w-2/3 md:w-1/2 h-full bg-white shadow-lg transform transition-transform duration-300 z-50
@@ -122,7 +112,7 @@ const Navbar = () => {
             {Object.keys(navType).map((type, index) => (
               <Link
                 key={index}
-                to="/collections/all"
+                to="/shop"
                 onClick={tongglNavDrawer}
                 className="block text-gray-600 hover:text-primary-300"
               >

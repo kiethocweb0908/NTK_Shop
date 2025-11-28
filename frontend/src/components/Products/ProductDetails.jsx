@@ -51,10 +51,8 @@ const ProductDetails = ({ productId }) => {
   );
   // Selected size
   const [selectedSize, setSelectedSize] = useState('');
-
   // quantity
   const [quantity, setQuantity] = useState(1);
-
   const [isButtonDisabled, setIsButtonDisable] = useState(false);
 
   useEffect(() => {
@@ -63,6 +61,11 @@ const ProductDetails = ({ productId }) => {
       dispatch(clearSelectedProduct());
       dispatch(fetchProductDetails({ id: productFetchId }));
       dispatch(fetchSimilarProducts({ id: productFetchId }));
+
+      // Reset state khi thay đổi product
+      setcurrentColorIndex(0);
+      setSelectedSize('');
+      setQuantity(1);
     }
   }, [productFetchId, dispatch]);
 

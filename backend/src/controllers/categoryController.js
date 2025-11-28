@@ -5,9 +5,11 @@ import Category from "../models/Category.js";
 // @access Public
 export const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ isActive: true }).sort({
-      createdAt: -1,
-    });
+    const categories = await Category.find({ isActive: true })
+      .select("_id name")
+      .sort({
+        name: -1,
+      });
 
     res.json(categories);
   } catch (error) {

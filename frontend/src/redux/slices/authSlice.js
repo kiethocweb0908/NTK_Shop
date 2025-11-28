@@ -41,7 +41,7 @@ export const loginUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(`/api/users/login`, userData);
-      return response.data.user;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data.message || 'Đăng nhập thất bại');
     }
@@ -67,7 +67,7 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/api/users/logout');
-      return response?.data?.message || null;
+      return response?.data || null;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Logout failed');
     }
@@ -116,10 +116,11 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
+        state.user = action.payload.user;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
+        state.user = null;
         state.error = action.payload;
       })
 

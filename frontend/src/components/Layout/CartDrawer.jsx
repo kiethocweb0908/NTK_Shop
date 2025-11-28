@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import CartContents from '../Cart/CartContents';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
+  const { cart, loading, error } = useSelector((state) => state.cart);
+
   const navigate = useNavigate();
   const handleCheckout = () => {
     tonggleCartDrawer();
@@ -32,6 +35,12 @@ const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
 
       {/* Thanh toán */}
       <div className="p-4 bg-white fixed right-0 left-0 bottom-0">
+        <div className="flex justify-between mb-4">
+          <p className="font-medium">Số lượng: {cart?.totalItems}</p>
+          <p className="text-2xl leading-none font-medium">
+            {cart?.totalPrice?.toLocaleString('vi-VN')}
+          </p>
+        </div>
         <button
           onClick={handleCheckout}
           className="w-full text-white bg-primary-400 border-2 border-primary-400 py-3 rounded-lg font-semibold

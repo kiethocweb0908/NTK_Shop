@@ -1,18 +1,58 @@
 import { Button } from '@/components/ui/button';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import login from '@/assets/login.webp';
 import { loginUser } from '../redux/slices/authSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import Result_ from 'postcss/lib/result';
+import { toast } from 'sonner';
+import { fetchCart } from '@/redux/slices/cartSlice';
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const location = useLocation();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
+  const from = location.state?.from?.pathname || '/';
 
-  const handleSubmit = (e) => {
+  // Tự động chuyển hướng khi đã login
+  useEffect(() => {
+    if (user) {
+      navigate(from || '/', { replace: true });
+
+      dispatch(fetchCart())
+        .unwrap()
+        .then((result) => {
+          setTimeout(() => {
+            toast.success(result?.message || 'cart');
+          }, 1000);
+        })
+        .catch((error) => {
+          toast.error(error?.message || 'lỗi');
+        });
+    }
+  }, [user, navigate, from, dispatch]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+
+    if (!email || !password) {
+      alert('Vui lòng nhập email và password');
+      return;
+    }
+    try {
+      const result = await dispatch(loginUser({ email, password })).unwrap();
+      toast.success(`Đăng nhập thành công. Chào mừng ${result.user.name}!`);
+    } catch (error) {
+      toast.error(error?.message || 'Đăng nhập thất bại');
+    }
+
+    // Không cần navigate ở đây vì useEffect sẽ xử lý
+
+    // dispatch(loginUser({ email, password }));
   };
 
   return (
@@ -24,9 +64,7 @@ const Login = () => {
             <h2 className="text-xl font-medium">Rabbit</h2>
           </div>
           <h2 className="text-2xl font-bold text-center mb-6">Hey there</h2>
-          <p className="text-center mb-6">
-            Enter your username and password to login
-          </p>
+          <p className="text-center mb-6">Enter your username and password to login</p>
           {/* email */}
           <div className="mb-4">
             <label className="block text-sm font-semibold mb-2">Email</label>
@@ -74,11 +112,7 @@ const Login = () => {
 
       <div className="hidden lg:block w-1/2 bg-gray-800">
         <div className="h-full flex flex-col justify-center items-center">
-          <img
-            src={login}
-            alt="Login"
-            className="h-[750px] w-full object-cover"
-          />
+          <img src={login} alt="Login" className="h-[750px] w-full object-cover" />
         </div>
       </div>
     </div>

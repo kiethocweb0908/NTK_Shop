@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PayPalButton from './PayPalButton';
+import { useSelector } from 'react-redux';
 
 const cart = {
   products: [
@@ -34,6 +35,8 @@ const Checkout = () => {
     phone: '',
   });
 
+  const { cart, loading, error } = useSelector((state) => state.cart);
+  const product = cart.products;
   const handleCreateCheckout = (e) => {
     e.preventDefault();
     // setCheckoutId(123);
@@ -157,10 +160,7 @@ const Checkout = () => {
           </div>
           <div className="mt-6">
             {!checkoutId ? (
-              <button
-                type="submit"
-                className="w-full bg-black text-white py-3 rounded"
-              >
+              <button type="submit" className="w-full bg-black text-white py-3 rounded">
                 Continue to Payment
               </button>
             ) : (
@@ -182,10 +182,7 @@ const Checkout = () => {
         <h3 className="text-lg mb-4">Order Sumary</h3>
         <div className="border-t py-4 mb-4">
           {cart.products.map((product, index) => (
-            <div
-              key={index}
-              className="flex items-start justify-between py-2 border-b"
-            >
+            <div key={index} className="flex items-start justify-between py-2 border-b">
               <div className="flex items-start">
                 <img
                   src={product.image}

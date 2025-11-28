@@ -63,8 +63,16 @@ const CartContents = () => {
       if (newQty !== item.quantity) {
         dispatch(updateCartItemQuantity({ productId, color, size, quantity: newQty }))
           .unwrap()
-          .then((result) => toast.success(result.message))
-          .catch((error) => toast.error(error || 'Lỗi cập nhật số lượng'));
+          .then((result) =>
+            toast.success(result.message, {
+              duration: 2000, // 3 giây
+            })
+          )
+          .catch((error) =>
+            toast.error(error || 'Lỗi cập nhật số lượng', {
+              duration: 2000, // 3 giây
+            })
+          );
       }
     } catch (error) {
       console.error('Lỗi khi lấy thông tin sản phẩm:', error);
@@ -134,7 +142,7 @@ const CartContents = () => {
   }
 
   return (
-    <div>
+    <div className="max-h-[450px]">
       {cart.products.map((product, index) => (
         <div className="flex items-start justify-between py-4 border-b" key={index}>
           <div className="flex items-start">

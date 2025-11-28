@@ -1,24 +1,36 @@
 import FilterSidebar from '@/components/Products/FilterSidebar';
 import ProductGrid from '@/components/Products/ProductGrid';
 import SortOptions from '@/components/Products/SortOptions';
+import { fetchProductsByFilters } from '@/redux/slices/productsSlice';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaFilter } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 const CollectionPage = () => {
-  const [products, setProducts] = useState([]);
+  const { collection } = useParams();
+  const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const { products, loading, error } = useSelector((state) => state.products);
+  const queryParams = Object.fromEntries([...searchParams]);
+
+  // const [products, setProducts] = useState([]);
   const sidebarRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    dispatch(fetchProductsByFilters({ collection, ...queryParams }));
+  }, [dispatch, collection, searchParams]);
+
+  // Đóng mở filter
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
   const handleClickOutside = (e) => {
     if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
       setIsSidebarOpen(false);
     }
   };
-
   useEffect(() => {
     //Add event listener for clicks
     document.addEventListener('mousedown', handleClickOutside);
@@ -29,63 +41,8 @@ const CollectionPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    setTimeout(() => {
-      const fetchedProducts = [
-        {
-          _id: 1,
-          name: 'product 1',
-          price: 250000,
-          images: [{ url: 'https://picsum.photos/500?random=10' }],
-        },
-        {
-          _id: 2,
-          name: 'product 2',
-          price: 250000,
-          images: [{ url: 'https://picsum.photos/500?random=11' }],
-        },
-        {
-          _id: 3,
-          name: 'product 3',
-          price: 250000,
-          images: [{ url: 'https://picsum.photos/500?random=12' }],
-        },
-        {
-          _id: 4,
-          name: 'product 4',
-          price: 250000,
-          images: [{ url: 'https://picsum.photos/500?random=13' }],
-        },
-        {
-          _id: 5,
-          name: 'product 5',
-          price: 250000,
-          images: [{ url: 'https://picsum.photos/500?random=14' }],
-        },
-        {
-          _id: 6,
-          name: 'product 6',
-          price: 250000,
-          images: [{ url: 'https://picsum.photos/500?random=15' }],
-        },
-        {
-          _id: 7,
-          name: 'product 7',
-          price: 250000,
-          images: [{ url: 'https://picsum.photos/500?random=16' }],
-        },
-        {
-          _id: 8,
-          name: 'product 8',
-          price: 250000,
-          images: [{ url: 'https://picsum.photos/500?random=17' }],
-        },
-      ];
-      setProducts(fetchedProducts);
-    }, 1000);
-  }, []);
   return (
-    <div className="flex flex-col lg:grid lg:grid-cols-5 container mx-auto">
+    <div className="flex flex-col lg:flex-row container mx-auto gap-6">
       {/* mobile filter button */}
       <button
         onClick={toggleSidebar}
@@ -98,19 +55,21 @@ const CollectionPage = () => {
       <div
         ref={sidebarRef}
         className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        fixed inset-y-0 z-10 lg:z-0 left-0 w-64 bg-white overflow-y-auto transition-transform 
-        duration-300 lg:static lg:translate-x-0 col-span-1 pl-6 pr-6 lg:pl-0 lg:pr-8`}
+        fixed inset-y-0 z-10 lg:z-0 left-0 w-1/2 lg:w-1/5 
+        bg-white overflow-y-auto transition-transform duration-300 
+        lg:static lg:translate-x-0 
+        pl-6 pr-6 lg:pl-0 lg:pr-0`}
       >
         <FilterSidebar />
       </div>
 
-      <div className="col-span-4 p-4 lg:p-0">
-        <h2 className="text-2xl uppercase mb-4">Tất cả sản phẩm</h2>
+      <div className="lg:w-4/5 p-4 lg:p-0">
+        <h2 className="text-2xl uppercase mb-4 pt-4">Tất cả sản phẩm</h2>
         {/* sort options */}
         <SortOptions />
 
         {/* product grid */}
-        <ProductGrid products={products} />
+        <ProductGrid products={products} loading={loading} error={error} />
       </div>
     </div>
   );

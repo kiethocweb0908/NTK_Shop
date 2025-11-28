@@ -75,11 +75,11 @@ function App() {
         {/* User Layout */}
         <Route path="/" element={<UserLayout />}>
           <Route index element={<Home />} />
-          <Route path="shop" element={<Shop />} />
+          {/* <Route path="shop" element={<Shop />} /> */}
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="collections/:collection" element={<CollectionPage />} />
+          <Route path="shop" element={<CollectionPage />} />
           <Route path="product/:id" element={<ProductDetails />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="order-confirmation" element={<OrderConfirmation />} />
