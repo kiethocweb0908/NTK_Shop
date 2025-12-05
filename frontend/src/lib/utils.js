@@ -7,8 +7,28 @@ export function cn(...inputs) {
 
 // Format tiền tệ
 export const formatCurrency = (amount) => {
-  return amount.toLocaleString('vi-VN', {
+  return amount?.toLocaleString('vi-VN', {
     style: 'currency',
     currency: 'VND',
   });
+};
+
+export const formatTime = (amount) => {
+  return amount
+    ? new Date(amount).toLocaleString('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false, // dùng 24h
+      })
+    : '-';
+};
+
+export const formatPriceInput = (amount) => {
+  const rawValue = amount.replace(/\./g, '');
+  if (!isNaN(rawValue)) return;
+  return Number(rawValue);
 };

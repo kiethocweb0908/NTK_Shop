@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { navType } from '../../lib/data';
+import { navType } from '../../lib/data/data';
 import { TbBrandMeta } from 'react-icons/tb';
 import { IoLogoInstagram } from 'react-icons/io';
 import { AiOutlineTikTok } from 'react-icons/ai';
@@ -13,8 +13,7 @@ const Footer = () => {
         <div>
           <h3 className="text-lg text-gray-800 mb-4">Bản tin</h3>
           <p className="text-gray-500 mb-4">
-            là người đầu tiên biết về các sản phẩm mới, độc quyền và trực tuyến
-            khác
+            là người đầu tiên biết về các sản phẩm mới, độc quyền và trực tuyến khác
           </p>
           <p className="font-medium text-sm text-gray-600 mb-6">
             Đăng ký và được giảm giá 10% cho đơn hàng đầu tiên của bạn.

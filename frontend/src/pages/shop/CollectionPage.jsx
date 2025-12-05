@@ -42,36 +42,38 @@ const CollectionPage = () => {
   }, []);
 
   return (
-    <div className="flex flex-col lg:flex-row container mx-auto gap-6">
-      {/* mobile filter button */}
-      <button
-        onClick={toggleSidebar}
-        className="lg:hidden border p-2 flex justify-center items-center"
-      >
-        <FaFilter className="mr-2" />
-      </button>
+    <>
+      <div className="flex flex-col lg:flex-row container mx-auto gap-6">
+        {/* mobile filter button */}
+        <button
+          onClick={toggleSidebar}
+          className="lg:hidden border p-2 flex justify-center items-center"
+        >
+          <FaFilter className="mr-2" />
+        </button>
 
-      {/* filter sidebar */}
-      <div
-        ref={sidebarRef}
-        className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        fixed inset-y-0 z-10 lg:z-0 left-0 w-1/2 lg:w-1/5 
+        {/* filter sidebar */}
+        <div
+          ref={sidebarRef}
+          className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+         inset-y-0 z-10 lg:z-0 left-0 w-1/2 lg:w-1/5 
         bg-white overflow-y-auto transition-transform duration-300 
         lg:static lg:translate-x-0 
         pl-6 pr-6 lg:pl-0 lg:pr-0`}
-      >
-        <FilterSidebar />
-      </div>
+        >
+          <FilterSidebar />
+        </div>
 
-      <div className="lg:w-4/5 p-4 lg:p-0">
-        <h2 className="text-2xl uppercase mb-4 pt-4">Tất cả sản phẩm</h2>
-        {/* sort options */}
-        <SortOptions />
+        <div className="lg:w-4/5 p-4 lg:p-0">
+          <h2 className="text-2xl uppercase mb-4 pt-4">Tất cả sản phẩm</h2>
+          {/* sort options */}
+          <SortOptions />
 
-        {/* product grid */}
-        <ProductGrid products={products} loading={loading} error={error} />
+          {/* product grid */}
+          <ProductGrid products={products} loading={loading} error={error} />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { HiOutlineUser, HiOutlineShoppingBag, HiBars3BottomRight } from 'react-icons/hi2';
 import SearchBar from './SearchBar';
 import CartDrawer from '../Layout/CartDrawer';
-import { navType } from '../../lib/data';
+import { navType } from '../../lib/data/data';
 import { IoMdClose } from 'react-icons/io';
+import { useSelector } from 'react-redux';
 
 const Navbar = () => {
+  const { cart } = useSelector((state) => state.cart);
   //active navbar
   const [navActive, setNavActive] = useState('');
   // đóng / mở giỏ hàng
@@ -77,7 +79,7 @@ const Navbar = () => {
           >
             <HiOutlineShoppingBag className="h-6 w-6" />
             <span className="absolute -top-1 bg-primary-300 text-white text-xs rounded-full px-2 py-0.5">
-              5
+              {cart?.totalItems || 0}
             </span>
           </button>
           {/* Right-Search */}

@@ -4,6 +4,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+
+// format
+import { formatCurrency } from '@/lib/utils';
+
 const NewArrivals = () => {
   const scrollRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -166,8 +170,7 @@ const NewArrivals = () => {
 
     if (container) {
       const lefScroll = container.scrollLeft;
-      const rightScrollable =
-        container.scrollWidth > lefScroll + container.clientWidth;
+      const rightScrollable = container.scrollWidth > lefScroll + container.clientWidth;
 
       setCanScrollLeft(lefScroll > 0);
       setCanScrollRight(rightScrollable);
@@ -197,8 +200,8 @@ const NewArrivals = () => {
       <div className="container mx-auto text-center mb-10 relative">
         <h2 className="text-3xl font-bold mb-4">Khám phá sản phẩm mới</h2>
         <p className="text-lg text-gray-600 mb-8">
-          Khám phá xu hướng mới nhất – những thiết kế vừa ra mắt giúp tủ đồ của
-          bạn luôn bắt kịp đỉnh cao thời trang.
+          Khám phá xu hướng mới nhất – những thiết kế vừa ra mắt giúp tủ đồ của bạn luôn
+          bắt kịp đỉnh cao thời trang.
         </p>
 
         {/* Scroll buttons */}
@@ -257,14 +260,7 @@ const NewArrivals = () => {
               <Link to={`/product/${product._id}`} className="block">
                 <h4 className="font-medium">{product.name}</h4>
                 <p className="mt-1">
-                  {product.discountPrice.toLocaleString('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND',
-                  }) ||
-                    product.price.toLocaleString('vi-VN', {
-                      style: 'currency',
-                      currency: 'VND',
-                    })}
+                  {formatCurrency(product.discountPrice) || formatCurrency(product.price)}
                 </p>
               </Link>
             </div>

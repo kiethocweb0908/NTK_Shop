@@ -39,7 +39,7 @@ const AdminLayout = () => {
       </div>
 
       {/* Main content */}
-      <div className="grow p-6 overflow-auto transition-all duration-300">
+      <div className="grow px-6 py-2 overflow-auto transition-all duration-300">
         <Outlet />
       </div>
     </div>

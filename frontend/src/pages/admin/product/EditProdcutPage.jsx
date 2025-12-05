@@ -72,9 +72,7 @@ const EditProdcutPage = () => {
         </div>
         {/* Description */}
         <div className="mb-6">
-          <label className="block font-semibold mb-2">
-            Prodcut Description
-          </label>
+          <label className="block font-semibold mb-2">Prodcut Description</label>
           <textarea
             name="description"
             value={prodcutData.description}
@@ -122,9 +120,7 @@ const EditProdcutPage = () => {
         </div>
         {/* Sizes */}
         <div className="mb-6">
-          <label className="block font-semibold mb-2">
-            Sizes (coma-separated)
-          </label>
+          <label className="block font-semibold mb-2">Sizes (coma-separated)</label>
           <input
             type="text"
             name="sizes"
@@ -141,9 +137,7 @@ const EditProdcutPage = () => {
         </div>
         {/* colors */}
         <div className="mb-6">
-          <label className="block font-semibold mb-2">
-            Sizes (coma-separated)
-          </label>
+          <label className="block font-semibold mb-2">Sizes (coma-separated)</label>
           <input
             type="text"
             name="colors"

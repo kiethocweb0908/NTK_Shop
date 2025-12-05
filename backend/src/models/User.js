@@ -8,12 +8,22 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    phone: {
+      type: Number,
+      trim: true,
+    },
     email: {
       type: String,
       required: true,
       unique: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
+    },
+    address: {
+      fullAddress: { type: String, required: false },
+      city: { type: String, required: false },
+      district: { type: String, required: false },
+      ward: { type: String, required: false },
     },
     password: {
       type: String,

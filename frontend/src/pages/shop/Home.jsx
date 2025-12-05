@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import Hero from '../components/Layout/Hero';
-import GenderCollectionSection from '../components/Products/GenderCollectionSection';
-import NewArriivals from '../components/Products/NewArrivals';
-import NewArrivals from '../components/Products/NewArrivals';
-import ProductDetails from '../components/Products/ProductDetails';
+import Hero from '@/components/Layout/Hero';
+import GenderCollectionSection from '@/components/Products/GenderCollectionSection';
+import NewArrivals from '@/components/Products/NewArrivals';
+import ProductDetails from '@/components/Products/ProductDetails';
 import { Button } from '@/components/ui/button';
 import ProductGrid from '@/components/Products/ProductGrid';
 import FeaturedCollection from '@/components/Products/FeaturedCollection';

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import register from '@/assets/register.webp';
 import { Button } from '@/components/ui/button';
-import { registerUser } from '../redux/slices/authSlice';
+import { registerUser } from '@/redux/slices/authSlice';
 import { useDispatch } from 'react-redux';
 
 const Register = () => {
@@ -34,9 +34,7 @@ const Register = () => {
             <h2 className="text-xl font-medium">Rabbit</h2>
           </div>
           <h2 className="text-2xl font-bold text-center mb-6">Hey there</h2>
-          <p className="text-center mb-6">
-            Enter your username and password to login
-          </p>
+          <p className="text-center mb-6">Enter your username and password to login</p>
           {/* Name */}
           <div className="mb-4">
             <lable className="block text-sm font-semibold mb-2">Name</lable>
@@ -72,9 +70,7 @@ const Register = () => {
           </div>
           {/* confirmPassword */}
           <div className="mb-4">
-            <lable className="block text-sm font-semibold mb-2">
-              Nhập lại mật khẩu
-            </lable>
+            <lable className="block text-sm font-semibold mb-2">Nhập lại mật khẩu</lable>
             <input
               type="password"
               value={confirmPassword}
@@ -106,11 +102,7 @@ const Register = () => {
 
       <div className="hidden lg:block w-1/2 bg-gray-800">
         <div className="h-full flex flex-col justify-center items-center">
-          <img
-            src={register}
-            alt="Login"
-            className="h-[750px] w-full object-cover"
-          />
+          <img src={register} alt="Login" className="h-[750px] w-full object-cover" />
         </div>
       </div>
     </div>

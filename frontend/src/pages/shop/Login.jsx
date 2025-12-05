@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import login from '@/assets/login.webp';
-import { loginUser } from '../redux/slices/authSlice';
+import { loginUser } from '@/redux/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import Result_ from 'postcss/lib/result';
 import { toast } from 'sonner';
@@ -23,18 +23,18 @@ const Login = () => {
     if (user) {
       navigate(from || '/', { replace: true });
 
-      dispatch(fetchCart())
-        .unwrap()
-        .then((result) => {
-          setTimeout(() => {
-            toast.success(result?.message || 'cart');
-          }, 1000);
-        })
-        .catch((error) => {
-          toast.error(error?.message || 'lỗi');
-        });
+      // dispatch(fetchCart())
+      //   .unwrap()
+      //   .then((result) => {
+      //     setTimeout(() => {
+      //       toast.success(result?.message || 'cart');
+      //     }, 1000);
+      //   })
+      //   .catch((error) => {
+      //     toast.error(error?.message || 'lỗi');
+      //   });
     }
-  }, [user, navigate, from, dispatch]);
+  }, [user, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

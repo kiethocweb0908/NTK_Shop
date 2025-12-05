@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCategories } from '@/redux/slices/categorySlice';
 
-import { colors, sizes, genders, materials } from '@/lib/data';
+import { colors, sizes, genders, materials } from '@/lib/data/data';
 import { Slider } from '../ui/slider';
 import { formatCurrency } from '@/lib/utils';
 

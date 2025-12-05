@@ -25,6 +25,9 @@ import ProductGrid from './ProductGrid';
 import QuantitySelector from './QuantitySelector ';
 import { addToCart } from '@/redux/slices/cartSlice';
 
+// format
+import { formatCurrency } from '@/lib/utils';
+
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -187,7 +190,7 @@ const ProductDetails = ({ productId }) => {
     <div className="p-4">
       {selectedProduct && (
         <div className="max-w-6xl mx-auto bg-white p4-8 sm:p-8  rounded-lg">
-          <div className="flex flex-col md:grid md:grid-cols-12">
+          <div className="flex flex-col md:grid md:grid-cols-12 gap-10 md:gap-0">
             {/* left */}
             <div className="flex flex-col sm:flex-row  md:col-span-8 lg:col-span-6">
               {/* Thumbnails */}
@@ -208,7 +211,7 @@ const ProductDetails = ({ productId }) => {
               </div>
 
               {/* main image */}
-              <div className="sm:col-span-6">
+              <div className="sm:col-span-6 max-h-[466px]">
                 <Carousel
                   setApi={setEmblaApi} // Nhận api
                   plugins={[plugin.current]}
@@ -253,18 +256,34 @@ const ProductDetails = ({ productId }) => {
               </div>
             </div>
             {/* Right Side*/}
-            <div className="sm:mt-10 md:mt-0 md:ml-10 md:col-span-4 lg:col-span-6">
+            <div className="sm:mt-10 md:mt-0 md:ml-10 md:col-span-4 lg:col-span-6 text-justify">
               {/* Tên giá mô tả */}
               <h1 className="text-2xl md:text-3xl font-semibold mb-2">
                 {selectedProduct?.name} {'- '}
                 {selectedProduct?.variants[currentColorIndex].colorName}
               </h1>
-              <p className="text-lg text-gray-600 mb-1 line-through">
-                {selectedProduct?.discountPrice &&
-                  `${selectedProduct?.discountPrice} vnđ`}
+              <p
+                className={`text-xl text-gray-500 mb-1
+                ${selectedProduct.discountPrice ? 'line-through' : ''}`}
+              >
+                {formatCurrency(selectedProduct?.price)}
               </p>
-              <p className="text-xl text-gray-500 mb-2">{selectedProduct?.price} vnđ</p>
-              <p className="text-gray-600 mb-4">{selectedProduct?.description}</p>
+              {selectedProduct.discountPrice && (
+                <div className="flex gap-5 items-center">
+                  <p className="text-2xl text-primary-300">
+                    {formatCurrency(selectedProduct?.discountPrice)}
+                  </p>
+                  <p className="p-2 rounded-full bg-primary-300 text-white font-medium text-">
+                    {Math.floor(
+                      ((selectedProduct.discountPrice - selectedProduct.price) /
+                        selectedProduct.price) *
+                        100
+                    )}
+                    %
+                  </p>
+                </div>
+              )}
+              <p className="text-gray-600 mb-4 mt-4">{selectedProduct?.description}</p>
               {/* màu sắc */}
               <div className="mb-4">
                 <p className="text-gray-700"> Màu sắc:</p>
@@ -280,7 +299,7 @@ const ProductDetails = ({ productId }) => {
                           : 'border-gray-300'
                       }`}
                       style={{
-                        backgroundColor: variant.colorName.toLocaleLowerCase(),
+                        backgroundColor: variant.colorHex.toLocaleLowerCase(),
                         filter: 'brightness(0.5)',
                       }}
                     >

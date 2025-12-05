@@ -7,7 +7,6 @@ import {
   FaUser,
 } from 'react-icons/fa';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import Aa from './AccordionItem ';
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -76,8 +75,6 @@ const AdminSidebar = () => {
           <FaStore />
           <span>Shop</span>
         </NavLink>
-
-        <Aa />
       </nav>
       <div className="mt-6">
         <button

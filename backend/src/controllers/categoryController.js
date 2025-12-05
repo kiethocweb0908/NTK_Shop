@@ -11,7 +11,10 @@ export const getCategories = async (req, res) => {
         name: -1,
       });
 
-    res.json(categories);
+    res.json({
+      message: "Lấy danh mục thành công!",
+      categories,
+    });
   } catch (error) {
     console.error("Lỗi khi gọi getCategories:", error);
     res.status(500).json({ message: "Server error" });
