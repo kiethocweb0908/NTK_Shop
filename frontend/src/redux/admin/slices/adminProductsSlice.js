@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '@/lib/axios';
+import { updateProduct } from '@/redux/slices/productsSlice';
 
 // Async Thunk to Fetch Admin Products
 export const fetchAdminProducts = createAsyncThunk(
@@ -41,6 +42,299 @@ export const fetchAdminProducts = createAsyncThunk(
   }
 );
 
+// Async Thunk to Fetch Admin Product Details
+export const fetchAdminProductDetails = createAsyncThunk(
+  'adminProducts/fetchAdminProductDetails',
+  async ({ productId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/api/admin/products/${productId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi gọi fetchAdminProductDetails: ', error);
+      return rejectWithValue({
+        message: error.response?.data?.message || 'fetch product details failed',
+      });
+    }
+  }
+);
+
+// Async Thunk to Create Product
+export const createProduct = createAsyncThunk(
+  'adminProducts/createProduct',
+  async (productData, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(
+        addUploadLog({
+          message: '📝 Đang tạo sản phẩm trong database...',
+          type: 'info',
+        })
+      );
+
+      const response = await axiosInstance.post('/api/admin/products', productData, {
+        timeout: 60000, // 1 phút
+      });
+
+      // console.log('✅ SERVER RESPONSE:', response.data);
+
+      if (response.data.success) {
+        dispatch(
+          addUploadLog({
+            message: '✅ Đã tạo sản phẩm thành công trong database',
+            type: 'success',
+          })
+        );
+        // Refresh product list sau khi tạo thành công
+        // setTimeout(() => {
+        //   dispatch(fetchAdminProducts({}));
+        // }, 2000);
+
+        return response.data;
+      }
+
+      throw new Error(response.data.message || 'Tạo sản phẩm thất bại');
+    } catch (error) {
+      console.error('Create product error:', error);
+      dispatch(
+        addUploadLog({
+          message: `❌ Lỗi tạo sản phẩm: ${error.message}`,
+          type: 'error',
+        })
+      );
+      if (error.code === 'ECONNABORTED') {
+        return rejectWithValue(
+          'Server mất quá nhiều thời gian để xử lý. Vui lòng thử lại'
+        );
+      }
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Async Thunk to delete product
+export const deleteProductThunk = createAsyncThunk(
+  'adminProducts/deleteProduct',
+  async ({ productId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(`/api/admin/products/${productId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi gọi deleteProduct: ', error);
+      return rejectWithValue({
+        message: error.response?.data?.message || 'delete product failed',
+      });
+    }
+  }
+);
+
+// Async Thunk to toggle product published
+export const toggleProductPublished = createAsyncThunk(
+  'adminProducts/toggleProductPublished',
+  async ({ _id }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(`/api/admin/products/isPublished`, {
+        _id,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi gọi toggleProductPublished: ', error);
+      return rejectWithValue(
+        error.response?.data?.message || { message: 'Update failed' }
+      );
+    }
+  }
+);
+
+// Asnyc Thunk to toggle product featured
+export const toggleProductFeaturedThunk = createAsyncThunk(
+  'adminProducts/toggleProductFeatured',
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(`/api/admin/products/${id}/isFeatured`);
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi gọi toggleProductFeatured: ', error);
+      return rejectWithValue(
+        error.response?.data?.message || { message: 'Update failed' }
+      );
+    }
+  }
+);
+
+// Async Thunk to update basic fields product
+export const updateBasicFieldsThunk = createAsyncThunk(
+  'adminProducts/updateBasicFieldsThunk',
+  async ({ productId, productData }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/admin/products/${productId}/updateBasicFields`,
+        productData
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi gọi updateBasicFieldsThunk: ', error);
+      return rejectWithValue(
+        error.response?.data?.message || { message: 'Update failed' }
+      );
+    }
+  }
+);
+
+// Async thunk to update countInStock for variant
+export const updateCountInStockThunk = createAsyncThunk(
+  'adminProducts/updateCountInStockThunk',
+  async ({ productId, variantId, stocks }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/admin/products/${productId}/variants/${variantId}/countInStock`,
+        { stocks }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi gọi updateCountInStockThunk: ', error);
+      return rejectWithValue(
+        error.response?.data?.message || { message: 'Update failed' }
+      );
+    }
+  }
+);
+
+// Async thunk to add sizes for variant
+export const addSizesThunk = createAsyncThunk(
+  'adminProducts/addSizesThunk',
+  async ({ productId, variantId, sizes }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/admin/products/${productId}/variants/${variantId}/addSizes`,
+        { sizes }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue({
+        message: error.response?.data?.message || 'addSizesThunk failed',
+      });
+    }
+  }
+);
+
+// Async thunk to delete sizes for variant
+export const deleteSizesThunk = createAsyncThunk(
+  'adminProducts/deleteSizesThunk',
+  async ({ productId, variantId, sizes }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/admin/products/${productId}/variants/${variantId}/deleteSizes`,
+        { sizes }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue({
+        message: error.response?.data?.message || 'deleteSizesThunk failed',
+      });
+    }
+  }
+);
+
+// Async thun to update color
+export const updateColorThunk = createAsyncThunk(
+  'adminProducts/updateColorThunk',
+  async ({ productId, variantId, colorName, colorHex }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/admin/products/${productId}/variants/${variantId}/updateColor`,
+        { colorName, colorHex }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue({
+        message: error.response?.data?.message || 'updateColorThunk failed',
+      });
+    }
+  }
+);
+
+// Async thunk to add images
+export const addImagesThunk = createAsyncThunk(
+  'adminProducts/addImagesThunk',
+  async ({ productId, variantId, images }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/admin/products/${productId}/variants/${variantId}/addImages`,
+        { images }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue({
+        message:
+          error.response?.data?.message ||
+          error?.data?.message ||
+          error ||
+          'addImagesThunk',
+      });
+    }
+  }
+);
+
+// Async thunk to remove images
+export const removeImagesThunk = createAsyncThunk(
+  'adminProducts/removeImagesThunk',
+  async ({ productId, variantId, publicIds }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/admin/products/${productId}/variants/${variantId}/removeImages`,
+        { publicIds }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          error.response?.data ||
+          'removeImagesThunk failed'
+      );
+    }
+  }
+);
+
+// Async thunk to add variants
+export const addVariantsThunk = createAsyncThunk(
+  'adminProducs/addVariantsThunk',
+  async ({ productId, variant }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        `/api/admin/products/${productId}/variants`,
+        { variant }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.response?.data || 'addVariantsThunk failed'
+      );
+    }
+  }
+);
+
+// Async thunk to remove variants
+export const removeVariantsThunk = createAsyncThunk(
+  'adminProducts/removeVariantsThunk',
+  async ({ productId, variantIds }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/api/admin/products/${productId}/variants`,
+        { data: { variantIds } }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          error.response?.data ||
+          'removeVariantsThunk failed'
+      );
+    }
+  }
+);
+
+//===============================================
+//-------------------IMAGES----------------------
 // Async Thunk to Upload Images với Progress Tracking
 export const uploadProductImages = createAsyncThunk(
   'adminProducts/uploadImages',
@@ -116,58 +410,8 @@ export const uploadProductImages = createAsyncThunk(
   }
 );
 
-// Async Thunk to Create Product
-export const createProduct = createAsyncThunk(
-  'adminProducts/createProduct',
-  async (productData, { rejectWithValue, dispatch }) => {
-    try {
-      dispatch(
-        addUploadLog({
-          message: '📝 Đang tạo sản phẩm trong database...',
-          type: 'info',
-        })
-      );
-
-      const response = await axiosInstance.post('/api/admin/products', productData, {
-        timeout: 30000, // 1 phút
-      });
-
-      console.log('✅ SERVER RESPONSE:', response.data);
-
-      if (response.data.success) {
-        dispatch(
-          addUploadLog({
-            message: '✅ Đã tạo sản phẩm thành công trong database',
-            type: 'success',
-          })
-        );
-        // Refresh product list sau khi tạo thành công
-        setTimeout(() => {
-          dispatch(fetchAdminProducts({}));
-        }, 2000);
-
-        return response.data;
-      }
-
-      throw new Error(response.data.message || 'Tạo sản phẩm thất bại');
-    } catch (error) {
-      console.error('Create product error:', error);
-      dispatch(
-        addUploadLog({
-          message: `❌ Lỗi tạo sản phẩm: ${error.message}`,
-          type: 'error',
-        })
-      );
-      if (error.code === 'ECONNABORTED') {
-        return rejectWithValue(
-          'Server mất quá nhiều thời gian để xử lý. Vui lòng thử lại'
-        );
-      }
-      return rejectWithValue(error.response?.data?.message || error.message);
-    }
-  }
-);
-
+//===============================================
+//-------------------PRODUCT&IMAGE---------------
 // Async Thunk to Create Product with Images (Main Flow)
 export const createProductWithImages = createAsyncThunk(
   'adminProducts/createProductWithImages',
@@ -189,7 +433,7 @@ export const createProductWithImages = createAsyncThunk(
         })
       );
 
-      console.log('🔍 DEBUG - ProductFormData variants:', variants);
+      // console.log('🔍 DEBUG - ProductFormData variants:', variants);
 
       // A. VALIDATE TRƯỚC
       const totalImages = variants.reduce((sum, v) => sum + (v.images?.length || 0), 0);
@@ -252,6 +496,8 @@ export const createProductWithImages = createAsyncThunk(
 
             uploadResults.push({
               ...result,
+              variantId: variant.id, // ← THÊM VÀO ĐÂY
+              colorName: variant.colorName, // Có thể thêm luôn cho chắc
               success: true,
               originalSizes: variant.sizes,
             });
@@ -290,6 +536,10 @@ export const createProductWithImages = createAsyncThunk(
         .map((variant) => {
           const uploadResult = uploadResults.find((r) => r.variantId === variant.id);
 
+          console.log('variantId: ', uploadResults.variantId);
+          console.log('variant.id: ', variant.id);
+          console.log('uploadResul: ', uploadResult);
+
           // Nếu upload thất bại, bỏ qua variant này
           if (!uploadResult?.success) {
             console.warn(`Bỏ qua variant ${variant.colorName}: upload thất bại`);
@@ -297,19 +547,20 @@ export const createProductWithImages = createAsyncThunk(
           }
 
           // DEBUG: Log sizes structure
-          console.log(`🔍 Preparing variant ${variant.colorName}:`, {
-            variantSizes: variant.sizes,
-            uploadResultSizes: uploadResult.originalSizes,
-            sizesType: typeof variant.sizes,
-            isArray: Array.isArray(variant.sizes),
-            sizesLength: variant.sizes?.length,
-          });
+          // console.log(`🔍 Preparing variant ${variant.colorName}:`, {
+          //   variantSizes: variant.sizes,
+          //   uploadResultSizes: uploadResult.originalSizes,
+          //   sizesType: typeof variant.sizes,
+          //   isArray: Array.isArray(variant.sizes),
+          //   sizesLength: variant.sizes?.length,
+          // });
 
           // QUAN TRỌNG: Sizes đã được filtered từ AddProductPage
           // Không cần filter lại, chỉ cần dùng trực tiếp
+
           const validSizes = variant.sizes || uploadResult.originalSizes || [];
 
-          console.log(`✅ Valid sizes for ${variant.colorName}:`, validSizes);
+          // console.log(`✅ Valid sizes for ${variant.colorName}:`, validSizes);
 
           return {
             colorName: variant.colorName,
@@ -320,7 +571,7 @@ export const createProductWithImages = createAsyncThunk(
             })),
             images:
               uploadResult.images?.map((img, idx) => ({
-                url: img.url || img.imageURL, // Dùng cả hai trường
+                url: img.imageURL, // Dùng cả hai trường
                 publicId: img.publicId,
                 altText: img.altText || `${variant.colorName} - ${idx + 1}`,
               })) || [],
@@ -340,8 +591,8 @@ export const createProductWithImages = createAsyncThunk(
       }
 
       // D. TẠO SẢN PHẨM
-      console.log('📦 Đang tạo sản phẩm...');
-      console.log('🔍 Prepared variants:', JSON.stringify(preparedVariants, null, 2));
+      // console.log('📦 Đang tạo sản phẩm...');
+      // console.log('🔍 Prepared variants:', JSON.stringify(preparedVariants, null, 2));
 
       const finalProductData = {
         ...productData,
@@ -354,7 +605,7 @@ export const createProductWithImages = createAsyncThunk(
         isPublished: true,
       };
 
-      console.log('📤 Final data to send:', JSON.stringify(finalProductData, null, 2));
+      // console.log('📤 Final data to send:', JSON.stringify(finalProductData, null, 2));
 
       const result = await dispatch(createProduct(finalProductData)).unwrap();
 
@@ -388,6 +639,306 @@ export const createProductWithImages = createAsyncThunk(
   }
 );
 
+// Async Thunk to Update Full Fields Product (Thunk tổng)
+export const editProduct = createAsyncThunk(
+  'adminProducs/editProduct',
+  async (
+    {
+      productId,
+      basicField,
+      updatedCountInStock,
+      newSizes,
+      deletedSizes,
+      updatedColor,
+      newImages,
+      deletedImages,
+      newVariants,
+      deletedVariants,
+    },
+    { rejectWithValue, dispatch }
+  ) => {
+    try {
+      let updatedProduct = null;
+
+      // cập nhật các trường cơ bản
+      if (basicField && Object.keys(basicField).length > 0) {
+        dispatch({
+          message: 'Đang tiếp hành cập nhật các trường cơ bản...',
+          type: 'info',
+        });
+        try {
+          const resultUpdateBasicField = await dispatch(
+            updateBasicFieldsThunk({ productId, productData: basicField })
+          ).unwrap();
+          updatedProduct = resultUpdateBasicField;
+        } catch (error) {
+          return rejectWithValue(error);
+        }
+      }
+
+      // cập nhật số lượng
+      if (updatedCountInStock && updatedCountInStock.length > 0) {
+        dispatch(
+          addUploadLog({
+            message: `Tiến hành cập nhật số lượng...`,
+            type: 'info',
+          })
+        );
+        try {
+          const results = await Promise.all(
+            updatedCountInStock.map((v) =>
+              dispatch(
+                updateCountInStockThunk({
+                  productId,
+                  variantId: v.variantId,
+                  stocks: v.sizes,
+                })
+              ).unwrap()
+            )
+          );
+          updatedProduct = results[results.length - 1];
+        } catch (error) {
+          return rejectWithValue(error);
+        }
+      }
+
+      // cập nhật màu sắc
+      if (updatedColor && updatedColor.length > 0) {
+        dispatch(
+          addUploadLog({
+            message: `Tiến hành cập nhật màu sắc...`,
+            type: 'info',
+          })
+        );
+        try {
+          const results = await Promise.all(
+            updatedColor.map((v) =>
+              dispatch(
+                updateColorThunk({
+                  productId,
+                  variantId: v.variantId,
+                  colorName: v.colorName,
+                  colorHex: v.colorHex,
+                })
+              ).unwrap()
+            )
+          );
+          updatedProduct = results[results.length - 1];
+        } catch (error) {}
+      }
+
+      // xoá size của biến thể
+      if (deletedSizes && deletedSizes.length > 0) {
+        dispatch(
+          addUploadLog({
+            message: `Tiến hành xoá size của biến thể...`,
+            type: 'info',
+          })
+        );
+        try {
+          for (const v of deletedSizes) {
+            const result = await dispatch(
+              deleteSizesThunk({ productId, variantId: v.variantId, sizes: v.sizes })
+            ).unwrap();
+            updatedProduct = result;
+          }
+        } catch (error) {
+          return rejectWithValue(error);
+        }
+      }
+
+      // xoá ảnh của biến thể
+      if (deletedImages && deletedImages.length > 0) {
+        dispatch(
+          addUploadLog({
+            message: `Tiến hành xoá ảnh của biến thể...`,
+            type: 'info',
+          })
+        );
+
+        try {
+          for (const v of deletedImages) {
+            const result = await dispatch(
+              removeImagesThunk({
+                productId,
+                variantId: v.variantId,
+                publicIds: v.publicIds,
+              })
+            );
+            updatedProduct = result;
+          }
+        } catch (error) {
+          return rejectWithValue(error);
+        }
+      }
+
+      // xoá biến thể
+      if (deletedVariants && deletedVariants.length > 0) {
+        dispatch(
+          addUploadLog({
+            message: `Tiến hành xoá biến thể...`,
+            type: 'info',
+          })
+        );
+        try {
+          const result = await dispatch(
+            removeVariantsThunk({ productId, variantIds: deletedVariants })
+          ).unwrap();
+          updatedProduct = result;
+        } catch (error) {
+          return rejectWithValue(error);
+        }
+      }
+
+      // thêm size cho biến thể
+      if (newSizes && newSizes.length > 0) {
+        dispatch(
+          addUploadLog({
+            message: `Tiến hành Thêm size cho biến thể...`,
+            type: 'info',
+          })
+        );
+        try {
+          for (const v of newSizes) {
+            const result = await dispatch(
+              addSizesThunk({
+                productId,
+                variantId: v.variantId,
+                sizes: v.sizes,
+              })
+            ).unwrap();
+            updatedProduct = result;
+          }
+        } catch (error) {
+          return rejectWithValue(error);
+        }
+      }
+
+      // Thêm ảnh cho biến thể
+      if (newImages && newImages.length > 0) {
+        dispatch(
+          addUploadLog({
+            message: `Tiến hành Thêm ảnh cho biến thể...`,
+            type: 'info',
+          })
+        );
+
+        for (const v of newImages) {
+          if (v.images.length > 0) {
+            dispatch(
+              addUploadLog({
+                message: `🎨 Đang upload ảnh cho màu "${v.colorName}" (${v.images.length} ảnh)`,
+                type: 'uploading',
+              })
+            );
+
+            try {
+              const result = await dispatch(
+                uploadProductImages({
+                  images: v.images,
+                  variantId: v.variantId,
+                  colorName: v.colorName,
+                })
+              ).unwrap();
+
+              if (result && result.images) {
+                const updated = await dispatch(
+                  addImagesThunk({
+                    productId,
+                    variantId: result.variantId,
+                    images: result.images,
+                  })
+                ).unwrap();
+                dispatch(
+                  addUploadLog({
+                    message: `Đã upload ${result.images?.length || 0} ảnh cho màu "${result.colorName || v.colorName}"`,
+                    type: 'success',
+                  })
+                );
+                updatedProduct = updated;
+              }
+            } catch (error) {
+              console.error('Lỗi khi thêm ảnh cho biến thể: ', error);
+              return rejectWithValue({
+                message: error.message || error,
+              });
+            }
+          }
+        }
+      }
+
+      // thêm variant
+      if (newVariants && newVariants.length > 0) {
+        dispatch(
+          addUploadLog({
+            message: `Tiến hành Thêm biến thể mới...`,
+            type: 'info',
+          })
+        );
+
+        for (const v of newVariants) {
+          if (v.images.length > 0) {
+            dispatch(
+              addUploadLog({
+                message: `🎨 Đang upload ảnh cho màu "${v.colorName}" (${v.images.length} ảnh)`,
+                type: 'uploading',
+              })
+            );
+
+            try {
+              const result = await dispatch(
+                uploadProductImages({
+                  images: v.images,
+                  variantId: v._id,
+                  colorName: v.colorName,
+                })
+              ).unwrap();
+
+              if (result && result.images) {
+                const imgs = result.images.map((img, index) => ({
+                  publicId: img.publicId,
+                  url: img.imageURL,
+                  altText: `${result.colorName} - ${index + 1}`,
+                  order: index,
+                }));
+
+                const variant = {
+                  colorName: v.colorName,
+                  colorHex: v.colorHex,
+                  sizes: v.sizes,
+                  images: imgs,
+                };
+
+                const createdVariant = await dispatch(
+                  addVariantsThunk({ productId, variant })
+                ).unwrap();
+                updatedProduct = createdVariant;
+              }
+            } catch (error) {
+              console.error('Lỗi khi thêm biến thể: ', error);
+              return rejectWithValue({
+                message: error.message || error,
+              });
+            }
+          }
+        }
+      }
+
+      return updatedProduct;
+    } catch (error) {
+      dispatch({
+        message: 'Có lỗi trong quá trình cập nhật...',
+        type: 'error',
+      });
+      return rejectWithValue(
+        error.response?.data?.message || error?.message || 'Update failed'
+      );
+    }
+  }
+);
+
+//============================================
+//-------------------SLICE--------------------
 const adminProductsSlice = createSlice({
   name: 'adminProducts',
   initialState: {
@@ -509,7 +1060,306 @@ const adminProductsSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || 'Failed to fetch products';
       })
+      //========== fetchAdminProductDetails ==========
+      .addCase(fetchAdminProductDetails.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAdminProductDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedProduct = action.payload.product;
+      })
+      .addCase(fetchAdminProductDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error?.message || 'Lỗi fetchAdminProductDetails';
+      })
 
+      // ========== deleteProductThunk ==========
+      .addCase(deleteProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteProductThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const newProducts = state.products.filter(
+          (p) => p._id !== action.payload.deletedProduct._id
+        );
+        state.products = newProducts;
+      })
+      .addCase(deleteProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to deleteProductThunk';
+      })
+
+      // ========== toggleProductPublished ==========
+      .addCase(toggleProductPublished.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(toggleProductPublished.fulfilled, (state, action) => {
+        state.loading = false;
+
+        // Lấy product đã update từ response
+        const updatedProduct = action.payload.product;
+        // Tìm index của product cần update
+        const index = state.products.findIndex(
+          (product) => product._id === updatedProduct._id
+        );
+        if (index !== -1) {
+          state.products[index] = updatedProduct;
+        }
+      })
+      .addCase(toggleProductPublished.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to toggle products published';
+      })
+
+      // ========== toggleProductFeaturedThunk ==========
+      .addCase(toggleProductFeaturedThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(toggleProductFeaturedThunk.fulfilled, (state, action) => {
+        state.loading = false;
+
+        // Lấy product đã update từ response
+        const updatedProduct = action.payload.product;
+        // Tìm index của product cần update
+        const index = state.products.findIndex(
+          (product) => product._id === updatedProduct._id
+        );
+        if (index !== -1) {
+          state.products[index] = updatedProduct;
+        }
+      })
+      .addCase(toggleProductFeaturedThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to toggle products featured';
+      })
+
+      // ========== updateBasicFieldsThunk ==========
+      .addCase(updateBasicFieldsThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateBasicFieldsThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedProduct = action.payload.product;
+        const productIndex = state.products.findIndex(
+          (p) => p._id === updatedProduct._id
+        );
+        if (productIndex !== -1) {
+          state.products[productIndex] = updatedProduct;
+        }
+      })
+      .addCase(updateBasicFieldsThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || action.payload || 'Lỗi';
+      })
+
+      // ========== updateCountInStockThunk ==========
+      .addCase(updateCountInStockThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateCountInStockThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const productIndex = state.products.findIndex(
+          (p) => p._id === action.payload.product._id
+        );
+        if (productIndex !== -1) {
+          const variantIndex = state.products[productIndex].variants.findIndex(
+            (v) => v._id === action.payload.variant._id
+          );
+          if (variantIndex !== -1) {
+            state.products[productIndex].variants[variantIndex] = action.payload.variant;
+          }
+        }
+      })
+      .addCase(updateCountInStockThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Lỗi';
+      })
+
+      // ========== addSizesThunk ==========
+      .addCase(addSizesThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addSizesThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const productIndex = state.products.findIndex(
+          (p) => p._id === action.payload.product._id
+        );
+        if (productIndex !== -1) {
+          const variantIndex = state.products[productIndex].variants.findIndex(
+            (v) => v._id === action.payload.variant._id
+          );
+          if (variantIndex !== -1) {
+            state.products[productIndex].variants[variantIndex].sizes =
+              action.payload.variant.sizes;
+          }
+        }
+      })
+      .addCase(addSizesThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Lỗi';
+      })
+
+      // ========== deleteSizesThunk ==========
+      .addCase(deleteSizesThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteSizesThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const productIndex = state.products.findIndex(
+          (p) => p._id === action.payload.product._id
+        );
+        if (productIndex !== -1) {
+          const variantIndex = state.products[productIndex].variants.findIndex(
+            (v) => v._id === action.payload.variant._id
+          );
+          if (variantIndex !== -1) {
+            state.products[productIndex].variants[variantIndex].sizes =
+              action.payload.variant.sizes;
+          }
+        }
+      })
+      .addCase(deleteSizesThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Lỗi';
+      })
+
+      // ========== updateColorThunk ==========
+      .addCase(updateColorThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateColorThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const productIndex = state.products.findIndex(
+          (p) => p._id === action.payload.product._id
+        );
+        if (productIndex !== -1) {
+          const variantIndex = state.products[productIndex].variants.findIndex(
+            (v) => v._id === action.payload.variant._id
+          );
+          if (variantIndex !== -1) {
+            state.products[productIndex].variants[variantIndex].sizes =
+              action.payload.variant.sizes;
+          }
+        }
+      })
+      .addCase(updateColorThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Lỗi';
+      })
+
+      // ========== addImagesThunk ==========
+      .addCase(addImagesThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addImagesThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const productIndex = state.products.findIndex(
+          (p) => p._id === action.payload.product._id
+        );
+        if (productIndex !== -1) {
+          const variantIndex = state.products[productIndex].variants.findIndex(
+            (v) => v._id === action.payload.variant._id
+          );
+          if (variantIndex !== -1) {
+            state.products[productIndex].variants[variantIndex].images =
+              action.payload.variant.images;
+          }
+        }
+      })
+      .addCase(addImagesThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || action.payload || 'Lỗi';
+      })
+
+      // ========== removeImagesThunk ==========
+      .addCase(removeImagesThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(removeImagesThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const productIndex = state.products.findIndex(
+          (p) => p._id === action.payload.product._id
+        );
+        if (productIndex !== -1) {
+          const variantIndex = state.products[productIndex].variants.findIndex(
+            (v) => v._id === action.payload.variant._id
+          );
+          if (variantIndex !== -1) {
+            state.products[productIndex].variants[variantIndex].images =
+              action.payload.variant.images;
+          }
+        }
+      })
+      .addCase(removeImagesThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || action.payload || 'Lỗi';
+      })
+
+      // ========== addVariantsThunk ==========
+      .addCase(addVariantsThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addVariantsThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const productIndex = state.products.findIndex(
+          (p) => p._id === action.payload.product._id
+        );
+        if (productIndex > -1) {
+          state.products[productIndex].variants = action.payload.product.variants;
+        }
+      })
+      .addCase(addVariantsThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || action.payload || 'Lỗi addVariantsThunk';
+      })
+
+      // ========== removeVariantsThunk ==========
+      .addCase(removeVariantsThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(removeVariantsThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const productIndex = state.products.findIndex(
+          (p) => p._id === action.payload.product._id
+        );
+        if (productIndex > -1) {
+          state.products[productIndex].variants = action.payload.product.variants;
+        }
+      })
+      .addCase(removeVariantsThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload?.message || action.payload || 'Lỗi removeVariantsThunk';
+      })
+
+      // ========== eidtProduct ==========
+      .addCase(editProduct.pending, (state) => {
+        state.operationLoading = true;
+        state.operationError = null;
+        state.uploadProgress = {};
+      })
+      .addCase(editProduct.fulfilled, (state, action) => {
+        state.operationLoading = false;
+        state.uploadProgress = {};
+      })
+      .addCase(editProduct.rejected, (state, action) => {
+        state.operationLoading = false;
+        state.uploadProgress = {};
+        state.operationError = action.payload;
+      })
       // ========== CREATE PRODUCT WITH IMAGES ==========
       .addCase(createProductWithImages.pending, (state) => {
         state.operationLoading = true;

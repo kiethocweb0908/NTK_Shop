@@ -426,7 +426,7 @@ export const getAllProducts = async (req, res) => {
 
     // Ưu tiên sản phẩm giảm giá khi sort mặc định
     if (sort === "default") {
-      sortStage = { isOnSale: -1, createdAt: -1 };
+      sortStage = { createdAt: -1, isOnSale: -1 };
     }
 
     pipeline.push({ $sort: sortStage });
@@ -717,52 +717,6 @@ export const updateProduct = async (req, res) => {
         .replace(/-+/g, "-");
     }
 
-    // if (variants && Array.isArray(variants) && variants !== oldVariants) {
-    //   const updatedVariants = variants.map((variant) => {
-    //     // // ✅ TÌM VARIANT CŨ BẰNG colorSlug
-    //     // const existingVariant = product.variants.find(
-    //     //   (v) =>
-    //     //     v.colorSlug ===
-    //     //     variant.colorName
-    //     //       .replace(/Đ/g, "D")
-    //     //       .replace(/đ/g, "d")
-    //     //       .normalize("NFD")
-    //     //       .replace(/[\u0300-\u036f]/g, "")
-    //     //       .trim()
-    //     //       .toLowerCase()
-    //     //       .replace(/[^a-z0-9 -]/g, "")
-    //     //       .replace(/\s+/g, "-")
-    //     //       .replace(/-+/g, "-")
-    //     // );
-
-    //     // // Nếu là variant cũ, merge với data mới
-    //     // if (existingVariant) {
-    //     //   return {
-    //     //     ...existingVariant, // Giữ data cũ
-    //     //     ...variant, // Ghi đè data mới
-    //     //     colorSlug: existingVariant.colorSlug, // Giữ nguyên slug
-    //     //   };
-    //     // }
-
-    //     // ✅ VARIANT MỚI - TẠO SLUG
-    //     return {
-    //       ...variant,
-    //       colorSlug: variant.colorName
-    //         .replace(/Đ/g, "D")
-    //         .replace(/đ/g, "d")
-    //         .normalize("NFD")
-    //         .replace(/[\u0300-\u036f]/g, "")
-    //         .trim()
-    //         .toLowerCase()
-    //         .replace(/[^a-z0-9 -]/g, "")
-    //         .replace(/\s+/g, "-")
-    //         .replace(/-+/g, "-"),
-    //     };
-    //   });
-
-    //   product.variants = updatedVariants;
-    // }
-
     const updatedProduct = await product.save();
 
     // Populate thông tin
@@ -776,79 +730,6 @@ export const updateProduct = async (req, res) => {
   } catch (error) {
     console.error("Update product error:", error);
     res.status(500).json({ message: "Lỗi server" });
-  }
-};
-
-// @route   DELETE /api/products/:id
-// @desc    delete product
-// @access  Private/Admin
-export const deleteProduct = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-
-    if (!product) {
-      return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
-    }
-
-    await Product.findByIdAndDelete(req.params.id);
-
-    res.json({
-      message: "Đã xóa sản phẩm thành công",
-      deletedProduct: {
-        id: product._id,
-        name: product.name,
-        sku: product.sku,
-      },
-    });
-  } catch (error) {
-    console.error("Delete product error:", error);
-    res.status(500).json({ message: "Lỗi server" });
-  }
-};
-
-// @route   PATCH /api/products/:id/featured
-// @desc    toggle featured product
-// @access  Private/Admin
-export const toggleFeaturedProduct = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-
-    if (!product)
-      return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
-
-    product.isFeatured = !product.isFeatured;
-    await product.save();
-
-    res.json({
-      message: `Sản phẩm ${
-        product.isFeatured ? "đã được" : "không còn"
-      } nổi bật!`,
-    });
-  } catch (error) {
-    console.error("Lỗi khi gọi toggleFeaturedProduct: ", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-// @route   PATCH /api/products/:id/published
-// @desc    toggle published product
-// @access  Private/Admin
-export const togglePublishedProduct = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-
-    if (!product)
-      return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
-
-    product.isPublished = !product.isPublished;
-    await product.save();
-
-    res.json({
-      message: `Sản phẩm đã được ${product.isPublished ? "hiển thị" : "ẩn"}`,
-    });
-  } catch (error) {
-    console.error("Lỗi khi gọi togglePublishedProduct: ", error);
-    res.status(500).json({ message: "Server error" });
   }
 };
 

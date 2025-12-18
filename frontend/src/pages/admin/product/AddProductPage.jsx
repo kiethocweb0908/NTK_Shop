@@ -1,6 +1,6 @@
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import React, { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
   createProductWithImages,
@@ -9,6 +9,7 @@ import {
 } from '@/redux/admin/slices/adminProductsSlice';
 
 // Shadcn
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
@@ -19,21 +20,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-
-// format
-import { formatPriceInput } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+
 // Data
 import { colors } from '@/lib/data/data';
-import { Checkbox } from '@/components/ui/checkbox';
-
 // Icons
-import { XIcon, Trash2, Save, ArrowLeft, AlertCircle } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { useDispatch, useSelector } from 'react-redux';
-
+import { XIcon, Trash2, Save, ArrowLeft, AlertCircle, Plus } from 'lucide-react';
+// Components
 import UploadProgressModal from './UploadProgressModal';
 
 const AddProductPage = () => {
@@ -634,13 +630,13 @@ const AddProductPage = () => {
             : null,
           sku: productData.sku.trim(),
           category: productData.category,
-          productCollection: productData.productCollection || null,
-          material: productData.material || '',
+          productCollection: productData.productCollection,
+          material: productData.material || 'cotton',
           gender: productData.gender || 'Unisex',
-          tags: productData.tags || [],
-          metaTitle: productData.metaTitle || '',
-          metaDescription: productData.metaDescription || '',
-          metaKeywords: productData.metaKeywords || '',
+          // tags: productData.tags || [],
+          // metaTitle: productData.metaTitle || '',
+          // metaDescription: productData.metaDescription || '',
+          // metaKeywords: productData.metaKeywords || '',
         },
         variants: variants.map((variant) => {
           // Lọc sizes hợp lệ
@@ -648,9 +644,9 @@ const AddProductPage = () => {
             .filter((size) => {
               const hasStock = parseInt(size.countInStock) > 0;
               const isSelected = size.selected;
-              console.log(
-                `   Size ${size.name}: selected=${isSelected}, stock=${size.countInStock}, valid=${isSelected && hasStock}`
-              );
+              // console.log(
+              //   `   Size ${size.name}: selected=${isSelected}, stock=${size.countInStock}, valid=${isSelected && hasStock}`
+              // );
               return isSelected && hasStock;
             })
             .map((size) => ({
@@ -658,7 +654,7 @@ const AddProductPage = () => {
               countInStock: parseInt(size.countInStock),
             }));
 
-          console.log(`📦 Variant ${variant.colorName} valid sizes:`, validSizes);
+          // console.log(`📦 Variant ${variant.colorName} valid sizes:`, validSizes);
 
           return {
             id: variant.id,
@@ -675,7 +671,7 @@ const AddProductPage = () => {
         (sum, v) => sum + (v.images?.length || 0),
         0
       );
-      console.log(`📊 Tổng số ảnh cần upload: ${totalImages}`);
+      // console.log(`📊 Tổng số ảnh cần upload: ${totalImages}`);
 
       // Gọi Redux thunk để tạo sản phẩm
       const result = await dispatch(createProductWithImages(productFormData)).unwrap();
@@ -708,7 +704,7 @@ const AddProductPage = () => {
       console.error('❌ Lỗi khi tạo sản phẩm:', error);
 
       // Hiển thị thông báo lỗi chi tiết
-      const errorMessage = error.message || 'Có lỗi xảy ra khi tạo sản phẩm';
+      const errorMessage = error?.message || error || 'Có lỗi xảy ra khi tạo sản phẩm';
       toast.error(errorMessage, { duration: 5000 });
 
       // Nếu lỗi là timeout, gợi ý người dùng

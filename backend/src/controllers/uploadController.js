@@ -1,16 +1,6 @@
 // controllers/uploadController.js
 import streamifier from "streamifier";
-import { v2 as cloudinary } from "cloudinary";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-// Cloudinary Configuration
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import cloudinary from "../config/cloudinary.config.js";
 
 // Helper: Tạo folder name từ timestamp
 const generateFolderName = () => {
@@ -27,11 +17,11 @@ const uploadToCloudinary = (fileBuffer) => {
       {
         folder: generateFolderName(),
         transformation: [
-          { quality: "auto:good", fetch_format: "auto" },
+          { quality: "auto", fetch_format: "auto" },
           { format: "webp" }, // Chuyển sang webp
         ],
         resource_type: "image",
-        timeout: 120000, // 2 phút cho mỗi ảnh
+        timeout: 60000, // 1 phút cho mỗi ảnh
       },
       (error, result) => {
         if (result) {
@@ -56,7 +46,7 @@ export const uploadMultipleImages = async (req, res) => {
       });
     }
 
-    console.log(`📤 Nhận ${req.files.length} ảnh để upload`);
+    // console.log(`📤 Nhận ${req.files.length} ảnh để upload`);
 
     // ✅ Validate files
     const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -110,9 +100,9 @@ export const uploadMultipleImages = async (req, res) => {
       });
     }
 
-    console.log(
-      `✅ Có ${validFiles.length} ảnh hợp lệ, ${invalidFiles.length} ảnh không hợp lệ`
-    );
+    // console.log(
+    //   `✅ Có ${validFiles.length} ảnh hợp lệ, ${invalidFiles.length} ảnh không hợp lệ`
+    // );
 
     // ✅ Upload tuần tự để dễ kiểm soát
     const uploadedImages = [];
@@ -120,9 +110,9 @@ export const uploadMultipleImages = async (req, res) => {
 
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i];
-      console.log(
-        `🔄 Đang upload ảnh ${i + 1}/${validFiles.length}: ${file.originalname}`
-      );
+      // console.log(
+      //   `🔄 Đang upload ảnh ${i + 1}/${validFiles.length}: ${file.originalname}`
+      // );
 
       try {
         const result = await uploadToCloudinary(file.buffer);
@@ -138,9 +128,9 @@ export const uploadMultipleImages = async (req, res) => {
           folder: result.folder,
         });
 
-        console.log(`✅ Upload thành công: ${file.originalname}`);
+        // console.log(`✅ Upload thành công: ${file.originalname}`);
       } catch (error) {
-        console.error(`❌ Lỗi upload ${file.originalname}:`, error.message);
+        // console.error(`❌ Lỗi upload ${file.originalname}:`, error.message);
         failedUploads.push({
           originalName: file.originalname,
           error: error.message,
@@ -176,8 +166,8 @@ export const uploadMultipleImages = async (req, res) => {
         altText: img.altText || "", // Thêm altText nếu cần
         // Các trường khác nếu cần
         format: img.format,
-        width: img.width,
-        height: img.height,
+        // width: img.width,
+        // height: img.height,
       })),
       failedUploads: failedUploads.length > 0 ? failedUploads : undefined,
       invalidFiles: invalidFiles.length > 0 ? invalidFiles : undefined,

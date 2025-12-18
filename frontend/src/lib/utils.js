@@ -27,8 +27,6 @@ export const formatTime = (amount) => {
     : '-';
 };
 
-export const formatPriceInput = (amount) => {
-  const rawValue = amount.replace(/\./g, '');
-  if (!isNaN(rawValue)) return;
-  return Number(rawValue);
+export const toWebp = (url) => {
+  return url.replace('/upload/', '/upload/f_webp/');
 };

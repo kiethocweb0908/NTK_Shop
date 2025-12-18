@@ -14,6 +14,7 @@ export const fetchProductsByFilters = createAsyncThunk(
     maxPrice,
     sortBy,
     limit,
+    page = 1,
     search,
   }) => {
     const query = new URLSearchParams();
@@ -29,6 +30,7 @@ export const fetchProductsByFilters = createAsyncThunk(
     if (category) query.append('category', category);
     if (material) query.append('material', material);
     if (limit) query.append('limit', limit);
+    if (page) query.append('page', page);
 
     const response = await axiosInstance.get(`/api/products?${query.toString()}`);
     return response.data;

@@ -32,9 +32,8 @@
 }
 
 /*  */
-.no-scrollbar::-webkit-scrollbar {
+/* .no-scrollbar::-webkit-scrollbar {
 }
 .no-scrollbar {
   -ms-overflow-style: none; /* Ẩn scrollbar trên IE, Edge */
-  scrollbar-width: none; /* Ẩn scrollbar trên Firefox */
-}
+/* scrollbar-width: none; Ẩn scrollbar trên Firefox */

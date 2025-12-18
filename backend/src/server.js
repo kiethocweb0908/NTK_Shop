@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import multer from "multer";
 
 import { connectDB } from "./config/db.js";
 
@@ -38,8 +39,8 @@ const PORT = process.env.PORT || 9000;
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-    console.log(`📤 Upload limit: 60 images, 5MB each, total 300MB`);
-    console.log(`⏱️  Timeout: Upload (3-5 mins), Create product (30s)`);
+    // console.log(`📤 Upload limit: 60 images, 5MB each, total 300MB`);
+    // console.log(`⏱️  Timeout: Upload (3-5 mins), Create product (30s)`);
   });
 });
 

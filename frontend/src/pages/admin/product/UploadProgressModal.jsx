@@ -1,12 +1,16 @@
 // Tạo file: components/UploadProgressModal.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { CheckCircle, XCircle, Upload, Info, AlertCircle } from 'lucide-react';
-
-const UploadProgressModal = () => {
+import { CheckCircle, XCircle, Upload, Info, AlertCircle, ListStart } from 'lucide-react';
+import { clearUploadLogs } from '@/redux/admin/slices/adminProductsSlice';
+const UploadProgressModal = ({ action }) => {
   const { operationLoading, uploadProgress, uploadLogs } = useSelector(
     (state) => state.adminProducts
   );
+
+  useEffect(() => {
+    clearUploadLogs();
+  }, [operationLoading]);
 
   if (!operationLoading) return null;
 
@@ -20,7 +24,7 @@ const UploadProgressModal = () => {
       case 'uploading':
         return <Upload className="h-4 w-4 text-blue-500 animate-pulse" />;
       case 'info':
-        return <Info className="h-4 w-4 text-gray-500" />;
+        return <Info className="h-5 w-5 text-gray-500" />;
       default:
         return <AlertCircle className="h-4 w-4 text-gray-400" />;
     }
@@ -40,6 +44,58 @@ const UploadProgressModal = () => {
         return 'text-gray-500';
     }
   };
+
+  if (action === 'edit') {
+    return (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-all duration-200 ease-linear">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+          {/* Header */}
+          <div className="p-6 w-full flex flex-col items-center justify-center">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500" />
+              <h3 className="text-xl text-center font-semibold">
+                Đang cập nhật sản phẩm...
+              </h3>
+            </div>
+            <p className="text-gray-500 text-sm">
+              Vui lòng không đóng trình duyệt trong quá trình này
+            </p>
+          </div>
+
+          {/* Logs section */}
+          <div className="mb-18">
+            <div className="p-4">
+              {uploadLogs.length <= 0 ? (
+                <div className="w-full flex items-center gap-4 justify-center text-center text-gray-400 py-8">
+                  <ListStart className="h-5 w-5 mx-auto" />
+                  <p>Đang bắt đầu quá trình...</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div
+                    className={`w-full flex items-center justify-center gap-3 py-12 px-4 rounded-lg ${
+                      uploadLogs[uploadLogs.length - 1].type === 'error'
+                        ? 'bg-red-50 border border-red-100'
+                        : uploadLogs[uploadLogs.length - 1].type === 'success'
+                          ? 'bg-green-50 border border-green-100'
+                          : 'bg-white'
+                    }`}
+                  >
+                    <div>{getLogIcon(uploadLogs[uploadLogs.length - 1].type)}</div>
+                    <p
+                      className={`text-md ${getLogColor(uploadLogs[uploadLogs.length - 1].type)}`}
+                    >
+                      {uploadLogs[uploadLogs.length - 1].message}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">

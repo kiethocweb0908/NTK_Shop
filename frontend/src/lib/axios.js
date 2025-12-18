@@ -13,9 +13,9 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     // Không log 400 errors ra console
-    if (error.response?.status !== 400) {
-      console.error('API Error:', error.response?.data || error.message);
-    }
+    // if (error.response?.status !== 400) {
+    //   console.error('API Error:', error.response?.data || error.message);
+    // }
     return Promise.reject(error);
   }
 );

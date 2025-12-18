@@ -62,8 +62,8 @@ const colorVariantSchema = new mongoose.Schema(
     },
     sizes: [sizeVariantSchema], // Mảng các kích thước và tồn kho
     images: [imageSchema], // Mảng các hình ảnh cho màu này
-  },
-  { _id: false }
+  }
+  // { _id: false }
 );
 
 const productSchema = new mongoose.Schema(

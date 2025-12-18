@@ -30,6 +30,7 @@ import OrderManagement from './pages/admin/order/OrderManagement';
 import { useEffect } from 'react';
 import AddProductPage from './pages/admin/product/AddProductPage';
 import { fetchCategories } from './redux/slices/categorySlice';
+import ProductDetailPage from './pages/admin/product/ProductDetailPage';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -129,10 +130,16 @@ function AdminRoutes() {
     <Routes>
       <Route path="/" element={<AdminLayout />}>
         <Route index element={<AdminHomePage />} />
-        <Route path="users" element={<UserManagement />} />
+        {/* Product */}
         <Route path="products" element={<ProductManagement />} />
-        <Route path="products/:id/edit" element={<EditProdcutPage />} />
+        <Route path="products/:productId" element={<ProductDetailPage />} />
         <Route path="products/add" element={<AddProductPage />} />
+        <Route path="products/:productId/edit" element={<EditProdcutPage />} />
+
+        {/* User */}
+        <Route path="users" element={<UserManagement />} />
+
+        {/* Order */}
         <Route path="orders" element={<OrderManagement />} />
       </Route>
     </Routes>

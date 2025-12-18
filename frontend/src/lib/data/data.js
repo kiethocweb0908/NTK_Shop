@@ -21,7 +21,20 @@ export const colors = [
   { colorName: 'Tím', colorHex: '#C39BE0' },
 ];
 export const sizes = ['S', 'M', 'L', 'XL'];
-export const genders = ['Men', 'Women', 'Unisex'];
+export const genders = [
+  {
+    value: 'Men',
+    name: 'Nam',
+  },
+  {
+    value: 'Women',
+    name: 'Nữ',
+  },
+  {
+    value: 'Unisex',
+    name: 'Unisex',
+  },
+];
 export const materials = [
   'Cotton',
   'Wool',
@@ -65,6 +78,33 @@ export const sort = [
   {
     value: 'stockDesc',
     name: 'Số lượng nhiều',
+  },
+];
+
+export const sortPublic = [
+  {
+    value: 'newest',
+    name: 'Mới nhất',
+  },
+  {
+    value: 'oldest',
+    name: 'Cũ nhất',
+  },
+  {
+    value: 'nameAsc',
+    name: 'Tên A - Z',
+  },
+  {
+    value: 'nameDesc',
+    name: 'Tên Z - A',
+  },
+  {
+    value: 'priceAsc',
+    name: 'Giá Thấp - Cao',
+  },
+  {
+    value: 'priceDesc',
+    name: 'Giá Cao - Thấp',
   },
 ];
 
@@ -129,5 +169,7 @@ export const rowsPerPage = [
     value: 50,
   },
 ];
+
+export const allSizes = ['XS', 'S', 'M', 'L', 'XL'];
 // discount;
 // rating;

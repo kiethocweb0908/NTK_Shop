@@ -26,7 +26,7 @@ import QuantitySelector from './QuantitySelector ';
 import { addToCart } from '@/redux/slices/cartSlice';
 
 // format
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, toWebp } from '@/lib/utils';
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -215,7 +215,7 @@ const ProductDetails = ({ productId }) => {
                 <Carousel
                   setApi={setEmblaApi} // Nhận api
                   plugins={[plugin.current]}
-                  className="mb-4 sm:mb-0 rounded-xl overflow-hidden border border-gray-200"
+                  className="mb-4 sm:mb-0 rounded-xl overflow-hidden max-h-[488px] border border-gray-200"
                   // onMouseEnter={plugin.current.stop}
                   onMouseLeave={plugin.current.reset}
                 >
@@ -224,9 +224,9 @@ const ProductDetails = ({ productId }) => {
                       (image, index) => (
                         <CarouselItem key={index}>
                           <img
-                            src={image.url}
+                            src={toWebp(image.url)}
                             alt="Main Product"
-                            className={`w-full h-auto object-cover`}
+                            className={`w-full h-full object-cover object-center`}
                           />
                         </CarouselItem>
                       )

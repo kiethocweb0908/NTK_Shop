@@ -24,7 +24,7 @@ const upload = multer({
       "image/jpg",
       "image/png",
       "image/webp",
-      "image/gif",
+      // "image/gif",
     ];
 
     if (allowedMimes.includes(file.mimetype)) {

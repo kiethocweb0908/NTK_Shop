@@ -113,7 +113,7 @@ const FilterSidebar = () => {
         const isEmpty =
           (Array.isArray(value) && value.length === 0) || // [] → empty
           (typeof value === 'string' && value === '') || // "" → empty
-          (typeof value === 'number' && value === 0); // 0 → empty
+          (typeof value === 'number' && (value === 0 || value === 1000000)); // 0 → empty
 
         if (!isEmpty) {
           if (Array.isArray(value)) {
@@ -181,23 +181,23 @@ const FilterSidebar = () => {
   };
 
   return (
-    <div className="pt-4 pb-4 lg:pr-6">
+    <div className="py-18 px-10 lg:px-0 lg:py-2 lg:pr-6">
       <h3 className="text-xl font-medium text-gray-800 mb-6">Bộ lọc</h3>
       {/* gender filter */}
       <div className="mb-6">
         <label className="block text-gray-600 font-medium mb-2">Giới tính</label>
         <div className="flex gap-4">
           {genders.map((gender) => (
-            <div key={gender} className="flex items-center mb-1">
+            <div key={gender.value} className="flex items-center mb-1">
               <input
                 type="checkbox"
                 name="gender"
-                value={gender}
+                value={gender.value}
                 onChange={handleFilterChange}
-                checked={filters.gender.includes(gender)}
+                checked={filters.gender.includes(gender.value)}
                 className="mr-2 h-4 text-blue-500 focus:ring-blue-400 border-gray-300"
               />
-              <span className="text-gray-700">{gender}</span>
+              <span className="text-gray-700">{gender.name}</span>
             </div>
           ))}
         </div>
@@ -258,8 +258,10 @@ const FilterSidebar = () => {
                 key={color.colorHex}
                 type="button"
                 onClick={() => handleColorChange(color.colorHex)}
-                className={`w-6 h-6 border border-gray-300 cursor-pointer transition rounded-full
-                  hover:scale-105
+                className={`w-6 h-6 border border-gray-300 
+                  
+                  hover:scale-105 cursor-pointer 
+                  transition rounded-full
                   ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
                 style={{ backgroundColor: color.colorHex.toLowerCase() }}
                 title={color.colorName}

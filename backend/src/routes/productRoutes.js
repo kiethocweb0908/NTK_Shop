@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 
 import {
   //public
@@ -8,20 +9,15 @@ import {
   getBestSellerProduct,
   getNewProduct,
   //Private
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  toggleFeaturedProduct,
-  togglePublishedProduct,
   addVariants,
   updateVariant,
   deleteVariant,
-  updateVariantStock,
   addImagesVariant,
   updateImageVariant,
   deleteImageVariant,
 } from "../controllers/productController.js";
 import { protect, admin } from "../middlewares/authMiddleware.js";
+import Product from "../models/Product.js";
 // import mongoose from "mongoose";
 // import Product from "../models/Product.js";
 const router = express.Router();
@@ -34,21 +30,11 @@ router.get("/new-arrivals", getNewProduct);
 router.get("/:id", getProduct);
 
 // Protected admin router
-router.post("/", protect, admin, createProduct);
-router.put("/:id", protect, admin, updateProduct);
-router.delete("/:id", protect, admin, deleteProduct);
-router.patch("/:id/featured", protect, admin, toggleFeaturedProduct);
-router.patch("/:id/published", protect, admin, togglePublishedProduct);
+// router.post("/", protect, admin, createProduct);
 // -- variants
 router.patch("/:id/variants", protect, admin, addVariants);
 router.patch("/:productId/variants/:colorSlug", protect, admin, updateVariant);
 router.delete("/:productId/variants/:colorSlug", protect, admin, deleteVariant);
-router.patch(
-  "/:productId/variants/:colorSlug/stock",
-  protect,
-  admin,
-  updateVariantStock
-);
 router.patch(
   "/:productId/variants/:colorSlug/images",
   protect,
@@ -87,6 +73,33 @@ router.delete(
 //     console.log(
 //       `Product ${product._id} updated, fixed ${totalFixed} images so far`
 //     );
+//   }
+
+//   res.json({ message: "Migration done", fixed: totalFixed });
+// });
+
+// Add _id cho variant
+// router.post("/admin/migrate-variants", async (req, res) => {
+//   const products = await Product.find().lean();
+//   let totalFixed = 0;
+
+//   for (const product of products) {
+//     let updated = false;
+
+//     for (const variant of product.variants) {
+//       if (!variant._id) {
+//         variant._id = new mongoose.Types.ObjectId();
+//         updated = true;
+//         totalFixed++;
+//       }
+//     }
+
+//     if (updated) {
+//       await Product.updateOne({ _id: product._id }, product);
+//       console.log(
+//         `Product ${product._id} updated, fixed ${totalFixed} variants so far`
+//       );
+//     }
 //   }
 
 //   res.json({ message: "Migration done", fixed: totalFixed });

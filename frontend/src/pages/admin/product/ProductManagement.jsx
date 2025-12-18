@@ -1,12 +1,15 @@
 import {
+  deleteProductThunk,
   fetchAdminProducts,
   setAdminFilters,
+  toggleProductFeaturedThunk,
+  toggleProductPublished,
 } from '@/redux/admin/slices/adminProductsSlice';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 // utils & Data
-import { formatCurrency, formatTime } from '@/lib/utils';
+import { formatCurrency, formatTime, toWebp } from '@/lib/utils';
 import { sort, filter, rowsPerPage, genders } from '@/lib/data/data';
 // Shadcn
 import { Badge } from '@/components/ui/badge';
@@ -55,9 +58,13 @@ import {
   Filter,
   ArrowUpDown,
   User2,
+  Layers,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import AlertDialogDemo from '@/components/Common/AlertDialog';
 
 const ProductManagement = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { products, pagination, loading, error, filters } = useSelector(
     (state) => state.adminProducts
@@ -176,12 +183,6 @@ const ProductManagement = () => {
     }));
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete the Product?')) {
-      console.log('Delete product with id: ', id);
-    }
-  };
-
   // Hàm tính tổng tồn kho
   const getTotalStock = (product) => {
     return (
@@ -211,6 +212,53 @@ const ProductManagement = () => {
     }
 
     return pages;
+  };
+
+  // Trạng thái Ẩn hiện
+  const togglePublished = async (productId) => {
+    const product = products.find((p) => p._id === productId);
+    if (!product) return toast.error('Không tìm thấy sản phẩm từ id', { duration: 3000 });
+
+    try {
+      const response = await dispatch(
+        toggleProductPublished({ _id: productId })
+      ).unwrap();
+      toast.success(response?.message || 'Thành công!');
+    } catch (error) {
+      toast.error(error?.message || error || 'Lỗi');
+    }
+  };
+
+  // Thêm/bỏ nổi bật
+  const toggleFeatured = async (productId) => {
+    const product = products.find((p) => p._id === productId);
+    if (!product) return toast.error('Không tìm thấy sản phẩm từ id', { duration: 3000 });
+
+    try {
+      const response = await dispatch(
+        toggleProductFeaturedThunk({ id: productId })
+      ).unwrap();
+      toast.success(response?.message || 'Thành công!');
+    } catch (error) {
+      toast.error(error || 'Lỗi');
+    }
+  };
+
+  // Xoá sản phẩm
+  const handleDelete = async (productId) => {
+    if (!productId) return toast.error('Không nhận được id sản phẩm', { duration: 3000 });
+    const product = products.find((p) => p._id.toString() === productId);
+    if (!product) return toast.error('Không tìm thấy sản phẩm từ id', { duration: 3000 });
+
+    const toastId = toast.loading('Đang xoá sản phẩm...', { duration: Infinity });
+    try {
+      const response = await dispatch(deleteProductThunk({ productId })).unwrap();
+      toast.success(response?.message || 'Xoá thành công!');
+    } catch (error) {
+      toast.error(error || 'Lỗi', { id: toastId, duration: 3000 });
+    } finally {
+      toast.dismiss(toastId);
+    }
   };
 
   return (
@@ -250,7 +298,7 @@ const ProductManagement = () => {
           <div>
             <Select value={currentFilters.category} onValueChange={handleCategoryChange}>
               <SelectTrigger className="w-45 py-4">
-                <User2 className="mr-1 h-4 w-4" />
+                <Layers className="mr-1 h-4 w-4" />
                 <SelectValue placeholder="Lọc theo trạng thái" />
               </SelectTrigger>
               <SelectContent className="bg-white w-45">
@@ -444,25 +492,14 @@ const ProductManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={10} className="p-4 text-center text-gray-500">
-                  Đang tìm sản phẩm...
-                </td>
-              </tr>
-            ) : error ? (
-              <tr>
-                <td colSpan={10} className="p-4 text-center text-gray-500">
-                  {error}
-                </td>
-              </tr>
-            ) : products.length > 0 ? (
+            {products.length > 0 ? (
               products.map((product) => {
                 const totalStock = getTotalStock(product);
-                const mainImage = product?.variants[0]?.images[0]?.url;
+                const mainImage = toWebp(product?.variants[0]?.images[0]?.url);
                 return (
                   <tr
                     key={product._id}
+                    onClick={() => navigate(`${product._id}`)}
                     className={`border-b border-gray-300 text-sm text-black/80  cursor-pointer
                       ${!product.isPublished ? 'bg-black/15 opacity-70 hover:opacity-100 transition-all duration-200' : 'hover:bg-gray-50'}`}
                   >
@@ -583,37 +620,36 @@ const ProductManagement = () => {
                     )}
 
                     {/* Hành động */}
-                    <td className="py-3 px-4 w-[140px]">
+                    <td
+                      onClick={(e) => e.stopPropagation()}
+                      className="py-3 px-4 w-[140px] cursor-default"
+                    >
                       <div className="grid grid-cols-4 gap-3">
                         {/* Ẩn */}
-                        <button className="px-1 py-1 ">
-                          {product.isPublished ? (
-                            <Eye className="hover:text-gray-500 h-5 w-5" />
-                          ) : (
-                            <EyeOff className="hover:text-gray-500 h-5 w-5" />
-                          )}
-                        </button>
+                        <AlertDialogDemo
+                          cb={togglePublished}
+                          product={product}
+                          action="published"
+                          loading={loading}
+                        />
                         {/* Nổi Bật */}
-                        <button
-                          onClick={() => handleDelete(product._id)}
-                          className="px-1 py-1 "
-                        >
-                          <Star
-                            className={`${product.isFeatured ? 'fill-yellow-400 text-yellow-500' : 'text-black'} hover:text-yellow-400 hover:fill-yellow-300 h-5 w-5`}
-                          />
-                        </button>
-
+                        <AlertDialogDemo
+                          cb={toggleFeatured}
+                          product={product}
+                          action="featured"
+                          loading={loading}
+                        />
                         {/* Chỉnh sửa */}
                         <Link to={`/admin/products/${product._id}/edit`} className="p-1">
                           <Edit className="hover:text-orange-500 h-5 w-5" />
                         </Link>
                         {/* Xoá */}
-                        <button
-                          onClick={() => handleDelete(product._id)}
-                          className="px-1 py-1 "
-                        >
-                          <Trash2 className="h-5 w-5 hover:text-red-400" />
-                        </button>
+                        <AlertDialogDemo
+                          cb={handleDelete}
+                          product={product}
+                          action="delete"
+                          loading={loading}
+                        />
                       </div>
                     </td>
                   </tr>
