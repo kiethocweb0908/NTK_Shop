@@ -66,9 +66,13 @@ const orderSchema = new mongoose.Schema(
     orderItems: [orderItemSchema],
     shippingAddress: {
       fullAddress: { type: String, required: true },
-      city: { type: String, required: true },
+      province: { type: String, required: true },
       district: { type: String, required: true },
       ward: { type: String, required: true },
+    },
+    name: {
+      type: String,
+      required: true,
     },
     phone: {
       type: String,
@@ -93,7 +97,7 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["cod", "momo", "vnpay", "banking"],
+      enum: ["cod", "momo", "vnpay", "paypal"],
       default: "cod",
       required: true,
     },
@@ -132,6 +136,10 @@ const orderSchema = new mongoose.Schema(
       // ✅ THÊM: Ghi chú đơn hàng
       type: String,
     },
+    expiresAt: {
+      type: Date,
+      index: true, // để query nhanh
+    },
   },
   { timestamps: true }
 );
@@ -143,22 +151,13 @@ orderSchema.pre("save", async function (next) {
     0
   );
 
-  this.shippingPrice = this.totalPrice >= 1000000 ? 0 : 30000;
+  // this.shippingPrice = this.totalPrice >= 1000000 ? 0 : 30000;
 
   this.totalPrice = this.shippingPrice + this.totalPriceItem;
 
-  this.isPaid = this.paymentMethod !== "cod";
+  // this.isPaid = false;
 
-  this.paymentStatus = this.isPaid ? "paid" : "pending";
-
-  // Tự động tạo orderNumber
-  //   if (!this.orderNumber) {
-  //     const date = new Date();
-  //     const timestamp = date.getTime();
-  //     const random = Math.floor(Math.random() * 1000);
-  //     this.orderNumber = `ORD-${timestamp}-${random}`;
-  //   }
-
+  // this.paymentStatus = this.isPaid ? "paid" : "pending";
   next();
 });
 

@@ -1215,12 +1215,13 @@ const EditProdcutPage = () => {
                           <Input
                             type="file"
                             multiple
-                            accept="image/*"
+                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                             onChange={(e) => {
                               handleAddImage(variant._id, e);
                             }}
                             className="w-20 text-center px-3"
                           />
+                          <p className="text-xs font-mono">(.jpeg .jpg .png .webp)</p>
                         </div>
                         <div className="grid grid-cols-3 gap-2 sm:gap-4 sm:max-h-[392px] md:max-h-[284px]">
                           {variant.images.length > 0 ? (
@@ -1286,7 +1287,7 @@ const EditProdcutPage = () => {
                               <Input
                                 type="file"
                                 multiple
-                                accept="image/*"
+                                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                                 onChange={(e) => {
                                   handleAddImage(variant._id, e);
                                 }}

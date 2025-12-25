@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 const checkout = {
   _id: '123123',
@@ -30,6 +31,7 @@ const checkout = {
 };
 
 const OrderConfirmation = () => {
+  const { selectedOrder } = useSelector((state) => state.orders);
   const calculateEstimatedDelivery = (createdAt) => {
     const orderDate = new Date(createdAt);
     orderDate.setDate(orderDate.getDate() + 10);
@@ -47,9 +49,7 @@ const OrderConfirmation = () => {
           <div className="flex justify-between mb-20">
             {/* order id and date */}
             <div>
-              <h2 className="text-xl font-semibold">
-                Order ID: {checkout._id}
-              </h2>
+              <h2 className="text-xl font-semibold">Order ID: {checkout._id}</h2>
               <p className="text-gray-500">
                 Order date: {new Date(checkout.createdAt).toLocaleDateString()}
               </p>
@@ -57,8 +57,7 @@ const OrderConfirmation = () => {
             {/* Estimated Delivery */}
             <div>
               <p className="text-emerald-700 text-sm">
-                Estimated Delivery:{' '}
-                {calculateEstimatedDelivery(checkout.createdAt)}
+                Estimated Delivery: {calculateEstimatedDelivery(checkout.createdAt)}
               </p>
             </div>
           </div>
@@ -98,8 +97,7 @@ const OrderConfirmation = () => {
           <div>
             <h4 className="text-lg font-semibold mb-2">Delivery</h4>
             <p className="text-gray-600">
-              {checkout.shippingAddress.address},{' '}
-              {checkout.shippingAddress.city}
+              {checkout.shippingAddress.address}, {checkout.shippingAddress.city}
             </p>
           </div>
         </div>

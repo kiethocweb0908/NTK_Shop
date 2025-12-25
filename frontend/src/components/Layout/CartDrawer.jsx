@@ -3,6 +3,7 @@ import { IoMdClose } from 'react-icons/io';
 import CartContents from '../Cart/CartContents';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { toast } from 'sonner';
 
 const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
   const { cart, loading, error } = useSelector((state) => state.cart);
@@ -10,7 +11,11 @@ const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
   const navigate = useNavigate();
   const handleCheckout = () => {
     tonggleCartDrawer();
-    navigate('/checkout');
+    if (cart || cart?.products.length > 0) {
+      navigate('/checkout');
+    } else {
+      toast.warning('Không thể tới trang thanh toán khi giỏ hàng trống!');
+    }
   };
 
   return (

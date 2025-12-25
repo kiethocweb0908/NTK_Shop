@@ -30,3 +30,15 @@ export const formatTime = (amount) => {
 export const toWebp = (url) => {
   return url.replace('/upload/', '/upload/f_webp/');
 };
+
+export const validatePhone = (phone) => {
+  const trimmed = phone.trim();
+  const phoneRegex = /^0\d{9}$/;
+  return phoneRegex.test(trimmed);
+};
+
+export const validatePassword = (password) => {
+  const trimmed = password.trim();
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,50}$/;
+  return passwordRegex.test(trimmed);
+};

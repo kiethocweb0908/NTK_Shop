@@ -3,6 +3,8 @@ import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
 
+import * as orderService from "../services/orderService.js";
+
 // @route   GET /api/orders
 // @desc    Get all orders
 // @access  Private/Admin
@@ -41,14 +43,33 @@ export const getMyOrders = async (req, res) => {
     if (!req.user)
       return res.status(404).json({ message: "Không tìm thấy người dùng!" });
 
-    const orders = await Order.find({ user: req.user._id });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    // Tổng số đơn hàng
+    const totalOrders = await Order.countDocuments({ user: req.user._id });
+
+    const orders = await Order.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     if (!orders || orders.length === 0)
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
 
+    // Tính tổng số trang
+    const totalPages = Math.ceil(totalOrders / limit);
+
     res.json({
+      message: "Lấy danh sách đơn hàng thành công!",
       myOrders: orders,
-      totalOrders: orders.length,
+      pagination: {
+        totalOrders,
+        currentPage: page,
+        totalPages,
+        limit,
+      },
     });
   } catch (error) {
     console.error("Lỗi khi gọi getMyOrders: ", error);
@@ -94,9 +115,9 @@ export const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await Order.findById(id)
-      .populate("user", "name email")
-      .populate("orderItems.productId", "name");
+    const order = await Order.findById(id);
+    // .populate("user", "name email phone address")
+    // .populate("orderItems.productId", "name");
 
     if (!order) {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
@@ -114,93 +135,12 @@ export const getOrderById = async (req, res) => {
       });
     }
 
-    res.json(order);
+    res.json({
+      message: "Lấy chi tiết đơn hàng thành công!",
+      order,
+    });
   } catch (error) {
     console.error("Lỗi khi lấy chi tiết đơn hàng:", error);
-    res.status(500).json({ message: "Lỗi server" });
-  }
-};
-
-// @route   POST /api/orders
-// @desc    Create new order
-// @access  Private/Public (user hoặc guest)
-export const createOrder = async (req, res) => {
-  try {
-    const { shippingAddress, phone, email, paymentMethod, notes } = req.body;
-
-    // 1. Lấy cart hiện tại
-    const guestId = req.cookies?.guestId;
-    let cart;
-    console.log("user", req.user);
-    console.log("user", req.user._id);
-    if (req.user) {
-      cart = await Cart.findOne({ user: req.user?._id });
-    } else {
-      cart = await Cart.findOne({ guestId });
-    }
-
-    if (!cart || cart.products.length === 0) {
-      return res.status(400).json({
-        message: "Giỏ hàng trống",
-      });
-    }
-
-    // 2. Tạo order object
-    const order = new Order({
-      user: req.user?._id,
-      guestId: guestId,
-      orderItems: cart.products,
-      shippingAddress,
-      phone,
-      email,
-      paymentMethod: paymentMethod || "cod",
-      notes,
-    });
-
-    // 3. Kiểm tra tồn kho trước khi tạo order
-    const stockIssues = await order.checkStock();
-    if (stockIssues.length > 0) {
-      return res.status(400).json({
-        message: "Một số sản phẩm không đủ tồn kho",
-        errors: stockIssues,
-      });
-    }
-
-    // 4. Lưu order (tự động chạy middleware tính toán)
-    const createdOrder = await order.save();
-
-    // 5. Cập nhật tồn kho sản phẩm
-    for (const item of createdOrder.orderItems) {
-      await Product.updateOne(
-        {
-          _id: item.productId,
-          "variants.colorName": item.color,
-          "variants.sizes.name": item.size,
-        },
-        {
-          $inc: {
-            "variants.$[variant].sizes.$[size].countInStock": -item.quantity,
-          },
-        },
-        {
-          arrayFilters: [
-            { "variant.colorName": item.color },
-            { "size.name": item.size },
-          ],
-        }
-      );
-    }
-
-    // 6. Xóa cart sau khi tạo order thành công
-    await Cart.findByIdAndDelete(cart._id);
-
-    // 7. Trả về order đã tạo
-    res.status(201).json({
-      message: "Đơn hàng đã được tạo thành công",
-      order: createdOrder,
-    });
-  } catch (error) {
-    console.error("Lỗi khi gọi createOrder: ", error);
     res.status(500).json({ message: "Lỗi server" });
   }
 };
@@ -289,5 +229,44 @@ export const updateOrderStatus = async (req, res) => {
   } catch (error) {
     console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
     res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+// tạo đơn hàng
+export const placeOrder = async (req, res) => {
+  try {
+    const {
+      name,
+      phone,
+      email,
+      shippingAddress,
+      shippingPrice,
+      paymentMethod,
+      notes,
+    } = req.body;
+
+    const user = req.user;
+    const guestId = req.cookies?.guestId;
+
+    const createdOrder = await orderService.createOrderr(
+      user,
+      guestId,
+      name,
+      phone,
+      email,
+      shippingAddress,
+      shippingPrice,
+      paymentMethod,
+      notes
+    );
+
+    res.status(201).json({
+      message: "Đặt hàng thành công!",
+      createdOrder,
+    });
+  } catch (error) {
+    console.error("Lỗi khi gọi placeOrder:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
   }
 };

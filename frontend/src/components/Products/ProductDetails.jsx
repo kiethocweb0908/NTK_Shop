@@ -53,7 +53,7 @@ const ProductDetails = ({ productId }) => {
     selectedProduct?.variants[currentColorIndex]?.colorName
   );
   // Selected size
-  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedSize, setSelectedSize] = useState({ name: '', countInStock: null });
   // quantity
   const [quantity, setQuantity] = useState(1);
   const [isButtonDisabled, setIsButtonDisable] = useState(false);
@@ -67,7 +67,10 @@ const ProductDetails = ({ productId }) => {
 
       // Reset state khi thay đổi product
       setcurrentColorIndex(0);
-      setSelectedSize('');
+      setSelectedSize({
+        name: '',
+        countInStock: null,
+      });
       setQuantity(1);
     }
   }, [productFetchId, dispatch]);
@@ -110,7 +113,7 @@ const ProductDetails = ({ productId }) => {
 
       if (action === 'plus') {
         const currentSize = selectedProduct.variants[currentColorIndex].sizes.find(
-          (s) => s.name === selectedSize
+          (s) => s.name === selectedSize.name
         );
 
         if (!currentSize) {
@@ -125,13 +128,13 @@ const ProductDetails = ({ productId }) => {
         setQuantity((prev) => prev + 1);
       }
     },
-    [quantity, selectedProduct, currentColorIndex, selectedSize]
+    [quantity, selectedProduct, currentColorIndex, selectedSize.name]
   );
 
   //reset số lượng khi đổi size
   useEffect(() => {
     setQuantity(1);
-  }, [selectedSize]);
+  }, [selectedSize.name]);
 
   // Effect để cập nhật khi product load xong
   useEffect(() => {
@@ -143,12 +146,15 @@ const ProductDetails = ({ productId }) => {
   //chạy lại khi thay đổi màu sắc, reset size
   useEffect(() => {
     setSelectedColor(selectedProduct?.variants[currentColorIndex]?.colorName);
-    setSelectedSize('');
+    setSelectedSize({
+      name: '',
+      countInStock: null,
+    });
   }, [currentColorIndex]);
 
   //Add to cart
   const handleAddToCart = () => {
-    if (!selectedSize || !selectedColor) {
+    if (!selectedSize.name || !selectedColor) {
       toast.error('Vui lòng chọn màu sắc và kích thước!', {
         duration: 1000,
       });
@@ -161,7 +167,7 @@ const ProductDetails = ({ productId }) => {
       addToCart({
         productId: productFetchId,
         color: selectedColor,
-        size: selectedSize,
+        size: selectedSize.name,
         quantity: quantity,
       })
     )
@@ -187,7 +193,7 @@ const ProductDetails = ({ productId }) => {
   console.log('Product Details, curent Color: ', selectedColor);
 
   return (
-    <div className="p-4">
+    <div className="relative z-10 p-4">
       {selectedProduct && (
         <div className="max-w-6xl mx-auto bg-white p4-8 sm:p-8  rounded-lg">
           <div className="flex flex-col md:grid md:grid-cols-12 gap-10 md:gap-0">
@@ -316,7 +322,12 @@ const ProductDetails = ({ productId }) => {
                     (size, index) => (
                       <button
                         disabled={size.countInStock === 0}
-                        onClick={() => setSelectedSize(size.name)}
+                        onClick={() =>
+                          setSelectedSize((prev) => ({
+                            name: size.name,
+                            countInStock: size.countInStock,
+                          }))
+                        }
                         key={index}
                         className={`min-w-[45px] max-w-[47px] text-center py-2 rounded border select-none transition-all ease-in duration-150
                       ${
@@ -325,7 +336,7 @@ const ProductDetails = ({ productId }) => {
                           : 'hover:border-primary-300 hover:text-primary-300 active:border-primary active:text-primary cursor-pointer'
                       }
                       ${
-                        selectedSize === size.name
+                        selectedSize.name === size.name
                           ? 'bg-primary-400 text-white border-primary-400'
                           : ''
                       }`}
@@ -337,11 +348,19 @@ const ProductDetails = ({ productId }) => {
                 </div>
               </div>
               {/* số lượng */}
-              <QuantitySelector
-                className="mb-6"
-                quantity={quantity}
-                handleQuantityChange={handleQuantityChange}
-              />
+              <div className="flex items-center gap-4">
+                <QuantitySelector
+                  className="mb-6"
+                  quantity={quantity}
+                  handleQuantityChange={handleQuantityChange}
+                />
+                {selectedSize.name && (
+                  <div className="mt-6 flex items-center gap-2 text-sm">
+                    Số lượng còn lại:{' '}
+                    <p className="text-red-500">{selectedSize.countInStock}</p>
+                  </div>
+                )}
+              </div>
 
               {/* Thêm giỏ hàng */}
               <button

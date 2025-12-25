@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { HiOutlineUser, HiOutlineShoppingBag, HiBars3BottomRight } from 'react-icons/hi2';
+
 import SearchBar from './SearchBar';
 import CartDrawer from '../Layout/CartDrawer';
 import { navType } from '../../lib/data/data';
-import { IoMdClose } from 'react-icons/io';
 import { useSelector } from 'react-redux';
+
+// Icons
+import { HiOutlineUser, HiOutlineShoppingBag, HiBars3BottomRight } from 'react-icons/hi2';
+import { IoMdClose } from 'react-icons/io';
+import { MdLogin } from 'react-icons/md';
+import { FaSignInAlt } from 'react-icons/fa';
+import { BiLogIn } from 'react-icons/bi';
 
 const Navbar = () => {
   const { cart } = useSelector((state) => state.cart);
+  const { user } = useSelector((state) => state.auth);
   //active navbar
   const [navActive, setNavActive] = useState('');
   // đóng / mở giỏ hàng
@@ -38,7 +45,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="container mx-auto flex items-center justify-between al py-4 px-4 md:px-0 ">
+      <nav className="container mx-auto flex items-center justify-between al py-4 px-4">
         {/* Logo */}
         <div onClick={() => setNavActive('')}>
           <Link to="/" className="text-2xl font-medium text-black hover:text-primary-300">
@@ -67,12 +74,22 @@ const Navbar = () => {
 
         {/* Right */}
         <div className="flex items-center space-x-4">
-          <Link to="/admin" className="block bg-black px-2 text-sm text-white">
-            Admin
-          </Link>
-          <Link to="/profile" className="p-3 hover:text-primary-300">
-            <HiOutlineUser className="h-6 w-6 mx-auto" />
-          </Link>
+          {user ? (
+            <>
+              {user.role === 'admin' && (
+                <Link to="/admin" className="block bg-black px-2 text-sm text-white">
+                  Admin
+                </Link>
+              )}
+              <Link to="/profile" className="p-3 hover:text-primary-300">
+                <HiOutlineUser className="h-6 w-6 mx-auto" />
+              </Link>
+            </>
+          ) : (
+            <Link to="/login" className="p-3 hover:text-primary-300">
+              Đăng nhập
+            </Link>
+          )}
           <button
             onClick={tonggleCartDrawer}
             className="p-3 relative hover:text-primary-300 cursor-pointer"

@@ -5,20 +5,23 @@ import {
   getMyOrders,
   getOrdersFromFilter,
   getOrderById,
-  createOrder,
   updateOrderStatus,
+  placeOrder,
 } from "../controllers/orderController.js";
 const router = express.Router();
 
 // public
 router.get("/filter", getOrdersFromFilter);
 router.get("/:id", optionalAuth, getOrderById);
-router.post("/", optionalAuth, createOrder);
 
 // private
-router.get("/my-orders", protect, getMyOrders);
+router.get("/user/my-orders", protect, getMyOrders);
 router.patch("/:id", optionalAuth, updateOrderStatus);
 
 // admin
 router.get("/", protect, admin, getAllOrders);
+
+// đặt hàng
+router.post("/", optionalAuth, placeOrder);
+
 export default router;

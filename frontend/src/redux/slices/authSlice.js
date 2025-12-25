@@ -48,15 +48,51 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// Async Thunk for User Registration
-export const registerUser = createAsyncThunk(
-  'auth/registerUser',
-  async (userData, { rejectWithValue }) => {
+// Async Thunk to send mail OTP
+export const requestRegisterOTPThunk = createAsyncThunk(
+  'auth/requestRegisterOTPThunk',
+  async ({ name, phone, email, password }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/api/users/register`, userData);
-      return response.data.user;
+      const response = await axiosInstance.post(`/api/users/request-otp`, {
+        name,
+        phone,
+        email,
+        password,
+      });
+      return response.data.message;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Đăng ký thất bại');
+      return rejectWithValue(
+        error.response?.data?.message || 'requestRegisterOTPThunk failed'
+      );
+    }
+  }
+);
+
+// Async Thunk to verify OTP & create user
+export const verifyRegisterOTPThunk = createAsyncThunk(
+  'auth/verifyRegisterOTPThunk',
+  async ({ email, otp }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(`/api/users/verify-otp`, {
+        email,
+        otp,
+      });
+      return response.data;
+    } catch (error) {
+      return error.response?.data?.message || 'verifyRegisterOTPThunk failed';
+    }
+  }
+);
+
+// Async thunk to resend OTP
+export const resendRegisterOTPThunk = createAsyncThunk(
+  'auth/resendRegisterOTP',
+  async ({ email }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('/api/users/resend-otp', { email });
+      return response.data.message;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
     }
   }
 );
@@ -124,16 +160,44 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // Register
-      .addCase(registerUser.pending, (state) => {
+      //==========requestRegisterOTPThunk=============
+      .addCase(requestRegisterOTPThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(requestRegisterOTPThunk.fulfilled, (state) => {
         state.loading = false;
-        state.user = action.payload;
+        state.error = null;
       })
-      .addCase(registerUser.rejected, (state, action) => {
+      .addCase(requestRegisterOTPThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      //==========verifyRegisterOTPThunk=============
+      .addCase(verifyRegisterOTPThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyRegisterOTPThunk.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(verifyRegisterOTPThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      //==========resendRegisterOTPThunk=============
+      .addCase(resendRegisterOTPThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resendRegisterOTPThunk.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(resendRegisterOTPThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

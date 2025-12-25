@@ -8,13 +8,6 @@ import {
   getSimilarProduct,
   getBestSellerProduct,
   getNewProduct,
-  //Private
-  addVariants,
-  updateVariant,
-  deleteVariant,
-  addImagesVariant,
-  updateImageVariant,
-  deleteImageVariant,
 } from "../controllers/productController.js";
 import { protect, admin } from "../middlewares/authMiddleware.js";
 import Product from "../models/Product.js";
@@ -32,27 +25,6 @@ router.get("/:id", getProduct);
 // Protected admin router
 // router.post("/", protect, admin, createProduct);
 // -- variants
-router.patch("/:id/variants", protect, admin, addVariants);
-router.patch("/:productId/variants/:colorSlug", protect, admin, updateVariant);
-router.delete("/:productId/variants/:colorSlug", protect, admin, deleteVariant);
-router.patch(
-  "/:productId/variants/:colorSlug/images",
-  protect,
-  admin,
-  addImagesVariant
-);
-router.patch(
-  "/:productId/variants/:colorSlug/images/:imageId",
-  protect,
-  admin,
-  updateImageVariant
-);
-router.delete(
-  "/:productId/variants/:colorSlug/images/:imageId",
-  protect,
-  admin,
-  deleteImageVariant
-);
 
 // Add _id cho img của sản phẩm
 // router.post("/admin/migrate-images", async (req, res) => {

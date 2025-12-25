@@ -1,50 +1,90 @@
 import { Button } from '@/components/ui/button';
-import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { use, useEffect, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import login from '@/assets/login.webp';
 import { loginUser } from '@/redux/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import Result_ from 'postcss/lib/result';
 import { toast } from 'sonner';
 import { fetchCart } from '@/redux/slices/cartSlice';
+import { Input } from '@/components/ui/input';
+import { AlertCircle, LockOpen } from 'lucide-react';
+
+// shadcn
+import { Checkbox } from '@/components/ui/checkbox';
+// icons
+import { Mail, Lock } from 'lucide-react';
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const location = useLocation();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const from = location.state?.from?.pathname || '/';
+
+  const [info, setInfo] = useState({
+    email: '',
+    password: '',
+  });
+  const [error, setError] = useState({});
+  const [isChecked, setIsChecked] = useState(false);
 
   // Tự động chuyển hướng khi đã login
   useEffect(() => {
     if (user) {
       navigate(from || '/', { replace: true });
-
-      // dispatch(fetchCart())
-      //   .unwrap()
-      //   .then((result) => {
-      //     setTimeout(() => {
-      //       toast.success(result?.message || 'cart');
-      //     }, 1000);
-      //   })
-      //   .catch((error) => {
-      //     toast.error(error?.message || 'lỗi');
-      //   });
     }
   }, [user, navigate, from]);
+
+  const handleInfoChange = (field, value) => {
+    setInfo((prev) => ({ ...prev, [field]: value }));
+
+    setError((prev) => ({ ...prev, [field]: '' }));
+  };
+
+  const validateInfo = (field) => {
+    let error;
+    switch (field) {
+      case 'email':
+        if (!info.email.trim()) {
+          error = 'Bạn phải nhập email';
+        } else {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(info.email)) {
+            error = 'Email không đúng định dạng';
+          }
+        }
+        break;
+      case 'password':
+        if (!info.password.trim()) error = 'Bạn phải nhập mật khẩu';
+        break;
+      default:
+        break;
+    }
+    setError((prev) => ({ ...prev, [field]: error }));
+    return !error;
+  };
+
+  const handleOnBlur = (field) => {
+    validateInfo(field);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      alert('Vui lòng nhập email và password');
-      return;
-    }
+    const allFields = ['email', 'password'];
+    let isValid = true;
+    allFields.forEach((field) => {
+      if (!validateInfo(field)) {
+        isValid = false;
+      }
+    });
+    if (!isValid) return toast.error('Thông tin không hợp lệ', { duration: 3000 });
+
     try {
-      const result = await dispatch(loginUser({ email, password })).unwrap();
+      const result = await dispatch(
+        loginUser({ email: info.email, password: info.password })
+      ).unwrap();
       toast.success(`Đăng nhập thành công. Chào mừng ${result.user.name}!`);
     } catch (error) {
       toast.error(error?.message || 'Đăng nhập thất bại');
@@ -56,64 +96,135 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-row container mx-auto px-4 lg:px-0">
-      {/* form login */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center pt-8 pb-8 md:pt-12 md:pb-12">
-        <form className="w-full max-w-md bg-white p-8 rounded-lg border shadow-sm">
-          <div className="flex justify-center mb-6">
-            <h2 className="text-xl font-medium">Rabbit</h2>
-          </div>
-          <h2 className="text-2xl font-bold text-center mb-6">Hey there</h2>
-          <p className="text-center mb-6">Enter your username and password to login</p>
+    <div className="w-full relative">
+      {/* Radial Gradient Background from Bottom */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          background: 'radial-gradient(125% 125% at 50% 90%, #fff 40%, #475569 100%)',
+        }}
+      />
+      {/* Your Content/Components */}
+      <div className="flex flex-col justify-center items-center py-11">
+        <div
+          className="w-full max-w-lg grid grid-cols-2 
+        text-center bg-white/5 
+        text-black text-shadow-sm
+        border-t-[0.75px] border-x-[0.75px] border-white/35
+        rounded-t-xl
+        overflow-hidden z-10
+        transition-all duration-300 ease-initial"
+        >
+          <NavLink
+            to="/login"
+            className={({ isActive }) =>
+              isActive
+                ? 'bg-white/15 backdrop-blur-md p-4 rounded-t-xl rounded-br-xl border-[0.75px] border-white/50 font-semibold'
+                : 'bg-bg-white/5 backdrop-blur-md text-center p-4 font-semibold'
+            }
+          >
+            Đăng nhập
+          </NavLink>
+          <NavLink
+            to="/register"
+            className={({ isActive }) =>
+              isActive
+                ? 'bg-white/15 backdrop-blur-md p-4 rounded-t-xl rounded-bl-xl border-[0.75px] border-white/50 font-semibold'
+                : 'bg-bg-white/5 backdrop-blur-md text-center p-4 font-semibold'
+            }
+          >
+            Đăng ký
+          </NavLink>
+        </div>
+        <form
+          className="w-full max-w-lg p-8
+            rounded-b-xl border-x-[0.5px] border-b-[0.5px] border-white/50
+            bg-white/5 backdrop-blur-md shadow-2xl
+            "
+        >
+          <h2 className="text-2xl font-bold text-center mb-6 text-shadow-md uppercase ">
+            Đăng nhập
+          </h2>
+          <p className="text-center mb-6 text-shadow-sm">
+            Hãy nhập email và mật khẩu để đăng nhập
+          </p>
           {/* email */}
           <div className="mb-4">
-            <label className="block text-sm font-semibold mb-2">Email</label>
-            <input
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded"
-              placeholder="Nhập email của bạn"
-            />
+            <label className="block text-sm font-semibold mb-2 text-shadow-sm">
+              Email
+            </label>
+            <div className="relative">
+              <Input
+                type="email"
+                autoComplete="email"
+                value={info.email}
+                onChange={(e) => handleInfoChange('email', e.target.value)}
+                onBlur={() => handleOnBlur('email')}
+                className="w-full py-5 px-10 border border-black/10 focus:ring-0! focus:border-black/30! rounded-md bg-white/70  text-sm"
+                placeholder="Nhập email của bạn"
+              />
+              <Mail className="absolute top-[50%] -translate-y-[50%] left-3 w-4 h-4 text-black/60" />
+            </div>
+            {error.email && (
+              <span className="text-red-500 text-sm flex items-center mt-2 text-shadow-sm">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {error.email}
+              </span>
+            )}
           </div>
           {/* password */}
           <div className="mb-4">
-            <label className="block text-sm font-semibold mb-2">Password</label>
-            <input
-              type="password"
-              value={password}
-              autoComplete="password"
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded"
-              placeholder="Nhập mật khẩu của bạn"
-            />
+            <label className="block text-sm font-semibold mb-2 text-shadow-sm">
+              Mật khẩu
+            </label>
+            <div className="relative">
+              <Input
+                type={!isChecked ? 'password' : 'text'}
+                value={info.password}
+                autoComplete="password"
+                onChange={(e) => handleInfoChange('password', e.target.value)}
+                onBlur={() => handleOnBlur('password')}
+                className="w-full py-5 px-10 border border-black/10 focus:ring-0! focus:border-black/30! rounded-md bg-white/70   text-sm"
+                placeholder="Nhập mật khẩu của bạn"
+              />
+              {!isChecked ? (
+                <Lock className="absolute top-[50%] -translate-y-[50%] left-3 w-4 h-4 text-black/60" />
+              ) : (
+                <LockOpen className="absolute top-[50%] -translate-y-[50%] left-3 w-4 h-4 text-black/60" />
+              )}
+            </div>
+            {error.password && (
+              <span className="text-red-500 text-sm flex items-center mt-2 text-shadow-sm">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {error.password}
+              </span>
+            )}
           </div>
-          {/* button */}
-          {/* <button type='submit' className='w-full bg-black text-white p-2 rounded-lg font-semibold
-          hover:bg-pri'></button> */}
+
+          <div className="flex gap-2 items-center">
+            <Checkbox
+              checked={isChecked}
+              onCheckedChange={() => setIsChecked((prev) => !prev)}
+              className="border border-black/10! focus:ring-0! focus:border-black/30! ring-0!"
+            />
+            <label className="text-sm text-shadow-sm select-none">Hiện mật khẩu</label>
+          </div>
+
           <Button
             variant="primary"
             size="full"
             type="submit"
-            className=""
+            className="mt-8"
             onClick={(e) => handleSubmit(e)}
           >
             Đăng nhập
           </Button>
           <p className="mt-6 text-center text-sm">
-            Bạn chưa có tài khoản?{' '}
-            <Link to="/register" className="text-blue-500">
-              Đăng ký
+            <Link to="/register" className="text-blue-500 text-shadow-sm">
+              Quên mật khẩu?
             </Link>
           </p>
         </form>
-      </div>
-
-      <div className="hidden lg:block w-1/2 bg-gray-800">
-        <div className="h-full flex flex-col justify-center items-center">
-          <img src={login} alt="Login" className="h-[750px] w-full object-cover" />
-        </div>
       </div>
     </div>
   );

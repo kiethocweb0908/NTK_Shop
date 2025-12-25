@@ -31,6 +31,8 @@ import { useEffect } from 'react';
 import AddProductPage from './pages/admin/product/AddProductPage';
 import { fetchCategories } from './redux/slices/categorySlice';
 import ProductDetailPage from './pages/admin/product/ProductDetailPage';
+import Otp from './pages/shop/Otp';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -65,9 +67,18 @@ function AppContent() {
 
 function UserRoutesWithStore() {
   return (
-    <Provider store={store}>
-      <UserRoutes />
-    </Provider>
+    <PayPalScriptProvider
+      options={{
+        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
+        currency: 'USD',
+        intent: 'capture',
+        // components: 'buttons',
+      }}
+    >
+      <Provider store={store}>
+        <UserRoutes />
+      </Provider>
+    </PayPalScriptProvider>
   );
 }
 
@@ -99,14 +110,16 @@ function UserRoutes() {
         <Route index element={<Home />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="otp" element={<Otp />} />
         <Route path="profile" element={<Profile />} />
         <Route path="shop" element={<CollectionPage />} />
         <Route path="product/:id" element={<ProductDetails />} />
-        <Route path="checkout" element={<Checkout />} />
+        {/* <Route path="checkout" element={<Checkout />} /> */}
         <Route path="order-confirmation" element={<OrderConfirmation />} />
         <Route path="order/:id" element={<OrderDetailsPage />} />
         <Route path="my-orders" element={<MyOrdersPage />} />
       </Route>
+      <Route path="checkout" element={<Checkout />} />
     </Routes>
   );
 }

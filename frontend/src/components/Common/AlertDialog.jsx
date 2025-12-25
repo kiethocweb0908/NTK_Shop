@@ -11,7 +11,16 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Action } from '@radix-ui/react-alert-dialog';
-import { AlertTriangle, Eye, EyeOff, Star, Trash2, XIcon, Check } from 'lucide-react';
+import {
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Star,
+  Trash2,
+  XIcon,
+  Check,
+  XCircle,
+} from 'lucide-react';
 
 export function AlertDialogDemo({
   cb,
@@ -24,6 +33,81 @@ export function AlertDialogDemo({
   sizeName,
   colorName,
 }) {
+  if (action === 'cancelOrder') {
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button
+            type="button"
+            className="flex px-4 py-3 
+            font-medium text-white bg-red-500/90 border-red-500/90
+            border-2  backdrop-blur-md rounded-xl shadow-lg
+            cursor-pointer transition-all duration-200 ease-linear
+            hover:px-5 hover:bg-white hover:text-red-600/80 hover:border-red-600/80
+            active:bg-red-500/90 active:border-red-500/90 active:text-white"
+            title="Huỷ đơn hàng"
+          >
+            <XCircle className="opacity-80 mr-2" />
+            Huỷ bỏ đơn
+          </button>
+        </AlertDialogTrigger>
+        {/* Hộp thoại */}
+        <AlertDialogContent
+          className={
+            'z-50 bg-white w-[500px] p-7 rounded-2xl border-gray-300 duration-300 ease-linear'
+          }
+        >
+          <AlertDialogHeader className={'items-center text-center'}>
+            {/* icon */}
+            <div
+              className={`w-16 h-16 mx-auto mb-4 rounded-full 
+                flex items-center justify-center bg-red-100`}
+            >
+              <XCircle
+                className={`w-8 h-8items-center text-center
+                text-red-500 hover:text-red-400
+              `}
+              />
+            </div>
+            {/* Title */}
+            <AlertDialogTitle className="text-xl font-bold text-gray-900 text-center mb-2">
+              Huỷ đơn
+            </AlertDialogTitle>
+            <AlertDialogTitle className="text-center mb-6">
+              <p className="text-gray-600 text-sm">Bạn có muốn huỷ bỏ đơn hàng này</p>
+              <div className="text-lg font-semibold text-gray-900 mt-2 px-4 flex gap-1 justify-center">
+                <p>"{product.orderNumber}"</p>
+              </div>
+            </AlertDialogTitle>
+            {/* Cảnh báo */}
+            <div className="w-full mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-start justify-center">
+                <AlertTriangle className="w-4 h-4 translate-y-0.75 mr-2 text-red-600 shrink-0" />
+                <AlertDialogDescription className="block text-sm text-red-600 text-center">
+                  Hãy cân nhắc thật kỹ
+                </AlertDialogDescription>
+              </div>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="w-full flex justify-between! mt-4">
+            <AlertDialogCancel className="w-1/2 py-6 border-0 px-8 text-gray-700 font-medium bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+              Huỷ
+            </AlertDialogCancel>
+            <AlertDialogAction
+              // onClick={() => cb(id, colorName)}
+              className={`w-1/2 py-6 font-medium text-white rounded-xl 
+              hover:opacity-90 transition-colors duration-300
+              bg-red-600 hover:bg-red-500
+            `}
+            >
+              Xác nhận
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
   if (action === 'removeVariant') {
     return (
       <AlertDialog>

@@ -1,136 +1,219 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { formatCurrency, toWebp } from '@/lib/utils';
+import { fetchMyOrders } from '@/redux/slices/orderSlice';
+import { ArrowLeft } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
+
+// Shadcn
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 const MyOrdersPage = () => {
-  const [orders, setOrders] = useState([]);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const {
+    orders,
+    pagination = {
+      currentPage: 1,
+      totalPages: 1,
+      limit: 5,
+    },
+    loading,
+    error,
+  } = useSelector((state) => state.orders);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = Number(searchParams.get('page')) || 1;
 
   useEffect(() => {
-    setTimeout(() => {
-      const mockOders = [
-        {
-          _id: '12345',
-          createdAt: new Date(),
-          shippingAddress: { city: 'Cần Thơ', county: 'Việt Nam' },
-          orderItems: [
-            {
-              name: 'Product 1',
-              image: 'https://picsum.photos/500?random=1',
-            },
-          ],
-          totalPrice: 350000,
-          isPaid: true,
-        },
-        {
-          _id: '56245',
-          createdAt: new Date(),
-          shippingAddress: { city: 'Cần Thơ', county: 'Việt Nam' },
-          orderItems: [
-            {
-              name: 'Product 2',
-              image: 'https://picsum.photos/500?random=2',
-            },
-            {
-              name: 'Product 1',
-              image: 'https://picsum.photos/500?random=1',
-            },
-            {
-              name: 'Product 3',
-              image: 'https://picsum.photos/500?random=3',
-            },
-          ],
-          totalPrice: 350000,
-          isPaid: true,
-        },
-        {
-          _id: '73457',
-          createdAt: new Date(),
-          shippingAddress: { city: 'Cần Thơ', county: 'Việt Nam' },
-          orderItems: [
-            {
-              name: 'Product 4',
-              image: 'https://picsum.photos/500?random=4',
-            },
-          ],
-          totalPrice: 350000,
-          isPaid: true,
-        },
-      ];
-
-      setOrders(mockOders);
-    }, 1000);
-  }, []);
+    if (user) {
+      dispatch(
+        fetchMyOrders({
+          page,
+          limit: pagination.limit,
+        })
+      )
+        .unwrap()
+        .then((result) => {
+          toast.success(result.message || 'Lấy đơn hàng ...');
+        })
+        .catch((error) => {
+          toast.error(error?.message || error);
+        });
+    }
+  }, [dispatch, user, page]);
 
   const handleRowClick = (orderId) => {
     navigate(`/order/${orderId}`);
   };
 
+  // Tạo mảng pages cho pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblepages = 5;
+
+    let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblepages / 2));
+    let endPage = Math.min(pagination.totalPages, startPage + maxVisiblepages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblepages) {
+      startPage = Math.max(1, endPage - maxVisiblepages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= pagination.totalPages) {
+      console.log('searchParam: ', searchParams);
+      setSearchParams({ page });
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // Cuộn lên đầu trang
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto pt-4 md:pt-6 md:pl-6">
-      <h2 className="text-xl sm:text-2xl font-bold mb-6">Đơn hàng của tôi</h2>
-      <div className="relative shadow-md sm:rounded-lg overflow-hidden">
-        <table className="min-w-full text-left text-gray-500">
-          <thead className="bg-gray-100 text-xs uppercase text text-gray-700">
+    <div className="max-w-7xl mx-auto">
+      <div className="relative flex justify-center mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="hidden absolute top-full -translate-y-full left-0
+          lg:flex items-center
+          rounded-full py-2 px-5 
+          bg-white/5  backdrop-blur-md border-[0.5px] border-white/50 
+          text-sm text-shadow-lg shadow-lg font-semibold
+          hover:bg-white/10 hover:px-6!
+          transition-all duration-300 ease-out"
+        >
+          <ArrowLeft className="mr-2 h-5 w-5" />
+          Quay lại trang trước
+        </button>
+        <h2
+          className="text-xl text-center md:text-lg font-semibold uppercase text-shadow-lg 
+        py-3 px-5 border border-white/50 rounded-full
+        bg-white/5 backdrop-blur-md shadow-lg"
+        >
+          Đơn hàng của tôi
+        </h2>
+      </div>
+      <div
+        className="shadow-lg overflow-auto rounded-xl bg-white/5 border-[1.5px] border-white/70
+        backdrop-blur-md"
+      >
+        <table
+          className="w-full 
+        text-left text-sm text-black"
+        >
+          <thead
+            className="bg-white/15 backdrop-blur-md 
+            text-xs uppercase text-shadow-sm"
+          >
             <tr>
-              <th className="py-2 px-4 sm:py-3">Ảnh</th>
-              <th className="py-2 px-4 sm:py-3">Mã đơn</th>
-              <th className="py-2 px-4 sm:py-3">Ngày đặt</th>
-              <th className="py-2 px-4 sm:py-3">Địa chỉ</th>
-              <th className="py-2 px-4 sm:py-3">Sản phẩm</th>
-              <th className="py-2 px-4 sm:py-3">Giá</th>
-              <th className="py-2 px-4 sm:py-3">Trạng thái</th>
+              <th className="py-2 px-4 sm:py-4 text-center">Ảnh</th>
+              <th className="py-2 px-4 sm:py-4 text-center">Mã đơn</th>
+              <th className="py-2 px-4 sm:py-4 text-center">Ngày đặt</th>
+              <th className="py-2 px-4 sm:py-4 text-center">Số sản phẩm</th>
+              <th className="py-2 px-4 sm:py-4 text-center">Giá</th>
+              <th className="py-2 px-4 sm:py-4 text-center">TT thanh toán</th>
+              <th className="py-2 px-4 sm:py-4 text-center">TT đơn hàng</th>
             </tr>
           </thead>
           <tbody>
-            {orders.length > 0 ? (
+            {orders?.length > 0 ? (
               orders.map((order) => (
                 <tr
-                  key={order._id}
+                  key={order.orderNumber}
                   onClick={() => handleRowClick(order._id)}
-                  className="border-b border-gray-300 cursor-pointer transition-all duration-150 ease-in
-                  hover:border-gray-100 hover:opacity-80"
+                  className="border-b last:border-b-0 border-black/15 cursor-pointer 
+                  transition-all duration-150 ease-linear
+                  hover:border-black/30 hover:bg-black/3 "
                 >
-                  <td className="py-2 px-2 sm:py4 sm:px-4">
+                  <td className="py-3 px-2 sm:px-4 flex justify-center">
                     <img
-                      src={order.orderItems[0].image}
+                      src={toWebp(order.orderItems[0].image)}
                       alt={order.orderItems[0].name}
-                      className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg"
+                      className="w-10 h-12 sm:min-w-12 sm:min-h-16 object-cover 
+                      border border-white shadow-lg rounded-lg "
                     />
                   </td>
-                  <td className="py-2 px-2 sm:py-4 sm:px-4 font-medium text-gray-900 whitespace-nowrap">
-                    #{order._id}
-                  </td>
-                  <td className="py-2 px-2 sm:py-4 sm:px-4">
-                    {new Date(order.createdAt).toLocaleDateString('vi-VN', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                    })}{' '}
-                    {new Date(order.createdAt).toLocaleTimeString()}
-                  </td>
-                  <td className="py-2 px-2 sm:py-4 sm:px-4">
-                    {order.shippingAddress
-                      ? `${order.shippingAddress.city}, ${order.shippingAddress.county}`
-                      : `N/A`}
-                  </td>
-                  <td className="py-2 px-2 sm:py-4 sm:px-4">
-                    {order.orderItems.map((item, key) => (
-                      <p>{item.name}</p>
-                    ))}
-                  </td>
-                  <td className="py-2 px-2 sm:py-4 sm:px-4">
-                    {order.totalPrice.toLocaleString('vi-VN')} vnđ
-                  </td>
-                  <td className="py-2 px-2 sm:py-4 sm:px-4">
-                    <span
-                      className={`${
-                        order.isPaid
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                      } px-2 py-1 rounded-full text-xs sm:text-sm font-medium`}
+                  <td className="py-3 px-2 sm:px-4 text-shadow-md font-semibold text-center whitespace-nowrap">
+                    <Badge
+                      variant="secondary"
+                      className="shadow-lg border-white backdrop-blur-xl bg-transparent py-2 px-2"
                     >
-                      {order.isPaid ? 'Paid' : 'Pending'}
-                    </span>
+                      #{order.orderNumber}
+                    </Badge>
+                  </td>
+                  <td className="py-3 px-2 sm:px-4 text-center text-shadow-md font-semibold text-gray-600">
+                    <Badge
+                      variant="secondary"
+                      className="shadow-lg border-white backdrop-blur-xl bg-transparent py-2 px-2"
+                    >
+                      {new Date(order.createdAt).toLocaleTimeString()}{' '}
+                      {new Date(order.createdAt).toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })}
+                    </Badge>
+                  </td>
+
+                  <td className="py-3 px-2 sm:px-4 text-center text-shadow-md font-semibold">
+                    <Badge
+                      variant="secondary"
+                      className="shadow-lg border-white backdrop-blur-xl bg-transparent py-2 px-2 rounded-2xl w-9 h-9"
+                    >
+                      {order.orderItems.length}
+                    </Badge>
+                  </td>
+                  <td className="py-3 px-2 sm:px-4 text-center text-shadow-md font-semibold">
+                    <Badge
+                      variant="secondary"
+                      className="shadow-lg border-white backdrop-blur-xl bg-transparent py-2 px-3 "
+                    >
+                      {formatCurrency(order.totalPrice)}
+                    </Badge>
+                  </td>
+                  <td className="py-3 px-2 sm:px-4 text-center text-shadow-md  ">
+                    <Badge
+                      variant="secondary"
+                      className={`shadow-lg border-white backdrop-blur-xl bg-transparent py-2 px-3
+                        ${order.isPaid ? 'text-green-700' : 'text-yellow-600/80'}`}
+                    >
+                      {order.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                    </Badge>
+                  </td>
+
+                  {/* Trạng thái đơn */}
+                  <td className="py-3 px-2 sm:px-4 text-center text-shadow-sm">
+                    <Badge
+                      variant="secondary"
+                      className={`shadow-lg border-white backdrop-blur-xl bg-transparent py-2 px-3
+                        ${order.status === 'processing' && 'text-orange-600/80'}
+                      ${order.status === 'confirmed' && 'text-blue-600/80'}
+                      ${order.status === 'shipping' && 'text-purple-600/80'}
+                      ${order.status === 'delivered' && 'text-green-600/80'}
+                      ${order.status === 'cancelled' && 'text-red-600/80'}`}
+                    >
+                      {order.status === 'processing' && 'Chờ xác nhận'}
+                      {order.status === 'confirmed' && 'Đã xác nhận'}
+                      {order.status === 'shipping' && 'Đang vận chuyển'}
+                      {order.status === 'delivered' && 'Đã giao'}
+                      {order.status === 'cancelled' && 'Đã huỷ'}
+                    </Badge>
                   </td>
                 </tr>
               ))
@@ -143,6 +226,77 @@ const MyOrdersPage = () => {
             )}
           </tbody>
         </table>
+      </div>
+      {/* Phân trang */}
+      <div className="mt-6 mb-6 w-full">
+        <Pagination>
+          <PaginationContent>
+            {/* Previous Button */}
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (pagination.currentPage > 1) {
+                    handlePageChange(pagination.currentPage - 1);
+                  }
+                }}
+                className={
+                  pagination.currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
+                }
+              />
+            </PaginationItem>
+
+            {/* Ellipsis for many pages */}
+            {pagination.totalPages > 5 && pagination.currentPage > 3 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+
+            {/* Page Numbers */}
+            {getPageNumbers().map((pageNum) => (
+              <PaginationItem key={pageNum}>
+                <PaginationLink
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(pageNum);
+                  }}
+                  isActive={pageNum === pagination.currentPage}
+                >
+                  {pageNum}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            {/* Ellipsis for many pages */}
+            {pagination.totalPages > 5 &&
+              pagination.currentPage < pagination.totalPages - 2 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+
+            {/* Next Button */}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (pagination.currentPage < pagination.totalPages) {
+                    handlePageChange(pagination.currentPage + 1);
+                  }
+                }}
+                className={
+                  pagination.currentPage === pagination.totalPages
+                    ? 'opacity-50 cursor-not-allowed'
+                    : ''
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

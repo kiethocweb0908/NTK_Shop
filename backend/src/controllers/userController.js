@@ -2,6 +2,8 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import Cart from "../models/Cart.js";
 
+import * as userService from "../services/userService.js";
+
 // Helper function to set token cookie
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
@@ -12,52 +14,34 @@ const setTokenCookie = (res, token) => {
   });
 };
 
-//Register User
-export const registerUser = async (req, res) => {
+// gửi otp khi đăng ký
+export const requestRegisterOTP = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, phone, email, password } = req.body;
 
-    let user = await User.findOne({ email });
+    await userService.requestOTP(name, phone, email, password);
+    res.json({
+      message: "OTP đã được gửi về email của bạn",
+    });
+  } catch (error) {
+    console.error("Lỗi khi gọi requestRegisterOTP:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
+  }
+};
 
-    if (user) {
-      return res
-        .status(400)
-        .json({ message: "User alreader exists! || Người dùng đã tồn tại!" });
-    }
+// xác nhận OTP và tạo user
+export const verifyRegisterOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
 
-    user = new User({ name, email, password });
-    await user.save();
+    const user = await userService.verifyOTP(email, otp);
 
-    // ✅ KIỂM TRA JWT_SECRET có tồn tại không
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not defined in environment variables");
-    }
+    if (!process.env.JWT_SECRET)
+      throw new Error("Lỗi! JWT_SECRET chưa được định nghĩa");
 
-    //Create JWT Payload
     const payload = { user: { id: user._id, role: user.role } };
 
-    // Sign and return the token along with user data
-    // jwt.sign(
-    //   payload,
-    //   process.env.JWT_SECRET,
-    //   { expiresIn: "40h" },
-    //   (err, token) => {
-    //     if (err) throw err;
-
-    //     // Send the user and token in response
-    //     res.status(201).json({
-    //       user: {
-    //         _id: user._id,
-    //         name: user.name,
-    //         email: user.email,
-    //         role: user.role,
-    //       },
-    //       token,
-    //     });
-    //   }
-    // );
-
-    // Dùng async/await thay vì callback
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "40h",
     });
@@ -65,17 +49,33 @@ export const registerUser = async (req, res) => {
     setTokenCookie(res, token);
 
     res.status(201).json({
+      message: "Đăng ký thành công!",
       user: {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
       },
-      // token,
     });
   } catch (error) {
-    console.error("Lỗi khi gọi registerUser: ", error);
-    res.status(500).send("Server Error");
+    console.error("Lỗi khi gọi verifyRegisterOTP:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
+  }
+};
+
+// gửi lại otp
+export const resendRegisterOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    await userService.resendOTP(email);
+
+    res.json({ message: "Đã gửi lại mã OTP" });
+  } catch (error) {
+    console.error("Lỗi khi gọi resendRegisterOTP:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
   }
 };
 

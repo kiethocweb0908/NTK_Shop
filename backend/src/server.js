@@ -1,7 +1,9 @@
 // const cors = require("cors");
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import multer from "multer";
 
@@ -13,8 +15,11 @@ import collectionRoutes from "./routes/collectionRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import adminProductRoutes from "./routes/admin/adminProductRoutes.js";
+
+import { startCancelExpiredOrdersCron } from "./cron/cancelExpiredOrders.js";
 
 const app = express();
 
@@ -31,16 +36,15 @@ app.use(
   })
 );
 
-dotenv.config();
-
 const PORT = process.env.PORT || 9000;
 
 //Connect to MongoDB
 connectDB().then(() => {
+  startCancelExpiredOrdersCron();
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-    // console.log(`📤 Upload limit: 60 images, 5MB each, total 300MB`);
-    // console.log(`⏱️  Timeout: Upload (3-5 mins), Create product (30s)`);
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "OK" : "MISSING");
   });
 });
 
@@ -56,6 +60,7 @@ app.use("/api/collections", collectionRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/payments", paymentRoutes);
 // - admin
 app.use("/api/admin/products", adminProductRoutes);
 app.use("/api/upload", uploadRoutes);

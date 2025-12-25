@@ -7,7 +7,7 @@ import { AiOutlineTikTok } from 'react-icons/ai';
 
 const Footer = () => {
   return (
-    <footer className="border-t border-gray-200 py-12 flex flex-col items-center">
+    <footer className="relative z-10 border-t border-gray-200 py-12 flex flex-col items-center">
       <div className="container md:grid md:grid-cols-4 gap-2 lg:gap-4 xl:gap-8 lg:px-0 px-4 md:px-0 ">
         {/* Bản tin */}
         <div>
