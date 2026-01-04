@@ -99,30 +99,42 @@ const CollectionPage = () => {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row lg:items-start container mx-auto gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-start max-w-7xl mx-auto gap-3 xl:gap-6 py-9 mt-[106.4px]">
         {/* mobile filter button */}
         <button
           onClick={toggleSidebar}
-          className="lg:hidden border p-2 flex justify-center items-center"
+          className="lg:hidden border p-2 flex justify-center items-center
+          rounded-xl border-white/70 shadow-lg backdrop-blur-md
+          font-semibold text-shadow-sm mx-3 mt-1"
         >
           <FaFilter className="mr-2" />
+          Bộ lọc
         </button>
 
         {/* filter sidebar */}
         <div
           ref={sidebarRef}
-          className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        inset-y-0 z-10 lg:z-0 left-0 w-1/2 lg:w-1/5 
+          className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-[105%]'}
+        inset-y-0 z-50 lg:z-0 left-0 lg:w-1/4 lg:min-w-[260px] xl:w-1/5 
          overflow-y-auto transition-all duration-300 
-        fixed top-0 bottom-0 lg:sticky lg:top-42 lg:mb-16 lg:translate-x-0
-        pl-6 pr-6 lg:pl-0 lg:pr-0 lg:mt-6 `}
+        fixed top-0 bottom-0 lg:sticky lg:top-30 lg:translate-x-0 
+        p-4 min-h-143 
+        lg:border 
+        lg:rounded-xl  ml-0 lg:ml-3 xl:ml-0
+        bg-white/85 shadow-lg backdrop-blur-3xl
+        border-white/95`}
         >
           <FilterSidebar />
         </div>
 
-        <div className="lg:w-4/5 p-4 lg:p-0">
-          <div className="flex items-center justify-between mt-8">
-            <h2 className="text-2xl font-medium uppercase ">Sản phẩm</h2>
+        <div
+          className="lg:w-3/4 xl:w-4/5 p-4 ml-3 lg:ml-0 mr-3 xl:mr-0
+        border bg-white/85 shadow-lg backdrop-blur-3xl
+        border-white/95
+        rounded-xl min-h-133 flex flex-col justify-between"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-shadow-sm uppercase ">Sản phẩm</h2>
             {/* sort options */}
             <SortOptions />
           </div>

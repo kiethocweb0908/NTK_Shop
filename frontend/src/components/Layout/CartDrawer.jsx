@@ -11,7 +11,7 @@ const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
   const navigate = useNavigate();
   const handleCheckout = () => {
     tonggleCartDrawer();
-    if (cart || cart?.products.length > 0) {
+    if (cart && cart?.products.length > 0) {
       navigate('/checkout');
     } else {
       toast.warning('Không thể tới trang thanh toán khi giỏ hàng trống!');
@@ -20,9 +20,9 @@ const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
 
   return (
     <div
-      className={`fixed top-0 right-0 w-4/5 sm:w-2/3 md:w-1/2 lg:w-1/3 lg:min-w-[480px] h-full 
+      className={`fixed top-0 bottom-0 right-0 w-4/5 sm:w-2/3 md:w-1/2 lg:w-1/3 lg:min-w-[480px] h-full 
     bg-white shadow-lg 
-        transform transition-transform duration-300 flex flex-col z-50
+        transform transition-transform duration-300 flex flex-col z-60
   ${cartDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
     >
       {/* close button */}
@@ -33,13 +33,13 @@ const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
       </div>
 
       {/* Nội dung giỏ hàng */}
-      <div className="flex flex-col p-4 overflow-y-auto">
+      <div className="flex flex-col p-4 overflow-y-auto min-h-[526px]">
         <h2 className="font-semiboldbold text-xl mb-4">Giỏ hàng của bạn</h2>
         <CartContents />
       </div>
 
       {/* Thanh toán */}
-      <div className="p-4 bg-white fixed right-0 left-0 bottom-0">
+      <div className="p-4 bg-white sticky right-0 left-0 bottom-0">
         <div className="flex justify-between mb-4">
           <p className="font-medium">Số lượng: {cart?.totalItems}</p>
           <p className="text-2xl leading-none font-medium">

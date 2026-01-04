@@ -4,9 +4,6 @@ import axios from "axios";
 
 // Lấy access token
 export const getPayPalAccessToken = async () => {
-  console.log("CLIENT_ID:", process.env.PAYPAL_CLIENT_ID);
-  console.log("SECRET:", process.env.PAYPAL_SECRET);
-  // console.log("accessToken:", accessToken);
   const auth = Buffer.from(
     `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
   ).toString("base64");

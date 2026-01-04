@@ -1,11 +1,15 @@
 // PayPalButtonWrapper.jsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PayPalButton from './PayPalButton';
 import { Button } from '../ui/button';
 
 const PayPalButtonWrapper = ({ checkoutData, validateCheckout, onValidationError }) => {
   const [showPayPal, setShowPayPal] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+
+  useEffect(() => {
+    setShowPayPal(false);
+  }, [checkoutData.shippingAddress]);
 
   const handleClick = async () => {
     setIsValidating(true);
@@ -23,12 +27,14 @@ const PayPalButtonWrapper = ({ checkoutData, validateCheckout, onValidationError
     // Nếu validate thành công, hiển thị PayPal button
     setShowPayPal(true);
     setIsValidating(false);
+    console.log(checkoutData);
   };
 
   return (
     <div className="paypal-wrapper">
       {!showPayPal ? (
         <Button
+          type="button"
           variant="primary"
           size="full"
           onClick={handleClick}
@@ -38,13 +44,7 @@ const PayPalButtonWrapper = ({ checkoutData, validateCheckout, onValidationError
         </Button>
       ) : (
         <div className="paypal-button-container">
-          <PayPalButton checkoutData={checkoutData} />
-          {/* <button
-            onClick={() => setShowPayPal(false)}
-            className="mt-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← Quay lại
-          </button> */}
+          <PayPalButton mode="checkout" checkoutData={checkoutData} />
         </div>
       )}
     </div>

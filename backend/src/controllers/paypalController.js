@@ -49,7 +49,7 @@ export const createPayPalOrder = async (req, res) => {
   }
 };
 
-//
+// thanh toán
 export const capturePayPalOrder = async (req, res) => {
   try {
     const { paypalOrderId, orderId } = req.body;

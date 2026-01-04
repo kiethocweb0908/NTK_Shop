@@ -65,10 +65,10 @@ const Checkout = () => {
   const [addressError, setAddressError] = useState({});
 
   useEffect(() => {
-    if (!cart) {
-      return navigate(-1);
+    if (cart && cart.products && cart.products.length === 0) {
+      navigate('/');
     }
-  }, []);
+  }, [cart, navigate]);
 
   // lấy phí ship khi đổi phương thức
   useEffect(() => {
@@ -287,10 +287,7 @@ const Checkout = () => {
         border border-white/50 shadow-xl lg:min-h-[764px] 
         w-full lg:w-1/2 xl:w-3/5"
         >
-          <form
-            onSubmit={handleCreateCheckout}
-            className="flex flex-col h-full justify-between"
-          >
+          <form className="flex flex-col h-full justify-between">
             <div>
               <h3 className="text-lg mb-4 font-semibold uppercase text-shadow-sm">
                 Thông tin liên hệ
@@ -517,7 +514,12 @@ const Checkout = () => {
             {/* Button thanh toán */}
             <div className="mt-8 lg:mt-0">
               {paymentMethod === 'cod' && (
-                <Button disabled={isButtonDisabled} variant="primary" size="full">
+                <Button
+                  onClick={(e) => handleCreateCheckout(e)}
+                  disabled={isButtonDisabled}
+                  variant="primary"
+                  size="full"
+                >
                   {isButtonDisabled ? 'Đang xử lý...' : 'Thanh toán COD'}
                 </Button>
               )}

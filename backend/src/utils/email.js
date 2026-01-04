@@ -51,3 +51,16 @@ export const sendOrderEmail = async (order, type = "created") => {
     html,
   });
 };
+
+export const sendUrlResetPassword = async (email, resetUrl) => {
+  await transporter.sendMail({
+    from: `NTK Shop <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Đặt lại mật khẩu",
+    html: `
+       <p>Bạn đã yêu cầu đặt lại mật khẩu.</p>
+        <p>Nhấn vào link bên dưới (có hiệu lực 10 phút):</p>
+        <a href="${resetUrl}">${resetUrl}</a>
+    `,
+  });
+};

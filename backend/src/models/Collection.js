@@ -12,7 +12,15 @@ const collectionSchema = new mongoose.Schema(
       type: String,
     },
     image: {
-      type: String, // URL ảnh banner cho collection
+      url: {
+        type: String,
+      },
+      altText: {
+        type: String,
+      },
+      publicId: {
+        type: String,
+      },
     },
     slug: {
       type: String,

@@ -1,89 +1,155 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 import SearchBar from './SearchBar';
 import CartDrawer from '../Layout/CartDrawer';
 import { navType } from '../../lib/data/data';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 // Icons
-import { HiOutlineUser, HiOutlineShoppingBag, HiBars3BottomRight } from 'react-icons/hi2';
+import {
+  HiOutlineUser,
+  HiOutlineShoppingBag,
+  HiBars3BottomRight,
+  HiMagnifyingGlass,
+} from 'react-icons/hi2';
 import { IoMdClose } from 'react-icons/io';
-import { MdLogin } from 'react-icons/md';
-import { FaSignInAlt } from 'react-icons/fa';
-import { BiLogIn } from 'react-icons/bi';
+import { Check, ChevronDown, UserCheck2, LogOut } from 'lucide-react';
+import Menu from './Menu';
+
+import { LayoutContext } from '../Layout/UserLayout';
+import { Button } from '../ui/button';
+import { clearOrders } from '@/redux/slices/orderSlice';
+import { toast } from 'sonner';
+import { logoutUser } from '@/redux/slices/authSlice';
 
 const Navbar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { cart } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
   //active navbar
   const [navActive, setNavActive] = useState('');
+
   // đóng / mở giỏ hàng
+  const { tonggleCartDrawer, tongglNavDrawer, toggleSearch } = useContext(LayoutContext);
 
-  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
-  const tonggleCartDrawer = () => {
-    setCartDrawerOpen(!cartDrawerOpen);
-    setIsOverlayVisible(!isOverlayVisible);
-  };
+  const location = useLocation();
 
-  const [navDrawerOpen, setNavDrawerOpen] = useState(false);
-  const tongglNavDrawer = () => {
-    setNavDrawerOpen(!navDrawerOpen);
-    setIsOverlayVisible(!isOverlayVisible);
-  };
+  const handleLogout = async () => {
+    // e.preventDefault();
 
-  //tấm phủ
-  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
-  const toggleOverlay = () => {
-    if (navDrawerOpen) {
-      tongglNavDrawer();
-    }
-    if (cartDrawerOpen) {
-      tonggleCartDrawer();
+    if (!user) return toast.error('Không thể đăng xuất khi chưa đăng nhập');
+
+    try {
+      dispatch(clearOrders());
+      const result = await dispatch(logoutUser()).unwrap();
+      toast.success(result?.message || result || 'aaaa', { duration: 2000 });
+      navigate('/login', { replace: true });
+    } catch (error) {
+      toast.error(error?.message || error || 'Lỗi khi đăng xuất', { duration: 2000 });
     }
   };
 
   return (
     <>
-      <nav className="container mx-auto flex items-center justify-between al py-4 px-4">
+      <nav className="max-w-7xl mx-auto flex  gap-2 items-center justify-between al py-4 px-3 xl:px-0">
         {/* Logo */}
-        <div onClick={() => setNavActive('')}>
-          <Link to="/" className="text-2xl font-medium text-black hover:text-primary-300">
-            NTK Clothing
+        <div
+          onClick={() => setNavActive('')}
+          className="border border-white/95 rounded-2xl
+            bg-white/85 shadow-lg backdrop-blur-3xl
+            text-shadow-lg 
+            h-12 px-4 leading-12
+            text-2xl font-black text-black hover:text-primary-300 "
+        >
+          <Link to="/">
+            NTK
+            <p className="hidden xl:inline">Clothing</p>
           </Link>
         </div>
 
         {/* Center */}
-        <div className="hidden md:flex space-x-4">
-          {Object.keys(navType).map((type, index) => (
-            <Link
-              key={index}
-              to="/shop"
-              className={`block min-w-[72px] text-center h-full p-5 
-                rounded-tl-3xl rounded-tr-3xl rounded-bl-3xl rounded-br-lg
-                text-sm font-bold border-2 border-white
-                hover:text-white hover:bg-primary
-                transition-all duration-200 ease-in
-                ${navActive === type ? 'active-navbar' : ''}`}
-              onClick={() => setNavActive(type)}
-            >
-              {navType[type]}
-            </Link>
-          ))}
+        <div
+          className="hidden lg:flex space-x-1 items-center
+        px-4 border
+        border-white/95 bg-white/85 rounded-2xl 
+        backdrop-blur-3xl shadow-lg text-shadow-lg"
+        >
+          <Menu />
         </div>
 
         {/* Right */}
-        <div className="flex items-center space-x-4">
+        <div
+          className="flex items-center space-x-4
+        px-4 border 
+        border-white/95 bg-white/85 rounded-2xl 
+         shadow-lg text-shadow-lg select-none"
+        >
           {user ? (
             <>
-              {user.role === 'admin' && (
-                <Link to="/admin" className="block bg-black px-2 text-sm text-white">
+              {(user.role === 'admin' || user.role === 'viewer') && (
+                <Link
+                  to="/admin"
+                  className="hidden md:block bg-black px-2 text-sm text-white"
+                >
                   Admin
                 </Link>
               )}
-              <Link to="/profile" className="p-3 hover:text-primary-300">
-                <HiOutlineUser className="h-6 w-6 mx-auto" />
-              </Link>
+
+              {/* user */}
+              <div className="relative group transition-all duration-300 ease-linear">
+                <div
+                  className={`leading-12 h-12 min-w-16
+            flex items-center justify-center border-b-2 
+            text-center text-sm font-bold
+            group-hover:text-primary-300 group-hover:border-b-primary-300 
+            transition-all duration-300 ease-in
+            ${location.pathname === '/profile' ? 'border-b-primary-300 text-primary-300' : 'border-b-transparent'}`}
+                >
+                  <HiOutlineUser className="h-6 w-6" />
+                  <ChevronDown className="h-4 w-4 " />
+                </div>
+                <ul
+                  className="absolute left-1/2 -translate-x-1/2 top-full 
+                  py-2 w-[180px]
+                bg-white rounded-lg shadow-lg mt-px
+                  invisible group-hover:visible
+                  opacity-0 group-hover:opacity-100
+                  transform
+                  -translate-y-3 group-hover:translate-y-0
+                  scale-80 group-hover:scale-100
+                  transition-all duration-200 ease-linear
+                  z-40"
+                >
+                  <li key={0}>
+                    <NavLink to={`/profile`}>
+                      {({ isActive }) => (
+                        <div
+                          className={`w-full px-5 py-2 hover:bg-gray-100/70 text-sm flex justify-between items-center ${isActive ? 'text-primary-300 bg-gray-50' : ''}`}
+                        >
+                          {' '}
+                          <p>Thông tin tài khoản</p>{' '}
+                          {isActive && <Check className="h-3 w-3" />}{' '}
+                        </div>
+                      )}
+                    </NavLink>
+                  </li>
+                  {/* Đăng xuất */}
+                  <li key={1}>
+                    <button
+                      type="button"
+                      onClick={() => handleLogout()}
+                      className="w-full px-5 py-2 hover:bg-gray-100/70 text-sm
+                      hover:text-red-500
+                      flex items-center gap-3"
+                    >
+                      <p>Đăng xuất</p>
+                      <LogOut className="w-5 h-5 text-red-500/80" />
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </>
           ) : (
             <Link to="/login" className="p-3 hover:text-primary-300">
@@ -100,55 +166,23 @@ const Navbar = () => {
             </span>
           </button>
           {/* Right-Search */}
-          <div className="overflow-hidden md:m-0">
+          {/* <div className="overflow-hidden md:m-0">
             <SearchBar />
-          </div>
+          </div> */}
 
           <button
-            className="md:hidden pl-3 pt-3 pb-3"
-            onClick={() => {
-              tongglNavDrawer();
-            }}
+            onClick={toggleSearch}
+            className="relative hover:text-primary-300 md:m-0
+            pl-3 pt-3 pb-3 m-0 cursor-pointer pr-3 md:pr-0"
           >
+            <HiMagnifyingGlass className="h-6 w-6" />
+          </button>
+
+          <button className="md:hidden pl-3 pt-3 pb-3" onClick={tongglNavDrawer}>
             <HiBars3BottomRight className="h-6 w-6" />
           </button>
         </div>
       </nav>
-      <CartDrawer cartDrawerOpen={cartDrawerOpen} tonggleCartDrawer={tonggleCartDrawer} />
-      {/* mobile */}
-      <div
-        className={`md:hidden fixed top-0 left-0 w-4/5 sm:w-2/3 md:w-1/2 h-full bg-white shadow-lg transform transition-transform duration-300 z-50
-          ${navDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
-      >
-        <div className="flex justify-end p-4">
-          <button onClick={tongglNavDrawer} className="cursor-pointer">
-            <IoMdClose className="h-6 w-6 text-gray-600 hover:text-primary-300" />
-          </button>
-        </div>
-        <div className="p-4">
-          <h2 className="text-xl font-semibold mb-4">Menu</h2>
-          <nav className="space-y-4">
-            {Object.keys(navType).map((type, index) => (
-              <Link
-                key={index}
-                to="/shop"
-                onClick={tongglNavDrawer}
-                className="block text-gray-600 hover:text-primary-300"
-              >
-                {navType[type]}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </div>
-
-      {/* tấm phủ */}
-      <div
-        onClick={toggleOverlay}
-        className={`fixed top-0 left-0 w-full h-full bg-black/20 z-40
-          transition-transform duration-300
-        ${isOverlayVisible ? 'block' : 'hidden'}`}
-      ></div>
     </>
   );
 };

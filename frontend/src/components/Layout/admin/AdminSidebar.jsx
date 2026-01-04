@@ -1,40 +1,72 @@
+import { logoutUser } from '@/redux/slices/authSlice';
+import { clearOrders } from '@/redux/slices/orderSlice';
 import React from 'react';
 import {
   FaBoxOpen,
   FaClipboardList,
+  FaList,
   FaSignOutAlt,
   FaStore,
+  FaThLarge,
+  FaTshirt,
   FaUser,
 } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const AdminSidebar = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleLogout = () => {
-    navigate('/login');
+  const handleLogout = async () => {
+    // e.preventDefault();
+
+    // if (!user) return toast.error('Không thể đăng xuất khi chưa đăng nhập');
+
+    try {
+      dispatch(clearOrders());
+      const result = await dispatch(logoutUser()).unwrap();
+      toast.success(result?.message || result || 'aaaa', { duration: 2000 });
+      navigate('/login', { replace: true });
+    } catch (error) {
+      toast.error(error?.message || error || 'Lỗi khi đăng xuất', { duration: 2000 });
+    }
   };
   return (
     <div className="p-6 sticky top-0 bottom-0">
       <div className="mb-6">
-        <Link to="/admin" className="text-2xl font-medium">
-          NTK
+        <Link to="/admin" className="text-2xl font-bold">
+          NTK Shop
         </Link>
       </div>
       <h2 className="text-xl font-medium mb-6 text-center">
-        <Link to="/admin">Admin Dashboard</Link>
+        <Link to="/admin">Trang quản trị</Link>
       </h2>
       <nav className="flex flex-col space-y-2">
-        {/* user */}
+        {/* categories */}
         <NavLink
-          to="/admin/users"
+          to="/admin/categories"
           className={({ isActive }) =>
             isActive
               ? 'bg-gray-700 text-white py-3 px-4 rounded flex items-center space-x-2'
               : 'text-gray-300 hover:bg-gray-700 hover:text-white py-3 px-4 rounded flex items-center space-x-2'
           }
         >
-          <FaUser />
-          <span>User</span>
+          <FaList />
+          <span>Danh mục</span>
+        </NavLink>
+
+        {/* categories */}
+        <NavLink
+          to="/admin/collections"
+          className={({ isActive }) =>
+            isActive
+              ? 'bg-gray-700 text-white py-3 px-4 rounded flex items-center space-x-2'
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white py-3 px-4 rounded flex items-center space-x-2'
+          }
+        >
+          <FaThLarge />
+          <span>Bộ sưu tập</span>
         </NavLink>
 
         {/* products */}
@@ -46,8 +78,8 @@ const AdminSidebar = () => {
               : 'text-gray-300 hover:bg-gray-700 hover:text-white py-3 px-4 rounded flex items-center space-x-2'
           }
         >
-          <FaBoxOpen />
-          <span>Products</span>
+          <FaTshirt />
+          <span>Sản phẩm</span>
         </NavLink>
 
         {/* orders */}
@@ -60,7 +92,20 @@ const AdminSidebar = () => {
           }
         >
           <FaClipboardList />
-          <span>Orders</span>
+          <span>Đơn hàng</span>
+        </NavLink>
+
+        {/* user */}
+        <NavLink
+          to="/admin/users"
+          className={({ isActive }) =>
+            isActive
+              ? 'bg-gray-700 text-white py-3 px-4 rounded flex items-center space-x-2'
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white py-3 px-4 rounded flex items-center space-x-2'
+          }
+        >
+          <FaUser />
+          <span>Người dùng</span>
         </NavLink>
 
         {/* shop */}
@@ -73,7 +118,7 @@ const AdminSidebar = () => {
           }
         >
           <FaStore />
-          <span>Shop</span>
+          <span>Cửa hàng</span>
         </NavLink>
       </nav>
       <div className="mt-6">
@@ -81,8 +126,8 @@ const AdminSidebar = () => {
           onClick={handleLogout}
           className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded flex items-center justify-center space-x-2"
         >
+          <span>Đăng xuất</span>
           <FaSignOutAlt />
-          <span>Logout</span>
         </button>
       </div>
     </div>

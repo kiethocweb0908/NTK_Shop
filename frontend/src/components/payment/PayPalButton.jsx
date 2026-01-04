@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -6,38 +6,60 @@ import { placeOrderThunk } from '@/redux/slices/orderSlice';
 import { toast } from 'sonner';
 import axiosInstance from '@/lib/axios';
 
-const PayPalButton = ({ checkoutData }) => {
+const PayPalButton = ({ mode = 'checkout', checkoutData, order }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [orderId, setOrderId] = useState(null);
-  const [loading, setLoading] = useState(null);
-  const [{ isPending, isRejected }] = usePayPalScriptReducer();
+  const orderIdRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [{ isPending, isRejected, isResolved }, paypalDispatch] =
+    usePayPalScriptReducer();
+
+  useEffect(() => {
+    paypalDispatch({
+      type: 'resetOptions',
+      value: {
+        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
+        currency: 'USD',
+        intent: 'capture',
+        components: 'buttons',
+      },
+    });
+
+    paypalDispatch({ type: 'setLoadingStatus', value: 'pending' });
+  }, []);
 
   const createOrder = async () => {
     try {
       setLoading(true);
 
-      // tạo order trong db
-      const response = await dispatch(
-        placeOrderThunk({
-          ...checkoutData,
-          paymentMethod: 'paypal',
-        })
-      ).unwrap();
+      let orderId = '';
 
-      let paypalOrderId;
-      if (response) {
-        const createdOrderId = response.createdOrder._id;
-        setOrderId(createdOrderId);
+      if (mode === 'checkout') {
+        // tạo order trong db
+        const response = await dispatch(
+          placeOrderThunk({
+            ...checkoutData,
+            paymentMethod: 'paypal',
+          })
+        ).unwrap();
+        orderId = response.createdOrder._id;
+      }
+
+      if (mode === 'existing') {
+        orderId = order._id;
+      }
+
+      if (orderId) {
+        orderIdRef.current = orderId;
 
         // tạo PayPal order
         const paypalResponse = await axiosInstance.post('/api/payments/paypal/create', {
-          orderId: createdOrderId,
+          orderId,
         });
 
-        paypalOrderId = paypalResponse.data.paypalOrderId;
+        const paypalOrderId = paypalResponse.data.paypalOrderId;
+        return paypalOrderId;
       }
-      return paypalOrderId;
     } catch (error) {
       console.error('Lỗi khi tạo Paypal order: ', error);
       toast.error(error?.message || 'Không thể khởi tạo thanh toán Paypal');
@@ -53,21 +75,26 @@ const PayPalButton = ({ checkoutData }) => {
 
       await axiosInstance.post('/api/payments/paypal/capture', {
         paypalOrderId: data.orderID,
-        orderId,
+        orderId: orderIdRef.current,
       });
 
       toast.success('Thanh toán thành công!');
-      navigate('/order-confirmation');
     } catch (error) {
       console.error('Lỗi khi thanh toán paypal: ', error);
       toast.error('Thanh toán thaats bại');
     } finally {
       setLoading(false);
+      if (mode === 'checkout') {
+        navigate('/order-confirmation');
+      }
     }
   };
 
   const onCancel = () => {
     toast.info('Bạn đã huỷ thanh toán PayPal');
+    if (mode === 'checkout') {
+      navigate('/order-confirmation');
+    }
   };
 
   const onError = (error) => {
@@ -75,13 +102,21 @@ const PayPalButton = ({ checkoutData }) => {
     toast.error('Paypal gặp lỗi');
   };
 
-  // Đợi PayPal SDK
-  if (isPending) {
-    return <p className="text-sm text-gray-500">Đang tải PayPal...</p>;
+  // Chỉ render khi SDK đã sẵn sàng
+  if (!isResolved) {
+    return (
+      <div className="flex justify-center p-4">
+        <p className="text-sm text-gray-500">Đang tải PayPal...</p>
+      </div>
+    );
   }
 
   if (isRejected) {
-    return <p className="text-red-500">Không thể tải PayPal</p>;
+    return (
+      <div className="flex justify-center p-4">
+        <p className="text-red-500">Không thể tải PayPal. Vui lòng thử lại sau.</p>
+      </div>
+    );
   }
 
   return (

@@ -8,6 +8,9 @@ const categorySchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    description: {
+      type: String,
+    },
     slug: {
       type: String,
       unique: true,
@@ -17,6 +20,28 @@ const categorySchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    imageSizeMen: {
+      url: {
+        type: String,
+      },
+      altText: {
+        type: String,
+      },
+      publicId: {
+        type: String,
+      },
+    },
+    imageSizeWomen: {
+      url: {
+        type: String,
+      },
+      altText: {
+        type: String,
+      },
+      publicId: {
+        type: String,
+      },
     },
     metaTitle: String,
     metaDescription: String,

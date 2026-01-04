@@ -39,25 +39,83 @@ const AddressForm = ({
     setProvinces(provincesData);
   }, []);
 
-  // Load districts khi chọn province
+  // KHỞI TẠO BAN ĐẦU - chỉ chạy một lần
+  useEffect(() => {
+    if (!provinces.length || !initialAddress?.province) return;
+
+    const province = provinces.find(
+      (p) => p.Name.trim() === initialAddress.province.trim()
+    );
+
+    if (province) {
+      setSelectedProvince(province.Id);
+      setFullAddress(initialAddress.fullAddress || '');
+      setDistricts(province.Districts || []);
+
+      // Tìm district
+      if (initialAddress?.district) {
+        const district = province.Districts?.find(
+          (d) => d.Name.trim() === initialAddress.district.trim()
+        );
+
+        if (district) {
+          setSelectedDistrict(district.Id);
+          setWards(district.Wards || []);
+
+          // Tìm ward
+          if (initialAddress?.ward) {
+            const ward = district.Wards?.find(
+              (w) => w.Name.trim() === initialAddress.ward.trim()
+            );
+
+            if (ward) {
+              setSelectedWard(ward.Id);
+            }
+          }
+        }
+      }
+    }
+  }, [provinces, disabled]); // CHỈ phụ thuộc vào provinces
+
+  // Khi user chọn tỉnh mới
   useEffect(() => {
     if (selectedProvince) {
       const province = provinces.find((p) => p.Id === selectedProvince);
-      setDistricts(province?.Districts || []);
-      setSelectedDistrict('');
-      setSelectedWard('');
+      const newDistricts = province?.Districts || [];
+      setDistricts(newDistricts);
+
+      // Reset chỉ khi không tìm thấy district ban đầu trong districts mới
+      const initialDistrict = initialAddress?.district
+        ? newDistricts.find((d) => d.Name.trim() === initialAddress.district.trim())
+        : null;
+
+      if (!initialDistrict) {
+        setSelectedDistrict('');
+        setSelectedWard('');
+        setWards([]);
+      }
     }
   }, [selectedProvince, provinces]);
 
-  // Load wards khi chọn district
+  // Khi user chọn quận mới
   useEffect(() => {
     if (selectedDistrict) {
       const district = districts.find((d) => d.Id === selectedDistrict);
-      setWards(district?.Wards || []);
-      setSelectedWard('');
+      const newWards = district?.Wards || [];
+      setWards(newWards);
+
+      // Reset chỉ khi không tìm thấy ward ban đầu trong wards mới
+      const initialWard = initialAddress?.ward
+        ? newWards.find((w) => w.Name.trim() === initialAddress.ward.trim())
+        : null;
+
+      if (!initialWard) {
+        setSelectedWard('');
+      }
     }
   }, [selectedDistrict, districts]);
 
+  // Gửi dữ liệu
   useEffect(() => {
     if (onAddressChange) {
       const provinceName = provinces.find((p) => p.Id === selectedProvince)?.Name || '';
@@ -68,7 +126,6 @@ const AddressForm = ({
         provinceId: selectedProvince,
         districtId: selectedDistrict,
         wardId: selectedWard,
-
         province: provinceName,
         district: districtName,
         ward: wardName,
@@ -76,57 +133,6 @@ const AddressForm = ({
       });
     }
   }, [selectedProvince, selectedDistrict, selectedWard, fullAddress]);
-
-  // giá trị ban đầu
-  useEffect(() => {
-    // console.log(provinces);
-    if (!initialAddress?.province || provinces.length === 0) return;
-
-    const province = provinces.find(
-      (p) => p.Name.trim() === initialAddress.province.trim()
-    );
-
-    // console.log(province);
-
-    if (province) {
-      setSelectedProvince(province.Id);
-      setFullAddress(initialAddress.fullAddress || '');
-      const district = districts.find(
-        (d) => d.Name.trim() === initialAddress.district.trim()
-      );
-
-      if (district) {
-        setSelectedDistrict(district.Id);
-      }
-    }
-  }, [initialAddress, provinces]);
-
-  useEffect(() => {
-    if (!selectedProvince || !initialAddress?.district || districts.length === 0) return;
-
-    const district = districts.find(
-      (d) => d.Name.trim() === initialAddress.district.trim()
-    );
-
-    if (district) {
-      setSelectedDistrict(district.Id);
-    } else {
-      setSelectedDistrict(undefined);
-    }
-  }, [selectedProvince, districts]);
-
-  useEffect(() => {
-    // console.log('wards: ', wards);
-    if (!selectedDistrict || !initialAddress?.ward || wards.length === 0) return;
-
-    const ward = wards.find((d) => d.Name.trim() === initialAddress.ward.trim());
-
-    if (ward) {
-      setSelectedWard(ward.Id);
-    } else {
-      setSelectedWard(undefined);
-    }
-  }, [selectedDistrict, wards]);
 
   return (
     <div className="space-y-4">
@@ -164,7 +170,7 @@ const AddressForm = ({
       </div>
 
       {/* Tỉnh/Thành phố, Quận/Huyện, Phường/Xã */}
-      <div className={'md:grid grid-cols-3 gap-4' + className}>
+      <div className={'md:grid grid-cols-3 gap-4 ' + className}>
         {/* Tỉnh/Thành phố */}
         <div className="mb-4">
           <label className="block text-sm font-semibold text-shadow-sm mb-2">

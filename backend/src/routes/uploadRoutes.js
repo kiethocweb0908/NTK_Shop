@@ -5,7 +5,6 @@ import {
   uploadMultipleImages,
   deleteImages,
 } from "../controllers/uploadController.js";
-import { protect, admin } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 //Multer setup using memory storage
@@ -35,18 +34,17 @@ const upload = multer({
   },
 });
 
-router.post("/", upload.single("image"), protect, admin, uploadImage);
+router.post("/", upload.single("image"), uploadImage);
 
 // upload multiple images
 router.post(
   "/multiple",
   upload.array("images", 60),
-  protect,
-  admin,
+
   uploadMultipleImages
 );
 
 // delete images
-router.delete("/", protect, admin, deleteImages);
+router.delete("/", deleteImages);
 
 export default router;

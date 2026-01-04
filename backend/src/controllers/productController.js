@@ -357,6 +357,8 @@ export const getAllProducts = async (req, res) => {
                   _id: "$$cat._id",
                   name: "$$cat.name",
                   slug: "$$cat.slug",
+                  imageSizeMen: "$$cat.imageSizeMen",
+                  imageSizeWomen: "$$cat.imageSizeWomen",
                 },
               },
             },
@@ -470,7 +472,7 @@ export const getAllProducts = async (req, res) => {
 export const getProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
-      .populate("category", "name slug description")
+      .populate("category", "name slug description imageSizeMen imageSizeWomen")
       .populate("productCollection", "name slug image")
       .populate("user", "name email");
 
@@ -518,7 +520,9 @@ export const getSimilarProduct = async (req, res) => {
 // @access Public
 export const getBestSellerProduct = async (req, res) => {
   try {
-    const bestSellerproduct = await Product.findOne().sort({ rating: -1 });
+    const bestSellerproduct = await Product.findOne().sort({
+      quantitySold: -1,
+    });
 
     if (!bestSellerproduct)
       return res
@@ -537,7 +541,7 @@ export const getBestSellerProduct = async (req, res) => {
 // @access Public
 export const getNewProduct = async (req, res) => {
   try {
-    const newProduct = await Product.find().sort({ createdAt: -1 }).limit(8);
+    const newProduct = await Product.find().sort({ createdAt: -1 }).limit(4);
 
     if (!newProduct)
       return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
@@ -549,4 +553,24 @@ export const getNewProduct = async (req, res) => {
   }
 };
 
+export const getFeaturedProduct = async (req, res) => {
+  try {
+    const featuredPrtoducts = await Product.find({ isFeatured: true }).sort({
+      createdAt: -1,
+    });
+
+    if (!featuredPrtoducts)
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy sản phẩm nổi bật" });
+
+    res.json({
+      message: "Lấy sản phẩm nổi bật thành công",
+      featuredPrtoducts,
+    });
+  } catch (error) {
+    console.error("Lỗi khi gọi getFeaturedProduct: ", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 // ------------------------------------------------

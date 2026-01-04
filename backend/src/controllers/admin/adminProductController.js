@@ -114,36 +114,24 @@ export const getAdminProducts = async (req, res) => {
     }
 
     // Lọc theo category
-    if (category && category !== "allCategories") {
-      // const categoryArray = category.split(",");
-      // const validCategories = categoryArray.filter((cat) =>
-      //   mongoose.Types.ObjectId.isValid(cat)
-      // );
-
-      // if (validCategories.length > 0) {
-      //   matchStage.category = {
-      //     $in: validCategories.map((cat) => new mongoose.Types.ObjectId(cat)),
-      //   };
-      // }
-
+    if (category && category === "none") {
+      matchStage.category = null;
+    } else if (category !== "allCategories") {
       if (mongoose.Types.ObjectId.isValid(category)) {
         matchStage.category = new mongoose.Types.ObjectId(category);
       } else {
-        console.warn("Category ID không hợp lệ:", category);
+        console.warn("category ID không hợp lệ:", category);
       }
     }
 
     // Lọc theo Collection
-    if (productCollection) {
-      const collectionArray = productCollection.split(",");
-      const validCollections = collectionArray.filter((col) => {
-        mongoose.Types.ObjectId.isValid(col);
-      });
-
-      if (validCollections.length > 0) {
-        matchStage.productCollection = {
-          $in: validCollections.map((col) => new mongoose.Types.ObjectId(col)),
-        };
+    if (productCollection && productCollection !== "allCollections") {
+      if (mongoose.Types.ObjectId.isValid(productCollection)) {
+        matchStage.productCollection = new mongoose.Types.ObjectId(
+          productCollection
+        );
+      } else {
+        console.warn("productCollection ID không hợp lệ:", productCollection);
       }
     }
 
@@ -568,7 +556,7 @@ export const deleteProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Delete product error:", error);
-    res.status(500).json({ message: "Lỗi server" });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -851,21 +839,9 @@ export const toggleProductPublished = async (req, res) => {
       product: updatedProduct,
     });
   } catch (error) {
-    if (
-      error.message.includes("không tìm thấy") ||
-      error.message.includes("không hợp lệ")
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Lỗi khi gọi toggleProductPublished",
-      error: error.message,
-    });
+    console.error("Lỗi khi gọi toggleProductPublished:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
   }
 };
 

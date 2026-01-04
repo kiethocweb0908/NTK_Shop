@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import register from '@/assets/register.webp';
 import { Button } from '@/components/ui/button';
 import { requestRegisterOTPThunk } from '@/redux/slices/authSlice';
 import { useDispatch } from 'react-redux';
 import { Input } from '@/components/ui/input';
-import AddressForm from '@/components/Common/AddressForm';
 import { AlertCircle, Lock, LockOpen, Mail, Phone, User2 } from 'lucide-react';
 import { validatePassword, validatePhone } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -127,7 +125,7 @@ const Register = () => {
         }}
       />
       {/* Your Content/Components */}
-      <div className="flex flex-col justify-center items-center py-11">
+      <div className="flex flex-col justify-center items-center pb-11 pt-41">
         <div
           className="w-full max-w-lg grid grid-cols-2 
         text-center bg-white/5 
@@ -324,7 +322,7 @@ const Register = () => {
             {isButtonDisabled ? 'Đang xử lý...' : 'Đăng ký'}
           </Button>
           <p className="mt-6 text-center text-sm">
-            <Link to="/register" className="text-blue-500 text-shadow-sm">
+            <Link to="/forgot-password" className="text-blue-500 text-shadow-sm">
               Quên mật khẩu?
             </Link>
           </p>

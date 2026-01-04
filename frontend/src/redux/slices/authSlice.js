@@ -110,6 +110,54 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
+// Async thunk to change information
+export const changeInfomrmationThunk = createAsyncThunk(
+  'auth/changeInfomrmationThunk',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/users/${data.email}/change-infomation`,
+        data
+      );
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'changeInfomrmationThunk failed'
+      );
+    }
+  }
+);
+
+// Async thunk to forgot password
+export const forgotPasswordThunk = createAsyncThunk(
+  'auth/forgotPasswordThunk',
+  async ({ email }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(`/api/users/forgot-password`, { email });
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'forgotPasswordThunk failed'
+      );
+    }
+  }
+);
+
+// Async thunk to reset password
+export const resetPasswordThunk = createAsyncThunk(
+  'auth/resetPasswordThunk',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(`/api/users/reset-password`, data);
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'resetPasswordThunk failed'
+      );
+    }
+  }
+);
+
 // Slice
 const authSlice = createSlice({
   name: 'auth',
@@ -213,6 +261,49 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // changeInfomrmationThunk
+      .addCase(changeInfomrmationThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changeInfomrmationThunk.fulfilled, (state, action) => {
+        state.user.address = action.payload.user.address;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(changeInfomrmationThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // forgotPasswordThunk
+      .addCase(forgotPasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(forgotPasswordThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(forgotPasswordThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // resetPasswordThunk
+      .addCase(resetPasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPasswordThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(resetPasswordThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

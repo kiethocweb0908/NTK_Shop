@@ -20,24 +20,375 @@ import {
   XIcon,
   Check,
   XCircle,
+  Truck,
+  CheckCircle,
+  CheckCircle2,
 } from 'lucide-react';
 
 export function AlertDialogDemo({
   cb,
   product,
   action,
-  loading,
+  loading = false,
   image,
   id,
   index,
   sizeName,
   colorName,
+  isButtonDisabled,
+  order,
+  item,
 }) {
+  if (action === 'deleteItem') {
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button className="px-1 py-1 cursor-pointer" disabled={loading}>
+            <Trash2 className="h-5 w-5 hover:text-red-400" />
+          </button>
+        </AlertDialogTrigger>
+        {/* Hộp thoại */}
+        <AlertDialogContent
+          className={
+            'z-50 bg-white w-[500px] p-7 rounded-2xl border-gray-300 duration-300 ease-linear'
+          }
+        >
+          <AlertDialogHeader className={'items-center text-center'}>
+            {/* icon */}
+            <div
+              className={`w-16 h-16 mx-auto mb-4 rounded-full 
+                flex items-center justify-center 
+                bg-red-100`}
+            >
+              <Trash2 className="w-8 h-8items-center text-center text-red-600 hover:text-red-700" />
+            </div>
+            {/* Title */}
+            <AlertDialogTitle className="text-xl font-bold text-gray-900 text-center mb-2">
+              {item?.isActive ? 'Ẩn bộ sưu tập' : 'Hiện bộ sưu tập'}
+            </AlertDialogTitle>
+            <AlertDialogTitle className="text-center mb-6">
+              <p className="text-gray-600 text-sm">
+                Bạn có muốn xoá bộ sưu tập này không
+              </p>
+              <div className="text-lg font-semibold text-gray-900 mt-2 px-4 flex gap-1 justify-center">
+                <p>"{item.name}"</p>
+              </div>
+            </AlertDialogTitle>
+            {/* Cảnh báo */}
+            <div className="w-full mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-start justify-center">
+                <AlertTriangle className="w-4 h-4 translate-y-0.75 mr-2 text-red-600 shrink-0" />
+                <AlertDialogDescription className="block text-sm text-red-600 text-center">
+                  Hãy cân nhắc thật kỹ
+                </AlertDialogDescription>
+              </div>
+            </div>
+            {item.totalProducts > 0 && (
+              <div className="w-full mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start justify-center">
+                  <AlertTriangle className="w-4 h-4 translate-y-0.75 mr-2 text-blue-600 shrink-0" />
+                  <AlertDialogDescription className="block text-sm text-blue-600 text-center">
+                    Các sản phẩm thuộc bộ sưu tập sẽ vẫn còn
+                  </AlertDialogDescription>
+                </div>
+              </div>
+            )}
+          </AlertDialogHeader>
+          <AlertDialogFooter className="w-full flex justify-between! mt-4">
+            <AlertDialogCancel className="w-1/2 py-6 border-0 px-8 text-gray-700 font-medium bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+              Huỷ
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => cb(item._id)}
+              className={`w-1/2 py-6 font-medium text-white rounded-xl hover:opacity-90 transition-colors duration-300
+              bg-red-600 hover:bg-red-500
+            `}
+            >
+              Xác nhận
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
+  if (action === 'toggleActive') {
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button className="px-1 py-1 cursor-pointer" disabled={loading}>
+            {item?.isActive ? (
+              <Eye className="hover:text-gray-500 h-5 w-5" />
+            ) : (
+              <EyeOff className="hover:text-gray-500 h-5 w-5" />
+            )}
+          </button>
+        </AlertDialogTrigger>
+        {/* Hộp thoại */}
+        <AlertDialogContent
+          className={
+            'z-50 bg-white w-[500px] p-7 rounded-2xl border-gray-300 duration-300 ease-linear'
+          }
+        >
+          <AlertDialogHeader className={'items-center text-center'}>
+            {/* icon */}
+            <div
+              className={`w-16 h-16 mx-auto mb-4 rounded-full 
+                flex items-center justify-center 
+                bg-blue-100`}
+            >
+              {item.isActive ? (
+                <EyeOff className="w-8 h-8items-center text-center text-blue-600 hover:text-blue-700" />
+              ) : (
+                <Eye className="w-8 h-8items-center text-center  text-blue-600 hover:text-blue-700" />
+              )}
+            </div>
+            {/* Title */}
+            <AlertDialogTitle className="text-xl font-bold text-gray-900 text-center mb-2">
+              {item?.isActive
+                ? `Ẩn ${item.image ? 'bộ sưu tập' : 'danh mục'}`
+                : `Hiện ${item.image ? 'bộ sưu tập' : 'danh mục'}`}
+            </AlertDialogTitle>
+            <AlertDialogTitle className="text-center mb-6">
+              <p className="text-gray-600 text-sm">
+                Bạn có muốn
+                {item?.isActive
+                  ? ` Ẩn ${item.image ? 'bộ sưu tập ' : 'danh mục '}`
+                  : ` Hiện ${item.image ? 'bộ sưu tập ' : 'danh mục '}`}
+                này không
+              </p>
+              <div className="text-lg font-semibold text-gray-900 mt-2 px-4 flex gap-1 justify-center">
+                <p>"{item.name}"</p>
+              </div>
+            </AlertDialogTitle>
+            {/* Cảnh báo */}
+            <div className="w-full mb-4 p-3 bg-amber-50 border border-red-200 rounded-lg">
+              <div className="flex items-start justify-center">
+                <AlertTriangle className="w-4 h-4 translate-y-0.75 mr-2 text-amber-600 shrink-0" />
+                <AlertDialogDescription className="block text-sm text-amber-600 text-center">
+                  Hãy cân nhắc thật kỹ
+                </AlertDialogDescription>
+              </div>
+            </div>
+            {item.isActive && item.totalProducts && (
+              <div className="w-full mb-4 p-3 bg-amber-50 border border-red-200 rounded-lg">
+                <div className="flex items-start justify-center">
+                  <AlertTriangle className="w-4 h-4 translate-y-0.75 mr-2 text-amber-600 shrink-0" />
+                  <AlertDialogDescription className="block text-sm text-amber-600 text-center">
+                    Các sản phẩm thuộc {item.image ? 'bộ sưu tập' : 'danh mục'} cũng sẽ bị
+                    ẩn.
+                  </AlertDialogDescription>
+                </div>
+              </div>
+            )}
+          </AlertDialogHeader>
+          <AlertDialogFooter className="w-full flex justify-between! mt-4">
+            <AlertDialogCancel className="w-1/2 py-6 border-0 px-8 text-gray-700 font-medium bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+              Huỷ
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => cb(item._id)}
+              className={`w-1/2 py-6 font-medium text-white rounded-xl hover:opacity-90 transition-colors duration-300
+              bg-blue-600 hover:bg-blue-500
+            `}
+            >
+              Xác nhận
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
+  if (action === 'updateStatusOrder') {
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button
+            type="button"
+            className={`px-2 py-1 cursor-pointer flex items-center justify-center
+            rounded-xl font-semibold border mx-auto
+            transition-colors duration-200 ease-linear
+            ${order?.status === 'processing' && 'text-white bg-green-500 border-green-500 hover:text-green-600 hover:bg-white'}
+            ${order?.status === 'confirmed' && 'text-white bg-blue-500 border-blue-500 hover:text-blue-600 hover:bg-white'}
+            `}
+            disabled={loading}
+          >
+            {order?.status === 'processing' && (
+              <>
+                <CheckCircle className="mr-1 h-4 w-4" />
+                <p>Xác nhận</p>
+              </>
+            )}
+            {order?.status === 'confirmed' && (
+              <>
+                <Truck className="mr-1 h-4 w-4" />
+                Đi đơn
+              </>
+            )}
+          </button>
+        </AlertDialogTrigger>
+        {/* Hộp thoại */}
+        <AlertDialogContent
+          className={
+            'z-50 bg-white w-[500px] p-7 rounded-2xl border-gray-300 duration-300 ease-linear'
+          }
+        >
+          <AlertDialogHeader className={'items-center text-center'}>
+            {/* icon */}
+            <div
+              className={`w-16 h-16 mx-auto mb-4 rounded-full 
+                flex items-center justify-center 
+                ${order?.status === 'processing' && 'bg-green-100'}
+                ${order?.status === 'confirmed' && 'bg-blue-100'}`}
+            >
+              {order?.status === 'processing' && (
+                <CheckCircle
+                  className={`w-8 h-8 items-center text-center
+                text-green-500 hover:text-green-400
+              `}
+                />
+              )}
+              {order?.status === 'confirmed' && (
+                <Truck
+                  className={`w-8 h-8 items-center text-center
+                text-blue-500 hover:text-blue-400
+              `}
+                />
+              )}
+            </div>
+            {/* Title */}
+            <AlertDialogTitle className="text-xl font-bold text-gray-900 text-center mb-2">
+              {order?.status === 'processing' && 'Xác nhận đơn hàng'}
+              {order?.status === 'confirmed' && 'Xác nhận vận chuyển'}
+            </AlertDialogTitle>
+            <AlertDialogTitle className="text-center mb-6">
+              <p className="text-gray-600 text-sm">
+                {order?.status === 'processing' && 'Bạn có muốn xác nhận đơn hàng này'}
+                {order?.status === 'confirmed' &&
+                  'Bạn có muốn xác nhận vận chuyển đơn hàng này'}
+              </p>
+              <div className="text-lg font-semibold text-gray-900 mt-2 px-4 flex gap-1 justify-center">
+                <p>"{order.orderNumber}"</p>
+              </div>
+            </AlertDialogTitle>
+            {/* Cảnh báo */}
+            <div className="w-full mb-4 p-3 bg-amber-50 border border-red-200 rounded-lg">
+              <div className="flex items-start justify-center">
+                <AlertTriangle className="w-4 h-4 translate-y-0.75 mr-2 text-amber-600 shrink-0" />
+                <AlertDialogDescription className="block text-sm text-amber-600 text-center">
+                  Hãy cân nhắc thật kỹ
+                </AlertDialogDescription>
+              </div>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="w-full flex justify-between! mt-4">
+            <AlertDialogCancel className="w-1/2 py-6 border-0 px-8 text-gray-700 font-medium bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+              Huỷ
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => cb(order._id)}
+              className={`w-1/2 py-6 font-medium text-white rounded-xl hover:opacity-90 transition-colors duration-300
+              ${order.status === 'processing' && 'bg-green-600 hover:bg-green-500'}
+              ${order.status === 'confirmed' && 'bg-blue-600 hover:bg-blue-500'}
+            `}
+            >
+              Xác nhận
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
+  if (action === 'completed') {
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button
+            disabled={isButtonDisabled}
+            type="button"
+            className="flex px-4 py-3 
+            font-medium text-white bg-green-500/90 border-green-500/90
+            border-2  backdrop-blur-md rounded-xl shadow-lg
+            cursor-pointer transition-all duration-200 ease-linear
+            hover:px-5 hover:bg-white hover:text-green-600/80 hover:border-green-600/80
+            active:bg-green-500/90 active:border-green-500/90 active:text-white"
+            title="Huỷ đơn hàng"
+          >
+            {isButtonDisabled ? (
+              'Đang xử lý...'
+            ) : (
+              <>
+                <CheckCircle2 className="opacity-80 mr-2" />
+                Đã nhận được hàng
+              </>
+            )}
+          </button>
+        </AlertDialogTrigger>
+        {/* Hộp thoại */}
+        <AlertDialogContent
+          className={
+            'z-50 bg-white w-[500px] p-7 rounded-2xl border-gray-300 duration-300 ease-linear'
+          }
+        >
+          <AlertDialogHeader className={'items-center text-center'}>
+            {/* icon */}
+            <div
+              className={`w-16 h-16 mx-auto mb-4 rounded-full 
+                flex items-center justify-center bg-green-100`}
+            >
+              <CheckCircle2
+                className={`w-8 h-8items-center text-center
+                text-green-500 hover:text-green-400
+              `}
+              />
+            </div>
+            {/* Title */}
+            <AlertDialogTitle className="text-xl font-bold text-gray-900 text-center mb-2">
+              Đã nhận hàng
+            </AlertDialogTitle>
+            <AlertDialogTitle className="text-center mb-6">
+              <p className="text-gray-600 text-sm">Bạn đã nhận được hàng chứ</p>
+              <div className="text-lg font-semibold text-gray-900 mt-2 px-4 flex gap-1 justify-center">
+                <p>"{product.orderNumber}"</p>
+              </div>
+            </AlertDialogTitle>
+            {/* Cảnh báo */}
+            <div className="w-full mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start justify-center">
+                <AlertTriangle className="w-4 h-4 translate-y-0.75 mr-2 text-amber-600 shrink-0" />
+                <AlertDialogDescription className="block text-sm text-amber-600 text-center">
+                  Xác nhận nếu đơn hàng này đã được giao đến bạn
+                </AlertDialogDescription>
+              </div>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="w-full flex justify-between! mt-4">
+            <AlertDialogCancel className="w-1/2 py-6 border-0 px-8 text-gray-700 font-medium bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+              Huỷ
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => cb(product._id)}
+              className={`w-1/2 py-6 font-medium text-white rounded-xl 
+              hover:opacity-90 transition-colors duration-300
+              bg-green-600 hover:bg-green-500
+            `}
+            >
+              Xác nhận
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
   if (action === 'cancelOrder') {
     return (
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <button
+            disabled={isButtonDisabled}
             type="button"
             className="flex px-4 py-3 
             font-medium text-white bg-red-500/90 border-red-500/90
@@ -47,8 +398,14 @@ export function AlertDialogDemo({
             active:bg-red-500/90 active:border-red-500/90 active:text-white"
             title="Huỷ đơn hàng"
           >
-            <XCircle className="opacity-80 mr-2" />
-            Huỷ bỏ đơn
+            {isButtonDisabled ? (
+              'Đang xử lý...'
+            ) : (
+              <>
+                <XCircle className="opacity-80 mr-2" />
+                Huỷ bỏ đơn
+              </>
+            )}
           </button>
         </AlertDialogTrigger>
         {/* Hộp thoại */}
@@ -94,7 +451,7 @@ export function AlertDialogDemo({
               Huỷ
             </AlertDialogCancel>
             <AlertDialogAction
-              // onClick={() => cb(id, colorName)}
+              onClick={() => cb(product._id)}
               className={`w-1/2 py-6 font-medium text-white rounded-xl 
               hover:opacity-90 transition-colors duration-300
               bg-red-600 hover:bg-red-500

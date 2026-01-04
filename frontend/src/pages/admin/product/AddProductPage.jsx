@@ -26,17 +26,17 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 // Data
-import { colors } from '@/lib/data/data';
+import { colors, genders } from '@/lib/data/data';
 // Icons
 import { XIcon, Trash2, Save, ArrowLeft, AlertCircle, Plus } from 'lucide-react';
 // Components
 import UploadProgressModal from './UploadProgressModal';
+import axiosInstance from '@/lib/axios';
 
 const AddProductPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { categories } = useSelector((state) => state.categories);
   const { products } = useSelector((state) => state.adminProducts);
   const { operationLoading, uploadProgress, operationError } = useSelector(
     (state) => state.adminProducts
@@ -54,6 +54,7 @@ const AddProductPage = () => {
     discountPrice: '',
     category: '',
     productCollection: '',
+    gender: '',
   });
   // state variants (ban đầu 1)
   const [variants, setVariants] = useState([
@@ -83,6 +84,34 @@ const AddProductPage = () => {
   const [fileDialogOpened, setFileDialogOpened] = useState({});
   // Ref để biết component đã mount chưa
   const isInitialMount = useRef(true);
+  const [collections, setCollections] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const res = await axiosInstance.get(`/api/admin/collections`, {
+          params: { status: 'published' },
+        });
+        setCollections(res.data.collections);
+      } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+      }
+    };
+    fetchCollections();
+
+    const fetchCategories = async () => {
+      try {
+        const res = await axiosInstance.get(`/api/admin/categories`, {
+          params: { status: 'isActive', limit: 50 },
+        });
+        setCategories(res.data.categories);
+      } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   //  Hàm đánh dấu field đã được touched
   const markFieldAsTouched = (field) => {
@@ -362,9 +391,9 @@ const AddProductPage = () => {
     }
 
     // ✅ SỬA: Kiểm tra số lượng ảnh với uniqueFiles (không phải files)
-    if (currentImages.length + uniqueFiles.length > 10) {
+    if (currentImages.length + uniqueFiles.length > 5) {
       e.target.value = ''; // Reset input
-      return toast.warning('Tối đa 10 ảnh mỗi biến thể', { duration: 3000 });
+      return toast.warning('Tối đa 5 ảnh mỗi biến thể', { duration: 3000 });
     }
 
     // ✅ SỬA: Thêm ảnh mới (chỉ uniqueFiles)
@@ -468,6 +497,8 @@ const AddProductPage = () => {
 
     if (!productData.category) newErrors.category = 'Danh mục là bắt buộc';
 
+    if (!productData.gender) newErrors.gender = 'Giới tính là bắt buộc';
+
     // Validate variants - TẤT CẢ variants
     variants.forEach((variant) => {
       const variantError = {};
@@ -543,6 +574,10 @@ const AddProductPage = () => {
       newErrors.category = 'Danh mục là bắt buộc';
     }
 
+    if (touchedFields.gender && !productData.gender) {
+      newErrors.gender = 'Giới tính là bắt buộc';
+    }
+
     // Validate variants - CHỈ touched fields
     variants.forEach((variant) => {
       const variantError = {};
@@ -602,7 +637,7 @@ const AddProductPage = () => {
 
     if (!validateAllForm()) {
       // Đánh dấu TẤT CẢ fields đã touched để hiển thị lỗi
-      const allFields = ['name', 'sku', 'description', 'price', 'category'];
+      const allFields = ['name', 'sku', 'description', 'price', 'category', 'gender'];
       allFields.forEach((field) => markFieldAsTouched(field));
 
       // Đánh dấu TẤT CẢ variant fields đã touched
@@ -847,55 +882,6 @@ const AddProductPage = () => {
       {/* Tiêu đề */}
       <h2 className="text-2xl font-semibold uppercase mb-6 pt-7 px-7">Thêm Sản Phẩm</h2>
 
-      {/* {Object.keys(uploadProgress).length > 0 && (
-        <div className="fixed top-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-md">
-          <h4 className="font-semibold mb-2">📤 Đang upload ảnh...</h4>
-          {Object.entries(uploadProgress).map(([variantId, progress]) => {
-            const variant = variants.find((v) => v.id === variantId);
-            const variantName = variant?.colorName || `Variant ${variantId}`;
-
-            return (
-              <div key={variantId} className="mb-3">
-                <div className="flex justify-between text-sm mb-1">
-                  <span>{variantName}</span>
-                  <span>
-                    {progress === -1
-                      ? '❌ Lỗi'
-                      : progress === 100
-                        ? '✅ Hoàn thành'
-                        : `${progress}%`}
-                  </span>
-                </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      progress === -1
-                        ? 'bg-red-500'
-                        : progress === 100
-                          ? 'bg-green-500'
-                          : 'bg-blue-600'
-                    }`}
-                    style={{ width: progress === -1 ? '100%' : `${progress}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {operationLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4" />
-            <p className="text-center font-medium">Đang tạo sản phẩm...</p>
-            <p className="text-center text-sm text-gray-500 mt-2">
-              Vui lòng không đóng trình duyệt
-            </p>
-          </div>
-        </div>
-      )} */}
-
       <UploadProgressModal />
 
       {/* form */}
@@ -963,135 +949,205 @@ const AddProductPage = () => {
             )}
           </div>
 
-          {/* giá gốc */}
-          <div className="">
-            <label className="block font-semibold mb-2">Giá sản phẩm *</label>
-            <Input
-              type="number"
-              name="price"
-              min="0"
-              value={productData.price}
-              onChange={(e) => handleProductDataChange('price', e.target.value)}
-              onBlur={() => handleInputBlur('price')}
-              placeholder="Hãy nhập giá sản phẩm..."
-              className="w-full outline-0
-              focus:ring-blue-500 focus:border-blue-500 mb-2"
-            />
-            {errors.price && (
-              <span className="text-red-500 text-sm flex items-center mt-1">
-                <AlertCircle className="h-4 w-4 mr-1" />
-                {errors.price}
-              </span>
-            )}
-          </div>
+          <div className="flex flex-col gap-6">
+            {/* giá gốc */}
+            <div className="mb-2">
+              <div className="flex items-center justify-between gap-6 w-full">
+                <label className="block font-semibold">Giá sản phẩm *</label>
+                <Input
+                  type="number"
+                  name="price"
+                  min="0"
+                  value={productData.price}
+                  onChange={(e) => handleProductDataChange('price', e.target.value)}
+                  onBlur={() => handleInputBlur('price')}
+                  placeholder="Hãy nhập giá sản phẩm..."
+                  className="w-1/2 outline-0
+              focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              {errors.price && (
+                <span className="text-red-500 text-sm flex items-center mt-1 justify-end">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors.price}
+                </span>
+              )}
+            </div>
 
-          {/* giảm giá */}
-          <div className="">
-            <label className="block font-semibold mb-2">Giá khuyến mãi </label>
-            <Input
-              type="number"
-              name="discountPrice"
-              min="0"
-              value={productData.discountPrice}
-              onChange={(e) => handleProductDataChange('discountPrice', e.target.value)}
-              placeholder="Hãy nhập giá sản phẩm..."
-              className="w-full outline-0
-              focus:ring-blue-500 focus:border-blue-500 mb-2"
-            />
-            {errors.discountPrice && (
-              <span className="text-red-500 text-sm flex items-center mt-1">
-                <AlertCircle className="h-4 w-4 mr-1" />
-                {errors.discountPrice}
-              </span>
-            )}
-          </div>
-
-          {/* Danh mục */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block font-semibold">Danh mục: *</label>
-              <Select
-                value={productData.category}
-                onValueChange={(value) => handleProductDataChange('category', value)}
-                onOpenChange={(open) => {
-                  if (!open && !productData.category) {
-                    handleInputBlur('category');
+            {/* giảm giá */}
+            <div className="mb-2">
+              <div className="flex items-center justify-between gap-6 w-full">
+                <label className="block font-semibold">Giá khuyến mãi </label>
+                <Input
+                  type="number"
+                  name="discountPrice"
+                  min="0"
+                  value={productData.discountPrice}
+                  onChange={(e) =>
+                    handleProductDataChange('discountPrice', e.target.value)
                   }
-                }}
-              >
-                <SelectTrigger className="w-58">
-                  <SelectValue placeholder="Hãy chọn danh mục" />
-                </SelectTrigger>
-                <SelectContent className={'bg-white'}>
-                  <SelectGroup>
-                    <SelectLabel>Danh mục</SelectLabel>
-                    {categories.map((category, index) => (
-                      <SelectItem
-                        key={index}
-                        className={'hover:bg-gray-100'}
-                        value={category._id}
-                      >
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                  placeholder="Hãy nhập giá sản phẩm..."
+                  className="w-1/2 outline-0
+              focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              {errors.discountPrice && (
+                <span className="text-red-500 text-sm flex items-center mt-1">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors.discountPrice}
+                </span>
+              )}
             </div>
-            {errors.category && (
-              <span className="text-red-500 text-sm flex w-full justify-end items-center mt-1">
-                <AlertCircle className="h-4 w-4 mr-1" />
-                {errors.category}
-              </span>
-            )}
-          </div>
 
-          {/* Bộ sưu tập */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block font-semibold">Bộ sưu tập: </label>
-              <Select
-                value={productData.productCollection}
-                onValueChange={(value) =>
-                  handleProductDataChange('productCollection', value)
-                }
-              >
-                <SelectTrigger className="w-58">
-                  <SelectValue placeholder="Hãy chọn bộ sưu tập" />
-                </SelectTrigger>
-                <SelectContent className={'bg-white'}>
-                  <SelectGroup>
-                    <SelectLabel>Danh mục</SelectLabel>
-                    <SelectItem className={'hover:bg-gray-100'} value="summer">
-                      Summer Collection
-                    </SelectItem>
-                    <SelectItem className={'hover:bg-gray-100'} value="winter">
-                      Winter Collection
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <span className="block w-full text-red-500 text-end"></span>
-          </div>
-
-          {/* Màu sắc */}
-          <div>
-            <div className="flex items-center gap-4">
-              <label className="block font-semibold">Biến thể màu sắc: </label>
-              <button
-                type="button"
-                onClick={handleAddVariant}
-                className="py-2 px-3 flex items-center 
+            {/* Màu sắc */}
+            <div className="hidden sm:block">
+              <div className="flex items-center gap-3 mb-2">
+                <label className="block font-semibold">Biến thể màu sắc: </label>
+                <label className="font-semibold">({variants.length}/6)</label>
+                <button
+                  type="button"
+                  onClick={handleAddVariant}
+                  className="py-2 px-3 flex items-center 
                 font-semibold text-sm text-white text-shadow-md
                 rounded-lg bg-green-400  cursor-pointer
                 active:opacity-100 hover:opacity-80"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Thêm
-              </button>
-              <label className="font-semibold">({variants.length}/6)</label>
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Thêm
+                </button>
+              </div>
             </div>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            {/* Danh mục */}
+            <div className="mb-2">
+              <div className="flex items-center justify-between ">
+                <label className="block font-semibold">Danh mục: *</label>
+                <Select
+                  value={productData.category}
+                  onValueChange={(value) => handleProductDataChange('category', value)}
+                  onOpenChange={(open) => {
+                    if (!open && !productData.category) {
+                      handleInputBlur('category');
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-58">
+                    <SelectValue placeholder="Hãy chọn danh mục" />
+                  </SelectTrigger>
+                  <SelectContent className={'bg-white'}>
+                    <SelectGroup>
+                      <SelectLabel>Danh mục</SelectLabel>
+                      {categories.map((category, index) => (
+                        <SelectItem
+                          key={index}
+                          className={'hover:bg-gray-100'}
+                          value={category._id}
+                        >
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              {errors.category && (
+                <span className="text-red-500 text-sm flex w-full justify-end items-center mt-1">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors.category}
+                </span>
+              )}
+            </div>
+
+            {/* Giới tính */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block font-semibold">Giới tính: *</label>
+                <Select
+                  value={productData.gender}
+                  onValueChange={(value) => handleProductDataChange('gender', value)}
+                  onOpenChange={(open) => {
+                    if (!open && !productData.gender) {
+                      handleInputBlur('gender');
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-58">
+                    <SelectValue placeholder="Hãy chọn danh mục" />
+                  </SelectTrigger>
+                  <SelectContent className={'bg-white'}>
+                    <SelectGroup>
+                      <SelectLabel>Danh mục</SelectLabel>
+                      {genders.map((gender, index) => (
+                        <SelectItem
+                          key={index}
+                          className={'hover:bg-gray-100'}
+                          value={gender.value}
+                        >
+                          {gender.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              {errors.gender && (
+                <span className="text-red-500 text-sm flex w-full justify-end items-center mt-1">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors.gender}
+                </span>
+              )}
+            </div>
+
+            {/* Bộ sưu tập */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block font-semibold">Bộ sưu tập: </label>
+                <Select
+                  value={productData.productCollection}
+                  onValueChange={(value) =>
+                    handleProductDataChange('productCollection', value)
+                  }
+                >
+                  <SelectTrigger className="w-58">
+                    <SelectValue placeholder="Hãy chọn bộ sưu tập" />
+                  </SelectTrigger>
+                  <SelectContent className={'bg-white'}>
+                    <SelectGroup>
+                      <SelectLabel>Bộ sưu tập</SelectLabel>
+                      {collections.map((collection, index) => (
+                        <SelectItem
+                          key={index}
+                          className={'hover:bg-gray-100'}
+                          value={collection._id}
+                        >
+                          {collection.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <span className="block w-full text-red-500 text-end"></span>
+            </div>
+          </div>
+
+          {/* Màu sắc mobile */}
+          <div className="flex sm:hidden items-center justify-between mb-2">
+            <label className="block font-semibold">Biến thể màu sắc: </label>
+            <label className="font-semibold">({variants.length}/6)</label>
+            <button
+              type="button"
+              onClick={handleAddVariant}
+              className="py-2 px-3 flex items-center 
+                font-semibold text-sm text-white text-shadow-md
+                rounded-lg bg-green-400  cursor-pointer
+                active:opacity-100 hover:opacity-80"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Thêm
+            </button>
           </div>
         </div>
 
@@ -1232,7 +1288,7 @@ const AddProductPage = () => {
               {/* Right - hình ảnh */}
               <div>
                 <label className="block font-semibold mb-4">
-                  Hình ảnh * ({variant.images.length}/10)
+                  Hình ảnh * ({variant.images.length}/5)
                 </label>
                 <div>
                   <div className="flex items-center gap-4 mb-4">
@@ -1260,7 +1316,7 @@ const AddProductPage = () => {
                         setFileDialogOpened((prev) => ({ ...prev, [variant.id]: false }));
                       }}
                       ref={(el) => (fileInputRefs.current[variant.id] = el)}
-                      disabled={variant.images.length >= 10}
+                      disabled={variant.images.length >= 5}
                       className="w-20 text-center px-3"
                     />
                   </div>
@@ -1327,7 +1383,7 @@ const AddProductPage = () => {
                             }));
                           }}
                           ref={(el) => (fileInputRefs.current[variant.id] = el)}
-                          disabled={variant.images.length >= 10}
+                          disabled={variant.images.length >= 5}
                           className="w-full h-full opacity-0 text-center px-3 cursor-pointer"
                         />
                       </div>
@@ -1352,22 +1408,28 @@ const AddProductPage = () => {
         })}
 
         {/* back & submit */}
-        <div className="w-full pb-7 flex justify-end">
-          <Link
-            to={`/admin/products`}
-            className="flex items-center mr-6 underline text-blue-500
-          hover:text-blue-400 active:text-blue-500"
-          >
-            <ArrowLeft className="mr-2" /> Quay lại trang sản phẩm
-          </Link>
-          <button
+        <div className="flex flex-col gap-3 fixed bottom-7 right-5 z-10">
+          <Button
             type="submit"
-            className="flex py-3 px-4 rounded-xl bg-green-400 text-shadow-md font-semibold text-white
-            hover:opacity-90 active:opacity-100"
+            variant={'outline'}
+            className="flex gap-3 items-center justify-start
+                  border border-green-500 rounded-md bg-white 
+                  underline text-green-600 py-2 px-3 text-sm 
+                  hover:text-green-500 active:text-green-600"
           >
             <Save className="mr-2" />
             Lưu sản phẩm
-          </button>
+          </Button>
+          <Button
+            type="button"
+            onClick={() => navigate(-1)}
+            variant={'outline'}
+            className="flex items-center gap-3 bg-white justify-start
+                            underline text-blue-500
+                            hover:text-blue-400 active:text-blue-500"
+          >
+            <ArrowLeft className="" /> Quay lại trang trước
+          </Button>
         </div>
       </form>
     </div>

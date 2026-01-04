@@ -20,6 +20,14 @@ const getCurrentCart = async (user, guestId) => {
   return cart;
 };
 
+// find order by id
+const findOrderById = async (orderId) => {
+  if (!orderId) throw new Error("Lỗi! không nhận được _id");
+  const order = await Order.findById(orderId);
+  if (!order) throw new Error("Lỗi! không tìm thấy đơn hàng từ _id");
+  return order;
+};
+
 export const createOrderr = async (
   user,
   guestId,
@@ -100,4 +108,129 @@ export const createOrderr = async (
   await sendOrderEmail(order, "created");
 
   return createdOrder;
+};
+
+// huỷ
+export const Cancel = async (orderId, user, guestId) => {
+  const order = await findOrderById(orderId);
+
+  if (user) {
+    if (!order.user.equals(user._id)) {
+      throw new Error("Lỗi! Đơn hàng này không phải của bạn!");
+    }
+  } else {
+    if (!order.guestId || !order.guestId.equals(guestId)) {
+      throw new Error("Lỗi! Đơn hàng này không phải của bạn!");
+    }
+  }
+
+  if (order.status !== "processing")
+    throw new Error("Lỗi! không thể huỷ đơn ở trạng thái này");
+
+  order.status = "cancelled";
+  order.expiresAt = undefined;
+  if (order.paymentStatus === "paid") {
+    order.paymentStatus = "refunded";
+    order.isPaid = false;
+  }
+
+  const bulkOps = order.orderItems.map((item) => ({
+    updateOne: {
+      filter: {
+        _id: item.productId,
+        "variants.colorName": item.color,
+        "variants.sizes.name": item.size,
+      },
+      update: {
+        $inc: {
+          "variants.$[variant].sizes.$[size].countInStock": item.quantity,
+        },
+      },
+      arrayFilters: [
+        { "variant.colorName": item.color },
+        { "size.name": item.size },
+      ],
+    },
+  }));
+
+  await Product.bulkWrite(bulkOps);
+
+  await order.validate();
+  const CancelleddOrder = await order.save();
+
+  await sendOrderEmail(order, "cancelled");
+
+  return CancelleddOrder;
+};
+
+// đã giao
+export const completed = async (orderId, user, guestId) => {
+  const order = await findOrderById(orderId);
+  console.log("user: ", user?._id);
+  console.log("guestId: ", guestId);
+  console.log("order user: ", order?.user);
+  console.log("order guestId: ", order?.guestId);
+
+  if (user) {
+    if (!order.user.equals(user._id)) {
+      throw new Error("Lỗi! Đơn hàng này không phải của bạn!");
+    }
+  } else {
+    if (!order.guestId || !order.guestId.equals(guestId)) {
+      throw new Error("Lỗi! Đơn hàng này không phải của bạn!");
+    }
+  }
+
+  if (order.status !== "delivered")
+    throw new Error("Lỗi! không thể nhận hàng ở trạng thái này");
+
+  order.status = "completed";
+  // order.isPaid = true;
+  // order.paidAt = new Date();
+  // order.paymentStatus = "paid";
+
+  const bulkOps = order.orderItems.map((item) => ({
+    updateOne: {
+      filter: {
+        _id: item.productId,
+      },
+      update: {
+        $inc: {
+          quantitySold: item.quantity,
+        },
+      },
+    },
+  }));
+
+  await Product.bulkWrite(bulkOps);
+
+  await order.validate();
+  const deliveredOrder = await order.save();
+
+  return deliveredOrder;
+};
+
+//==========ADMIN================
+
+// update order status admin
+export const updateStatus = async (orderId) => {
+  const order = await findOrderById(orderId);
+
+  let message;
+  switch (order.status) {
+    case "processing":
+      message = `Đơn hàng ${order.orderNumber} đã được xác nhận`;
+      order.status = "confirmed";
+      break;
+    case "confirmed":
+      message = `Đơn hàng ${order.orderNumber} đã được vận chuyển`;
+      order.status = "shipping";
+      order.shippingAt = new Date();
+      break;
+  }
+
+  await order.validate();
+  const updatedOrder = await order.save();
+
+  return { updatedOrder, message };
 };

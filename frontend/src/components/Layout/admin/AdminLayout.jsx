@@ -17,7 +17,7 @@ const AdminLayout = () => {
         <button onClick={toggleSidebar}>
           <FaBars size={24} />
         </button>
-        <h1 className="ml-4 text-xl font-medium">Admin Dashboard</h1>
+        <h1 className="ml-4 text-xl font-medium">Trang quản trị</h1>
       </div>
 
       {/* Overlay for mobile */}
@@ -30,7 +30,7 @@ const AdminLayout = () => {
 
       {/* sidebar */}
       <div
-        className={`bg-gray-900 w-64 min-h-screen text-white absolute top-0 bottom-0 lg:relative transform
+        className={`bg-gray-900 w-59 min-w-59 max-w-59 min-h-screen text-white absolute top-0 bottom-0 lg:relative transform
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         transition-transform duration-300 lg:translate-x-0 lg:static lg:block z-20`}
       >

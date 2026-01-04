@@ -1,7 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import featured from '@/assets/featured.webp';
-
 const FeaturedCollection = () => {
   return (
     <section className="container mx-auto py-16 px-4 lg:px-0">
@@ -11,16 +9,13 @@ const FeaturedCollection = () => {
       >
         {/* left content */}
         <div className="lg:w-1/2 p-8 text-center lg:text-left">
-          <h2 className="text-lg font-semibold text-gray-700 mb-2">
-            Comfort and Style
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-700 mb-2">Comfort and Style</h2>
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
             Apparel made for your everday life
           </h2>
           <p className="text-lg text-gray-600 mb-6">
-            Discover high-quality, comfortable clothing that effortlessly blends
-            fashion and function. Desianed to make you look and feel great every
-            day.
+            Discover high-quality, comfortable clothing that effortlessly blends fashion
+            and function. Desianed to make you look and feel great every day.
           </p>
           <Link
             to="/collections/all"

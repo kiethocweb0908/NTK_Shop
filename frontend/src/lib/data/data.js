@@ -173,3 +173,146 @@ export const rowsPerPage = [
 export const allSizes = ['XS', 'S', 'M', 'L', 'XL'];
 // discount;
 // rating;
+
+//=======ORDER=======
+export const orderStatus = [
+  {
+    value: 'all',
+    name: 'Tất cả tt đơn hàng',
+  },
+  {
+    value: 'processing',
+    name: 'Chờ xác nhận',
+  },
+  {
+    value: 'confirmed',
+    name: 'Đã xác nhận',
+  },
+  {
+    value: 'shipping',
+    name: 'Đang vận chuyển',
+  },
+  {
+    value: 'delivered',
+    name: 'Đã giao',
+  },
+  {
+    value: 'completed',
+    name: 'Hoàn thành',
+  },
+  {
+    value: 'cancelled',
+    name: 'Đã huỷ',
+  },
+];
+
+export const paymentStatus = [
+  {
+    value: 'all',
+    name: 'Tất cả tt thanh toán',
+  },
+  {
+    value: 'pending',
+    name: 'Chờ thanh toán',
+  },
+  {
+    value: 'paid',
+    name: 'Đã trả',
+  },
+  {
+    value: 'failed',
+    name: 'Thất bại',
+  },
+  {
+    value: 'refunded',
+    name: 'Hoàn tiền',
+  },
+];
+
+export const timeFilter = [
+  {
+    value: 'all',
+    name: 'Tất cả thời gian',
+  },
+  {
+    value: 'today',
+    name: 'Hôm nay',
+  },
+  {
+    value: 'week',
+    name: 'Tuần này',
+  },
+  {
+    value: 'month',
+    name: 'Tháng này',
+  },
+  {
+    value: 'year',
+    name: 'Năm nay',
+  },
+];
+
+export const paymentMethods = [
+  {
+    value: 'cod',
+    name: 'Thanh toán cod',
+  },
+  {
+    value: 'paypal',
+    name: 'Thanh toán PayPal',
+  },
+  {
+    value: 'momo',
+    name: 'Thanh toán MoMo',
+  },
+  {
+    value: 'vnpay',
+    name: 'Thanh toán VNPay',
+  },
+];
+
+export const sortCollection = [
+  {
+    value: 'newest',
+    name: 'Mới nhất',
+  },
+  {
+    value: 'oldest',
+    name: 'Cũ nhất',
+  },
+  {
+    value: 'nameAsc',
+    name: 'Tên A - Z',
+  },
+  {
+    value: 'nameDesc',
+    name: 'Tên Z - A',
+  },
+  {
+    value: 'productsAsc',
+    name: 'Số lượng ít',
+  },
+  {
+    value: 'productsDesc',
+    name: 'Số lượng nhiều',
+  },
+];
+
+export const roles = [
+  {
+    value: 'all',
+    name: 'Tất cả tài khoản',
+  },
+  {
+    value: 'admin',
+    name: 'Quản trị viên',
+  },
+  {
+    value: 'customer',
+    name: 'Khách hàng',
+  },
+  {
+    value: 'viewer',
+    name: 'Người tham quan',
+  },
+];

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '@/lib/axios';
-import { updateProduct } from '@/redux/slices/productsSlice';
+// import { updateProduct } from '@/redux/slices/productsSlice';
 
 // Async Thunk to Fetch Admin Products
 export const fetchAdminProducts = createAsyncThunk(
@@ -946,6 +946,8 @@ const adminProductsSlice = createSlice({
     selectedProduct: null,
     loading: false,
     error: null,
+    deleteLoading: false,
+    deleteError: null,
     operationLoading: false, // Loading cho các operation (create, update, delete)
     operationError: null,
     uploadProgress: {}, // { variantId: progressPercentage }
@@ -1076,19 +1078,19 @@ const adminProductsSlice = createSlice({
 
       // ========== deleteProductThunk ==========
       .addCase(deleteProductThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        state.deleteLoading = true;
+        state.deleteError = null;
       })
       .addCase(deleteProductThunk.fulfilled, (state, action) => {
-        state.loading = false;
+        state.deleteLoading = false;
         const newProducts = state.products.filter(
           (p) => p._id !== action.payload.deletedProduct._id
         );
         state.products = newProducts;
       })
       .addCase(deleteProductThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload?.message || 'Failed to deleteProductThunk';
+        state.deleteLoading = false;
+        state.deleteError = action.payload || 'Failed to deleteProductThunk';
       })
 
       // ========== toggleProductPublished ==========

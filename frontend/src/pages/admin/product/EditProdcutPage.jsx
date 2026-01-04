@@ -44,12 +44,12 @@ import {
 } from '@/redux/admin/slices/adminProductsSlice';
 import { Description } from '@radix-ui/react-alert-dialog';
 import AlertDialogDemo from '@/components/Common/AlertDialog';
+import axiosInstance from '@/lib/axios';
 
 const EditProdcutPage = () => {
   // lấy sản phẩm
   const { productId } = useParams();
   const { selectedProduct } = useSelector((state) => state.adminProducts);
-  const { categories } = useSelector((state) => state.categories);
   const { products } = useSelector((state) => state.adminProducts);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
@@ -67,11 +67,36 @@ const EditProdcutPage = () => {
   const [selectedColors, setSelectedColors] = useState([]);
   // để useEffect 1 lần cho lần đầu mount lấy selectedColors
   const [initialized, setInitialized] = useState(false);
+  const [collections, setCollections] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   // loading dữ liệu và clear dữ liệu cũ
   useEffect(() => {
     dispatch(clearSelectedProduct());
     dispatch(fetchAdminProductDetails({ productId }));
+
+    const fetchCollections = async () => {
+      try {
+        const res = await axiosInstance.get(`/api/admin/collections`, {
+          params: { status: 'published', limit: 50 },
+        });
+        setCollections(res.data.collections);
+      } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+      }
+    };
+    fetchCollections();
+    const fetchCategories = async () => {
+      try {
+        const res = await axiosInstance.get(`/api/admin/categories`, {
+          params: { status: 'isActive', limit: 50 },
+        });
+        setCategories(res.data.categories);
+      } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+      }
+    };
+    fetchCategories();
 
     return () => {
       dispatch(clearSelectedProduct());
@@ -90,7 +115,7 @@ const EditProdcutPage = () => {
         discountPrice: selectedProduct.discountPrice || '',
         gender: selectedProduct.gender,
         category: selectedProduct.category?._id,
-        productCollection: selectedProduct?.productCollection?._id || '',
+        productCollection: selectedProduct?.productCollection?._id || undefined,
       });
 
       setVariantsData(selectedProduct.variants);
@@ -205,32 +230,30 @@ const EditProdcutPage = () => {
 
   const validateVariant = () => {
     const newVariants = variantsData.filter((v) => v?.isNew);
+    const errors = {};
+
     newVariants.forEach((v) => {
-      if (v.colorHex === '' || v.images.length === 0 || v.sizes.length === 0) {
-        setVariantsDataErrors((prev) => {
-          const newErrors = { ...prev };
-          if (v.colorHex === '' && v.colorName === '') {
-            newErrors[v._id] = {
-              ...newErrors[v._id],
-              color: 'Chưa chọn màu sắc cho biến thể',
-            };
-          }
-          if (v.sizes.length === 0) {
-            newErrors[v._id] = {
-              ...newErrors[v._id],
-              size: 'Mỗi biến thể phải có ít nhất 1 size',
-            };
-          }
-          if (v.images.length === 0) {
-            newErrors[v._id] = {
-              ...newErrors[v._id],
-              image: 'Mỗi biến thể phải có ít nhất 1 ảnh',
-            };
-          }
-          return newErrors;
-        });
+      const variantErrors = {};
+
+      if (v.colorHex === '' && v.colorName === '') {
+        variantErrors.color = 'Chưa chọn màu sắc cho biến thể';
+      }
+
+      if (v.sizes.length === 0) {
+        variantErrors.size = 'Mỗi biến thể phải có ít nhất 1 size';
+      }
+
+      if (v.images.length === 0) {
+        variantErrors.image = 'Mỗi biến thể phải có ít nhất 1 ảnh';
+      }
+
+      if (Object.keys(variantErrors).length > 0) {
+        errors[v._id] = variantErrors;
       }
     });
+
+    setVariantsDataErrors(errors); // ✅ set 1 lần
+    return errors; // ✅ trả kết quả
   };
 
   // validate khi blur khỏi input
@@ -241,7 +264,7 @@ const EditProdcutPage = () => {
   // Kiểm tra dữ liệu của trường cơ bản thay đổi
   const checkBasicFieldChange = (field, updateBasicField) => {
     if (field === 'category' || field === 'productCollection') {
-      if (basicFieldProduct[field] !== selectedProduct[field]._id) {
+      if (basicFieldProduct[field] !== selectedProduct[field]?._id) {
         updateBasicField[field] = basicFieldProduct[field];
       }
     } else if (basicFieldProduct[field] !== selectedProduct[field]) {
@@ -661,6 +684,7 @@ const EditProdcutPage = () => {
       'price',
       'discountPrice',
       'category',
+      'productCollection',
       'gender',
     ];
     let isValid = true;
@@ -672,14 +696,25 @@ const EditProdcutPage = () => {
       checkBasicFieldChange(field, updateBasicField);
     });
 
-    validateVariant();
+    // validateVariant();
 
-    const notValidVariants = Object.entries(variantsDataErrors).filter(
-      ([_, errors]) => Object.keys(errors).length > 0
+    // const notValidVariants = Object.entries(variantsDataErrors).filter(
+    //   ([_, errors]) => Object.keys(errors).length > 0
+    // );
+
+    // if (!isValid || notValidVariants.length > 0)
+    //   return toast.error('Thông tin không hợp lệ', { duration: 3000 });
+
+    const variantErrors = validateVariant(); // trả về object
+
+    const notValidVariants = Object.values(variantErrors).some(
+      (errors) => Object.keys(errors).length > 0
     );
 
-    if (!isValid || notValidVariants.length > 0)
-      return toast.error('Thông tin không hợp lệ', { duration: 3000 });
+    if (!isValid || notValidVariants) {
+      toast.error('Thông tin không hợp lệ');
+      return;
+    }
 
     const { deletedVariants, deletedSizes, updatedCountInStock, updatedColor, newSizes } =
       handleValue();
@@ -687,21 +722,21 @@ const EditProdcutPage = () => {
     console.log('field basic: ', updateBasicField); // trường basic thay đổi
     // console.log('variantsData: ', variantsData);
     const deletedImages = handleDeletedImages();
-    console.log('deletedImages đã lọc: ', deletedImages); // ảnh bị xoá
-    console.log('deletedVariants: ', deletedVariants); // biến thể bị xoá
-    console.log('updatedCountInStock: ', updatedCountInStock); // số lượng cập nhật
-    console.log('deletedSizes: ', deletedSizes); // sizes bị xoá
-    console.log('newSizes: ', newSizes); // size mới
-    console.log('updatedColor: ', updatedColor); // màu cập nhật
+    //console.log('deletedImages đã lọc: ', deletedImages); // ảnh bị xoá
+    //console.log('deletedVariants: ', deletedVariants); // biến thể bị xoá
+    //console.log('updatedCountInStock: ', updatedCountInStock); // số lượng cập nhật
+    //console.log('deletedSizes: ', deletedSizes); // sizes bị xoá
+    //console.log('newSizes: ', newSizes); // size mới
+    //console.log('updatedColor: ', updatedColor); // màu cập nhật
     const newImages = handleNewImages();
-    console.log('newImages: ', newImages); // ảnh mới
+    //console.log('newImages: ', newImages); // ảnh mới
     const newVariants = variantsData
       .filter((v) => v?.isNew)
       .map((v) => {
         const imageFiles = v.images.map((img) => (img.file ? img.file : img));
         return { ...v, images: imageFiles };
       });
-    console.log('newVariants: ', newVariants); // biến thể mới
+    //console.log('newVariants: ', newVariants); // biến thể mới
 
     try {
       const response = await dispatch(
@@ -724,7 +759,7 @@ const EditProdcutPage = () => {
         navigate(-1);
       }, 500);
     } catch (error) {
-      toast.error(error?.message || 'Lỗi');
+      toast.error(error || 'Lỗi');
       console.log(error?.message || error);
     }
   };
@@ -979,13 +1014,23 @@ const EditProdcutPage = () => {
                       </SelectTrigger>
                       <SelectContent className={'bg-white'}>
                         <SelectGroup>
-                          <SelectLabel>Danh mục</SelectLabel>
-                          <SelectItem className={'hover:bg-gray-100'} value="summer">
-                            Summer Collection
+                          <SelectLabel>Bộ sưu tập</SelectLabel>
+                          <SelectItem
+                            key={0}
+                            className={'hover:bg-gray-100'}
+                            value={null}
+                          >
+                            Không
                           </SelectItem>
-                          <SelectItem className={'hover:bg-gray-100'} value="winter">
-                            Winter Collection
-                          </SelectItem>
+                          {collections.map((collection, index) => (
+                            <SelectItem
+                              key={index + 1}
+                              className={'hover:bg-gray-100'}
+                              value={collection._id}
+                            >
+                              {collection.name}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>

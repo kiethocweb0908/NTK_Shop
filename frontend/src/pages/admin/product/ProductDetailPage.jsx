@@ -143,64 +143,86 @@ const ProductDetailPage = () => {
             </p>
           </div>
 
-          {/* giá gốc */}
-          <div className="">
-            <label className="block font-semibold mb-2">Giá sản phẩm *</label>
-            <p
-              className="w-full px-4 py-2 flex items-center gap-2
+          <div className="flex flex-col gap-6">
+            {/* giá gốc */}
+            <div className="flex items-center justify-between gap-6 w-full">
+              <label className="block font-semibold mb-2">Giá sản phẩm *</label>
+              <p
+                className="w-1/2 px-4 py-2 flex items-center gap-2
             border border-gray-500 rounded-lg 
             text-sm font-normal text-black whitespace-pre-line
             mb-2"
-            >
-              <Coins className="h-5 w-5 text-yellow-500" />
-              {formatCurrency(product.price)}
-            </p>
-          </div>
+              >
+                <Coins className="h-5 w-5 text-yellow-500" />
+                {formatCurrency(product.price)}
+              </p>
+            </div>
 
-          {/* giảm giá */}
-          <div className="">
-            <label className="block font-semibold mb-2">Giá khuyến mãi </label>
-            <p
-              className={`w-full px-4 py-2 
+            {/* giảm giá */}
+            <div className="flex items-center justify-between gap-6 w-full">
+              <label className="block font-semibold mb-2">Giá khuyến mãi </label>
+              <p
+                className={`w-1/2 px-4 py-2 
               flex items-center gap-2
             border border-gray-500 rounded-lg 
             text-sm  whitespace-pre-line
             mb-2
             ${product?.discountPrice ? 'text-red-400 font-semibold' : 'text-black font-normal '}`}
-            >
-              <Coins className="h-5 w-5 text-yellow-500" />
-              {formatCurrency(product?.discountPrice) || 'Chưa có giảm giá'}
-            </p>
-          </div>
+              >
+                <Coins className="h-5 w-5 text-yellow-500" />
+                {formatCurrency(product?.discountPrice) || 'Chưa có giảm giá'}
+              </p>
+            </div>
 
-          <div className="col-span-2 flex gap-10 ">
-            {/* Danh mục */}
-            <div className="flex gap-2 items-center">
-              <label className="block font-semibold mb-2">Danh mục: *</label>
-              <p
-                className="px-4 py-2
+            {/* Màu sắc */}
+            <div className="hidden sm:block">
+              <div className="flex items-center gap-17 w-full">
+                <label className="block font-semibold">Biến thể màu sắc: </label>
+                <p
+                  className="px-4 py-2
               flex items-center gap-2
             border border-gray-500 rounded-lg 
             text-sm font-normal text-black whitespace-pre-line
             mb-2"
-              >
-                <Layers className="h-5 w-5 text-gray-700" />
-                {product.category.name}
-              </p>
+                >
+                  {product.variants.length}/6
+                  <Palette className="h-5 w-5 text-pink-400" />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            {/* Danh mục */}
+            <div className="mb-2">
+              <div className="flex gap-6 justify-between items-center">
+                <label className="block font-semibold mb-2">Danh mục: *</label>
+                <p
+                  className="px-4 py-2
+              flex items-center gap-2
+            border border-gray-500 rounded-lg 
+            text-sm font-normal text-black whitespace-pre-line
+            mb-2"
+                >
+                  <Layers className="h-5 w-5 text-gray-700" />
+                  {product.category.name}
+                </p>
+              </div>
             </div>
 
             {/* Giới tính */}
-            <div className="flex gap-2 items-center">
-              <label className="block font-semibold mb-2">Giới tính: *</label>
-              <p
-                className="px-4 py-2
+            <div className="mb-2">
+              <div className="flex gap-6 justify-between items-center">
+                <label className="block font-semibold mb-2">Giới tính: *</label>
+                <p
+                  className="px-4 py-2 
             border border-gray-500 rounded-lg 
               flex gap-2 items-center
               text-sm font-normal text-black whitespace-pre-line
             mb-2"
-              >
-                <User2
-                  className={`h-5 w-5
+                >
+                  <User2
+                    className={`h-5 w-5
                 ${
                   product.gender === 'Men'
                     ? 'text-blue-500'
@@ -208,44 +230,42 @@ const ProductDetailPage = () => {
                       ? 'text-pink-500'
                       : 'text-purple-500'
                 }`}
-                />
-                {product.gender}
-              </p>
+                  />
+                  {product.gender}
+                </p>
+              </div>
             </div>
 
             {/* Bộ sưu tập */}
-            <div>
-              <div className="flex gap-2 items-center">
+            <div className="mb-2">
+              <div className="flex gap-6 justify-between items-center">
                 <label className="block font-semibold mb-2">Bộ sưu tập: </label>
                 <p
-                  className="px-4 py-2
+                  className="px-4 py-2 min-w-1/2
                 flex items-center gap-2
             border border-gray-500 rounded-lg 
             text-sm font-normal text-black whitespace-pre-line
             mb-2"
                 >
                   <Package className="h-5 w-5 text-amber-500" />
-                  {product.productCollection || 'Không có'}
+                  {product?.productCollection?.name || 'Không có'}
                 </p>
               </div>
             </div>
           </div>
-
-          {/* Màu sắc */}
-          <div>
-            <div className="flex items-center gap-4">
-              <label className="block font-semibold">Biến thể màu sắc: </label>
-              <p
-                className="px-4 py-2
+          {/* màu sắc mobile */}
+          <div className="flex sm:hidden items-center justify-between mb-2">
+            <label className="block font-semibold">Biến thể màu sắc: </label>
+            <p
+              className="px-4 py-2
               flex items-center gap-2
             border border-gray-500 rounded-lg 
             text-sm font-normal text-black whitespace-pre-line
             mb-2"
-              >
-                {product.variants.length}/6
-                <Palette className="h-5 w-5 text-pink-400" />
-              </p>
-            </div>
+            >
+              {product.variants.length}/6
+              <Palette className="h-5 w-5 text-pink-400" />
+            </p>
           </div>
         </div>
         {/* Các biến thể màu sắc được thêm vào */}

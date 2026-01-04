@@ -153,24 +153,13 @@ const CartContents = () => {
             />
           </div>
           <div className="flex-1 flex flex-col justify-between h-23">
-            <h3>{product.name}</h3>
+            <h3 className="truncate max-w-[100px] sm:max-w-[200px] md:max-w-40 lg:max-w-[250px]">
+              {product.name}
+            </h3>
             <p className="text-sm text-gray-500">
               {product.size} | {product.color}
             </p>
             <div className="flex items-center">
-              {/* <button
-                className="border rounded h-6 w-6 leading-[22px] text-xl font-medium
-              cursor-pointer hover:border-primary-400 hover:text-primary-400"
-              >
-                -
-              </button>
-              <span className="mx-4">{product.quantity}</span>
-              <button
-                className="border rounded h-6 w-6 leading-[22px] text-xl font-medium
-              cursor-pointer hover:border-primary-400 hover:text-primary-400"
-              >
-                +
-              </button> */}
               <QuantitySelector
                 className="mb-0"
                 size="small"

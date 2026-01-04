@@ -6,20 +6,13 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import multer from "multer";
-
 import { connectDB } from "./config/db.js";
-
-import userRoutes from "./routes/userRoutes.js";
-import categoryRoutes from "./routes/categoryRoutes.js";
-import collectionRoutes from "./routes/collectionRoutes.js";
-import productRoutes from "./routes/productRoutes.js";
-import cartRoutes from "./routes/cartRoutes.js";
-import orderRoutes from "./routes/orderRoutes.js";
-import paymentRoutes from "./routes/paymentRoutes.js";
-import uploadRoutes from "./routes/uploadRoutes.js";
-import adminProductRoutes from "./routes/admin/adminProductRoutes.js";
-
-import { startCancelExpiredOrdersCron } from "./cron/cancelExpiredOrders.js";
+import {
+  startCancelExpiredOrdersCron,
+  deliveredCron,
+  completedOrderCron,
+} from "./cron/ordersCron.js";
+import routes from "./routes/index.js";
 
 const app = express();
 
@@ -41,10 +34,10 @@ const PORT = process.env.PORT || 9000;
 //Connect to MongoDB
 connectDB().then(() => {
   startCancelExpiredOrdersCron();
+  deliveredCron();
+  completedOrderCron();
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "OK" : "MISSING");
   });
 });
 
@@ -53,17 +46,7 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-// - public
-app.use("/api/users", userRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/collections", collectionRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/payments", paymentRoutes);
-// - admin
-app.use("/api/admin/products", adminProductRoutes);
-app.use("/api/upload", uploadRoutes);
+app.use("/api", routes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

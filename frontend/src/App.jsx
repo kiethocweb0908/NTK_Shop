@@ -33,6 +33,16 @@ import { fetchCategories } from './redux/slices/categorySlice';
 import ProductDetailPage from './pages/admin/product/ProductDetailPage';
 import Otp from './pages/shop/Otp';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import OrderDetailsAdmin from './pages/admin/order/OrderDetailsAdmin';
+import { fetchCollections } from './redux/slices/collectionSlice';
+import ForgotPassword from './pages/shop/ForgotPassword';
+import ResetPassword from './pages/shop/ResetPassword';
+import CategoryManagement from './pages/admin/category/CategoryManagement';
+import CollectionManagement from './pages/admin/collection/CollectionManagement';
+import AddCollectionPage from './pages/admin/collection/AddCollectionPage';
+import AddCategoryPage from './pages/admin/category/AddCategoryPage';
+import EditCollectionPage from './pages/admin/collection/EditCollectionPage';
+import EditCategoryPage from './pages/admin/category/EditCategoryPage';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -49,7 +59,7 @@ function AppContent() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Toaster position="top-right" closeButton richColors />
+      <Toaster duration={2000} position="top-right" closeButton richColors />
 
       <Routes>
         {/* User Routes */}
@@ -72,7 +82,7 @@ function UserRoutesWithStore() {
         clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
         currency: 'USD',
         intent: 'capture',
-        // components: 'buttons',
+        components: 'buttons',
       }}
     >
       <Provider store={store}>
@@ -98,6 +108,8 @@ function UserRoutes() {
   // 1. Kiểm tra login khi vào trang (chạy 1 lần)
   useEffect(() => {
     dispatch(fetchCurrentUser());
+    dispatch(fetchCategories());
+    dispatch(fetchCollections());
   }, [dispatch]);
 
   // 2. Mỗi khi user thay đổi → tự động cập nhật giỏ hàng
@@ -108,9 +120,6 @@ function UserRoutes() {
     <Routes>
       <Route path="/" element={<UserLayout />}>
         <Route index element={<Home />} />
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="otp" element={<Otp />} />
         <Route path="profile" element={<Profile />} />
         <Route path="shop" element={<CollectionPage />} />
         <Route path="product/:id" element={<ProductDetails />} />
@@ -118,6 +127,12 @@ function UserRoutes() {
         <Route path="order-confirmation" element={<OrderConfirmation />} />
         <Route path="order/:id" element={<OrderDetailsPage />} />
         <Route path="my-orders" element={<MyOrdersPage />} />
+
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+        <Route path="otp" element={<Otp />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password" element={<ResetPassword />} />
       </Route>
       <Route path="checkout" element={<Checkout />} />
     </Routes>
@@ -126,23 +141,20 @@ function UserRoutes() {
 
 // Admin
 function AdminRoutes() {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(fetchCategories())
-      .unwrap()
-      .then((result) => {
-        toast.success(result.message, { duration: 3000 });
-      })
-      .catch((error) => {
-        toast.error(error?.message || 'Lỗi khi lấy danh mục', { duration: 3000 });
-      });
-  }, [dispatch]);
-
   return (
     <Routes>
       <Route path="/" element={<AdminLayout />}>
         <Route index element={<AdminHomePage />} />
+        {/* Category */}
+        <Route path="categories" element={<CategoryManagement />} />
+        <Route path="categories/add" element={<AddCategoryPage />} />
+        <Route path="categories/:categoryId/edit" element={<EditCategoryPage />} />
+
+        {/* collection */}
+        <Route path="collections" element={<CollectionManagement />} />
+        <Route path="collections/add" element={<AddCollectionPage />} />
+        <Route path="collections/:collectionId/edit" element={<EditCollectionPage />} />
+
         {/* Product */}
         <Route path="products" element={<ProductManagement />} />
         <Route path="products/:productId" element={<ProductDetailPage />} />
@@ -154,6 +166,7 @@ function AdminRoutes() {
 
         {/* Order */}
         <Route path="orders" element={<OrderManagement />} />
+        <Route path="orders/:orderId" element={<OrderDetailsAdmin />} />
       </Route>
     </Routes>
   );

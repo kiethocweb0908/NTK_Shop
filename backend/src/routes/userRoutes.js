@@ -6,6 +6,9 @@ import {
   requestRegisterOTP,
   verifyRegisterOTP,
   resendRegisterOTP,
+  changeInfoUser,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/userController.js";
 
 import { protect } from "../middlewares/authMiddleware.js";
@@ -22,6 +25,13 @@ router.post("/request-otp", requestRegisterOTP);
 router.post("/verify-otp", verifyRegisterOTP);
 // gửi lại OTP
 router.post("/resend-otp", resendRegisterOTP);
+// đổi thông tin
+router.patch("/:email/change-infomation", protect, changeInfoUser);
+
+// quên mật khẩu
+router.post(`/forgot-password`, forgotPassword);
+// đặt lại mật khẩu
+router.post(`/reset-password`, resetPassword);
 
 // module.exports = router;
 export default router;

@@ -17,25 +17,30 @@ import {
   addProductVariants,
   removeProductVariants,
 } from "../../controllers/admin/adminProductController.js";
-import { admin, protect } from "../../middlewares/authMiddleware.js";
+import { authorize, protect } from "../../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 // Get
-router.get("/", protect, admin, getAdminProducts);
-router.get("/:productId", protect, admin, getProductDetails);
+router.get("/", protect, authorize("admin", "viewer"), getAdminProducts);
+router.get(
+  "/:productId",
+  protect,
+  authorize("admin", "viewer"),
+  getProductDetails
+);
 
 // Create
-router.post("/", protect, admin, createProduct);
+router.post("/", protect, authorize("admin"), createProduct);
 
 // Delete
-router.delete("/:productId", protect, admin, deleteProduct);
+router.delete("/:productId", protect, authorize("admin"), deleteProduct);
 
 // Cập nhật trường cơ bản
 router.patch(
   "/:productId/updateBasicFields",
   protect,
-  admin,
+  authorize("admin"),
   updateBasicFieldsProduct
 );
 
@@ -43,7 +48,7 @@ router.patch(
 router.patch(
   "/:productId/variants/:variantId/countInStock",
   protect,
-  admin,
+  authorize("admin"),
   updateCountInStockProduct
 );
 
@@ -51,7 +56,7 @@ router.patch(
 router.patch(
   "/:productId/variants/:variantId/addSizes",
   protect,
-  admin,
+  authorize("admin"),
   addSizesVariant
 );
 
@@ -59,7 +64,7 @@ router.patch(
 router.patch(
   "/:productId/variants/:variantId/deleteSizes",
   protect,
-  admin,
+  authorize("admin"),
   deleteSizesVariant
 );
 
@@ -67,7 +72,7 @@ router.patch(
 router.patch(
   "/:productId/variants/:variantId/updateColor",
   protect,
-  admin,
+  authorize("admin"),
   updateColoVariants
 );
 
@@ -75,7 +80,7 @@ router.patch(
 router.patch(
   "/:productId/variants/:variantId/addImages",
   protect,
-  admin,
+  authorize("admin"),
   addImagesVariant
 );
 
@@ -83,18 +88,38 @@ router.patch(
 router.patch(
   "/:productId/variants/:variantId/removeImages",
   protect,
-  admin,
+  authorize("admin"),
   removeImagesVariant
 );
 
 // thêm biến thể
-router.post("/:productId/variants", protect, admin, addProductVariants);
+router.post(
+  "/:productId/variants",
+  protect,
+  authorize("admin"),
+  addProductVariants
+);
 
 // xoá biến thể
-router.delete("/:productId/variants", protect, admin, removeProductVariants);
+router.delete(
+  "/:productId/variants",
+  protect,
+  authorize("admin"),
+  removeProductVariants
+);
 
 // Thay đổi trạng thái hiện/ẩn
-router.patch("/isPublished", protect, admin, toggleProductPublished);
-router.patch("/:id/isFeatured", protect, admin, toggleProductFeatured);
+router.patch(
+  "/isPublished",
+  protect,
+  authorize("admin"),
+  toggleProductPublished
+);
+router.patch(
+  "/:id/isFeatured",
+  protect,
+  authorize("admin"),
+  toggleProductFeatured
+);
 
 export default router;

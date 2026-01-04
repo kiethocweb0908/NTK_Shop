@@ -46,10 +46,10 @@ const MyOrdersPage = () => {
       )
         .unwrap()
         .then((result) => {
-          toast.success(result.message || 'Lấy đơn hàng ...');
+          // toast.success(result.message || 'Lấy đơn hàng ...');
         })
         .catch((error) => {
-          toast.error(error?.message || error);
+          toast.error(error);
         });
     }
   }, [dispatch, user, page]);
@@ -206,12 +206,14 @@ const MyOrdersPage = () => {
                       ${order.status === 'confirmed' && 'text-blue-600/80'}
                       ${order.status === 'shipping' && 'text-purple-600/80'}
                       ${order.status === 'delivered' && 'text-green-600/80'}
+                      ${order.status === 'completed' && 'text-green-600/80'}
                       ${order.status === 'cancelled' && 'text-red-600/80'}`}
                     >
                       {order.status === 'processing' && 'Chờ xác nhận'}
                       {order.status === 'confirmed' && 'Đã xác nhận'}
                       {order.status === 'shipping' && 'Đang vận chuyển'}
                       {order.status === 'delivered' && 'Đã giao'}
+                      {order.status === 'completed' && 'Hoàn thành'}
                       {order.status === 'cancelled' && 'Đã huỷ'}
                     </Badge>
                   </td>

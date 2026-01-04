@@ -258,9 +258,26 @@ export const toggleProductPublished = async (_id) => {
   // tìm và kiểm tra product
   const product = await findProductById(_id);
 
-  const oldStatus = product.isPublished;
-  product.isPublished = !product.isPublished;
-  if (product.isFeatured && oldStatus === true) product.isFeatured = false;
+  await product.populate("category", "isActive");
+
+  if (product.productCollection) {
+    await product.populate("productCollection", "isActive");
+  }
+
+  if (!product.isPublished) {
+    if (!product.category.isActive) {
+      throw new Error("Lỗi! Danh mục của sản phẩm này đang bị ẩn");
+    }
+
+    if (product.productCollection && !product.productCollection.isActive)
+      throw new Error("Lỗi! Bộ sưu tập của sản phẩm này đang bị ẩn");
+
+    product.isPublished = !product.isPublished;
+  } else {
+    if (product.isFeatured) product.isFeatured = false;
+
+    product.isPublished = !product.isPublished;
+  }
 
   await productRepository.productValidate(product);
   const updatedProduct = await productRepository.productSave(product);
@@ -339,10 +356,10 @@ export const updateBasicFields = async (productId, data) => {
     if (!categoryExists) throw new Error("Loại sản phẩm không tồn tại!");
   }
 
-  if (data?.productCollection) {
-    const collectionExists = await Collection.findById(data.productCollection);
-    if (!collectionExists) throw new Error("Bộ sưu tập không tồn tại!");
-  }
+  // if (data?.productCollection) {
+  //   const collectionExists = await Collection.findById(data.productCollection);
+  //   if (!collectionExists) throw new Error("Bộ sưu tập không tồn tại!");
+  // }
 
   const oldName = product.name;
   if (data?.name) product.name = data.name || product.name;
@@ -365,8 +382,30 @@ export const updateBasicFields = async (productId, data) => {
 
   if (data?.category) product.category = data.category || product.category;
   if (data?.gender) product.gender = data.gender || product.gender;
-  if (data?.productCollection)
-    product.productCollection = data.productCollection;
+  // if (data?.productCollection)
+  //   product.productCollection = data.productCollection;
+
+  if (Object.prototype.hasOwnProperty.call(data, "productCollection")) {
+    if (data.productCollection === null) {
+      // Gỡ sản phẩm khỏi bộ sưu tập
+      await Product.updateOne(
+        { _id: productId },
+        { $unset: { productCollection: "" } }
+      );
+
+      delete product.productCollection;
+    } else {
+      // Kiểm tra collection tồn tại
+      const collectionExists = await Collection.findById(
+        data.productCollection
+      );
+      if (!collectionExists) {
+        throw new Error("Bộ sưu tập không tồn tại!");
+      }
+
+      product.productCollection = data.productCollection;
+    }
+  }
 
   if (data?.name && data.name !== oldName) {
     product.slug = generateSlug(data.name);

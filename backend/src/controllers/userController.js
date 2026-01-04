@@ -170,3 +170,62 @@ export const logoutUser = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+// change information
+export const changeInfoUser = async (req, res) => {
+  try {
+    const { name, email, phone, address } = req.body;
+    const user = req.user;
+
+    const updatedUser = await userService.changeInformation(
+      name,
+      email,
+      phone,
+      address,
+      user
+    );
+
+    res.json({
+      message: "Thay đổi thông tin thành công!",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Lỗi khi gọi changeInfoUser:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
+  }
+};
+
+// forgot password
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    await userService.forgotPass(email);
+
+    res.json({
+      message: `Đã gửi đặt lại mật khẩu đến ${email}`,
+    });
+  } catch (error) {
+    console.error("Lỗi khi gọi forgotPassword:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
+  }
+};
+
+// reset password
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    await userService.resetPass(token, password);
+
+    res.json({
+      message: "Đặt lại mật khẩu thành công!",
+    });
+  } catch (error) {
+    console.error("Lỗi khi gọi resetPassword:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
+  }
+};

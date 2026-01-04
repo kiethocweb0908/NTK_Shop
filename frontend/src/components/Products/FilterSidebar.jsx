@@ -12,10 +12,9 @@ const FilterSidebar = () => {
   const { categories, loading: categoriesLoading } = useSelector(
     (state) => state.categories
   );
+  const { collections } = useSelector((state) => state.collections);
+
   const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchCategories());
-  }, [dispatch]);
 
   // url bộ lọc
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,16 +23,16 @@ const FilterSidebar = () => {
   // Bộ lọc
   const [filters, setFilters] = useState({
     category: [],
+    collection: [],
     gender: [],
     color: '',
     size: [],
-    material: [],
     minPrice: 0,
-    maxPrice: 1000000,
+    maxPrice: 2000000,
   });
 
   // Giá trị slider (đơn vị: VND)
-  const [priceRange, setPriceRange] = useState([0, 1000000]);
+  const [priceRange, setPriceRange] = useState([0, 2000000]);
   const [isSliding, setIsSliding] = useState(false);
   // giá
 
@@ -41,14 +40,14 @@ const FilterSidebar = () => {
     const params = Object.fromEntries([...searchParams]);
 
     const minPrice = params.minPrice ? parseInt(params.minPrice) : 0;
-    const maxPrice = params.maxPrice ? parseInt(params.maxPrice) : 1000000;
+    const maxPrice = params.maxPrice ? parseInt(params.maxPrice) : 2000000;
 
     setFilters({
       category: params.category ? params.category.split(',') : [],
+      collection: params.collection ? params.collection.split(',') : [],
       gender: params.gender ? params.gender.split(',') : [],
       color: params.color || '',
       size: params.size ? params.size.split(',') : [],
-      // material: params.material ? params.material.split(',') : [],
       minPrice,
       maxPrice,
     });
@@ -113,7 +112,7 @@ const FilterSidebar = () => {
         const isEmpty =
           (Array.isArray(value) && value.length === 0) || // [] → empty
           (typeof value === 'string' && value === '') || // "" → empty
-          (typeof value === 'number' && (value === 0 || value === 1000000)); // 0 → empty
+          (typeof value === 'number' && (value === 0 || value === 2000000)); // 0 → empty
 
         if (!isEmpty) {
           if (Array.isArray(value)) {
@@ -123,15 +122,6 @@ const FilterSidebar = () => {
             params.set(key, value.toString());
           }
         }
-
-        // if (Array.isArray(newFilters[key]) && value.length > 0) {
-        //   // chuyển arr thành string phân cách bằng ,
-        //   params.set(key, value.join(','));
-        // } else if (value && value !== '' && value !== 0) {
-        //   params.set(key, value.toString());
-        // } else {
-        //   params.delete(key);
-        // }
       });
 
       setSearchParams(params);
@@ -181,12 +171,14 @@ const FilterSidebar = () => {
   };
 
   return (
-    <div className="py-18 px-10 lg:px-0 lg:py-2 lg:pr-6">
-      <h3 className="text-xl font-medium text-gray-800 mb-6">Bộ lọc</h3>
+    <div className="py-18 px-10 lg:px-0 lg:py-0">
+      <h3 className="text-xl font-semibold text-black mb-2 text-shadow-lg">Bộ lọc</h3>
       {/* gender filter */}
-      <div className="mb-6">
-        <label className="block text-gray-600 font-medium mb-2">Giới tính</label>
-        <div className="flex gap-4">
+      <div className="mb-2">
+        <label className="block text-black mb-1 font-semibold text-shadow-lg">
+          Giới tính
+        </label>
+        <div className="flex justify-between">
           {genders.map((gender) => (
             <div key={gender.value} className="flex items-center mb-1">
               <input
@@ -197,41 +189,79 @@ const FilterSidebar = () => {
                 checked={filters.gender.includes(gender.value)}
                 className="mr-2 h-4 text-blue-500 focus:ring-blue-400 border-gray-300"
               />
-              <span className="text-gray-700">{gender.name}</span>
+              <span className="text-gray-700 font-semibold text-shadow-lg">
+                {gender.name}
+              </span>
             </div>
           ))}
         </div>
       </div>
       {/* catogory filter */}
-      <div className="mb-6">
-        <label className="block text-gray-600 font-medium mb-2">Danh mục</label>
+      <div className="mb-2">
+        <label className="block text-black font-semibold text-shadow-lg mb-1">
+          Danh mục
+        </label>
         {categoriesLoading ? (
           <p>Đang tải danh mục...</p>
         ) : categories && categories.length > 0 ? (
-          categories.map((category) => (
-            <div key={category._id} className="flex items-center mb-1">
-              <input
-                type="checkbox"
-                name="category"
-                value={category._id}
-                onChange={handleFilterChange}
-                checked={filters.category.includes(category._id)}
-                className="mr-2 h-4 text-blue-500 focus:ring-blue-400 border-gray-300"
-              />
-              <span className="text-gray-700">{category.name}</span>
-            </div>
-          ))
+          <div className="grid grid-cols-2 lg:max-h-17 overflow-y-auto">
+            {categories.map((category) => (
+              <div key={category._id} className="flex items-center mb-1">
+                <input
+                  type="checkbox"
+                  name="category"
+                  value={category._id}
+                  onChange={handleFilterChange}
+                  checked={filters.category.includes(category._id)}
+                  className="mr-2 h-4 text-blue-500 focus:ring-blue-400 border-gray-300"
+                />
+                <span className="text-gray-700 font-semibold text-shadow-lg">
+                  {category.name}
+                </span>
+              </div>
+            ))}
+          </div>
         ) : (
-          <p className="text-gray-500">Không có danh mục nào</p>
+          <p className="text-gray-500 text-center">Không có danh mục nào</p>
+        )}
+      </div>
+
+      {/* collections filter */}
+      <div className="mb-2">
+        <label className="block text-black font-semibold text-shadow-lg mb-1">
+          Bộ sưu tập
+        </label>
+        {collections && collections.length > 0 ? (
+          <div className="lg:max-h-17 overflow-y-auto">
+            {collections.map((collection) => (
+              <div key={collection._id} className="flex items-center mb-1 ">
+                <input
+                  type="checkbox"
+                  name="collection"
+                  value={collection._id}
+                  onChange={handleFilterChange}
+                  checked={filters.collection.includes(collection._id)}
+                  className="mr-2 h-4 text-blue-500 focus:ring-blue-400 border-gray-300"
+                />
+                <span className="text-gray-700 font-semibold text-shadow-lg">
+                  {collection.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center">Không có bộ sưu tập</p>
         )}
       </div>
 
       {/* size filter */}
-      <div className="mb-6">
-        <label className="block text-gray-600 font-medium mb-2">Kích thước</label>
+      <div className="mb-2">
+        <label className="block text-black font-semibold text-shadow-lg mb-1">
+          Kích thước
+        </label>
         <div className="flex justify-between">
-          {sizes.map((size) => (
-            <div key={size} className="flex items-center mb-1">
+          {sizes.map((size, index) => (
+            <div key={size} className="flex items-center">
               <input
                 type="checkbox"
                 name="size"
@@ -240,15 +270,17 @@ const FilterSidebar = () => {
                 checked={filters.size.includes(size)}
                 className="mr-2 h-4 text-blue-500 focus:ring-blue-400 border-gray-300"
               />
-              <span className="text-gray-700">{size}</span>
+              <span className="text-gray-700 font-semibold text-shadow-lg">{size}</span>
             </div>
           ))}
         </div>
       </div>
       {/* colors filter */}
-      <div className="mb-6">
-        <label className="block text-gray-600 font-medium mb-2">Màu sắc</label>
-        <div className="flex flex-wrap gap-4 pl-0.5">
+      <div className="mb-2">
+        <label className="block text-black font-semibold text-shadow-lg mb-1">
+          Màu sắc
+        </label>
+        <div className="flex flex-wrap justify-between gap-3">
           {colors.map((color) => {
             const isSelected = filters.color
               ? filters.color.split(',').includes(color.colorHex)
@@ -261,7 +293,7 @@ const FilterSidebar = () => {
                 className={`w-6 h-6 border border-gray-300 
                   
                   hover:scale-105 cursor-pointer 
-                  transition rounded-full
+                  transition rounded-full shadow-lg
                   ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
                 style={{ backgroundColor: color.colorHex.toLowerCase() }}
                 title={color.colorName}
@@ -271,47 +303,31 @@ const FilterSidebar = () => {
         </div>
       </div>
 
-      {/* Material filter */}
-      {/* <div className="mb-6">
-        <label className="block text-gray-600 font-medium mb-2">Material</label>
-        {materials.map((material) => (
-          <div key={material} className="flex items-center mb-1">
-            <input
-              type="checkbox"
-              name="material"
-              value={material}
-              onChange={handleFilterChange}
-              checked={filters.material.includes(material)}
-              className="mr-2 h-4 text-blue-500 focus:ring-blue-400 border-gray-300"
-            />
-            <span className="text-gray-700">{material}</span>
-          </div>
-        ))}
-      </div> */}
-
       {/* Price filter với Shadcn Slider */}
-      <div className="mb-6">
-        <label className="block text-gray-600 font-medium mb-4">Khoảng giá</label>
+      <div className="mb-2">
+        <label className="block text-black font-semibold text-shadow-lg mb-4">
+          Khoảng giá
+        </label>
 
         <div className="space-y-4">
           {/* Slider */}
           <Slider
             value={priceRange}
             min={0}
-            max={1000000}
-            step={50000}
+            max={2000000}
+            step={100000}
             onValueChange={handlePriceChange}
             onValueCommit={handlePriceChangeEnd}
             className="w-full"
           />
 
           {/* Hiển thị giá trị */}
-          <div className="flex justify-between items-center pt-2">
-            <div className="text-sm font-medium text-gray-700">
+          <div className="flex justify-between items-center pt-1">
+            <div className="text-sm font-semibold text-shadow-lg text-gray-700">
               {formatCurrency(priceRange[0])}
             </div>
-            <div className="text-sm text-gray-500">đến</div>
-            <div className="text-sm font-medium text-gray-700">
+            <div className="text-sm text-gray-500 text-shadow-lg">đến</div>
+            <div className="text-sm font-semibold text-shadow-lg text-gray-700">
               {formatCurrency(priceRange[1])}
             </div>
           </div>

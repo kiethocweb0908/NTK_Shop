@@ -46,6 +46,32 @@ export const fetchOrderById = createAsyncThunk(
   }
 );
 
+// Async thunk to cancel order
+export const cancelOrderThunk = createAsyncThunk(
+  'orders/cancelOrderThunk',
+  async ({ orderId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(`/api/orders/${orderId}/cancel`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data?.message || 'Lỗi cancelOrderThunk');
+    }
+  }
+);
+
+// Async thunk to delivered order
+export const completedOrderThunk = createAsyncThunk(
+  'orders/completedOrderThunk',
+  async ({ orderId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(`/api/orders/${orderId}/completed`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data?.message || 'Lỗi deliveredOrderThunk');
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: 'orders',
   initialState: {
@@ -65,7 +91,7 @@ const orderSlice = createSlice({
       state.pagination = { ...state.pagination, ...action.payload.pagination };
     },
     clearOrders: (state) => {
-      state.orders = null;
+      state.orders = [];
     },
     clearSelectedOrder: (state) => {
       state.selectedOrder = null;
@@ -80,6 +106,10 @@ const orderSlice = createSlice({
       })
       .addCase(placeOrderThunk.fulfilled, (state, action) => {
         state.loading = false;
+        if (!Array.isArray(state.orders)) {
+          state.orders = [];
+        }
+
         state.orders.push(action.payload.createdOrder);
         state.selectedOrder = action.payload.createdOrder;
         state.error = null;
@@ -122,6 +152,41 @@ const orderSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchOrderById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      //==========cancelOrderThunk==========
+      .addCase(cancelOrderThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(cancelOrderThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedOrder = action.payload.CancelleddOrder;
+        const orderIndex = state.orders.findIndex(
+          (order) => order._id === action.payload.CancelleddOrder._id
+        );
+        if (orderIndex > -1) state.orders[orderIndex] = action.payload.CancelleddOrder;
+      })
+      .addCase(cancelOrderThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      //==========completedOrderThunk==========
+      .addCase(completedOrderThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(completedOrderThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedOrder = action.payload.order;
+        const orderIndex = state.orders.findIndex(
+          (order) => order._id === action.payload.order._id
+        );
+        if (orderIndex > -1) state.orders[orderIndex] = action.payload.order;
+      })
+      .addCase(completedOrderThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

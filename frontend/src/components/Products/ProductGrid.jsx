@@ -13,10 +13,10 @@ const ProductGrid = React.memo(({ products, loading, error }) => {
   return (
     <>
       {products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-12">
-          {products.map((product) => (
-            <Link key={product._id} to={`/product/${product._id}`} className="block">
-              <div className="bg-white relative group ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pt-6">
+          {products.map((product, index) => (
+            <Link key={index} to={`/product/${product._id}`} className="block">
+              <div className="bg-white relative group rounded-2xl">
                 <div
                   className="w-full h-96 mb-4 overflow-hidden rounded-lg 
                 group-hover:rounded-2xl 

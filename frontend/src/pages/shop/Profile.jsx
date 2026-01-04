@@ -16,24 +16,9 @@ const Profile = () => {
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
 
-  // if (!user) {
-  //   return navigate('/login');
-  // }
-
-  const handleLogout = async () => {
-    // e.preventDefault();
-
-    if (!user) return toast.error('Không thể đăng xuất khi chưa đăng nhập');
-
-    try {
-      await dispatch(clearOrders());
-      const result = await dispatch(logoutUser()).unwrap();
-      toast.success(result?.message || result || 'aaaa', { duration: 2000 });
-      navigate('/', { replace: true });
-    } catch (error) {
-      toast.error(error?.message || error || 'Lỗi khi đăng xuất', { duration: 2000 });
-    }
-  };
+  if (!user) {
+    return navigate('/login');
+  }
 
   return (
     <div className="min-h-screen w-full relative">
@@ -45,7 +30,7 @@ const Profile = () => {
         }}
       />
       {/* Your Content/Components */}
-      <div className="relative z-10 min-h-screen flex flex-col py-11 px-4">
+      <div className="relative z-10 min-h-screen flex flex-col pb-11 pt-41 px-4">
         <div className="grow container mx-auto">
           <div className="flex flex-col lg:flex-row gap-4 md:space-y-0">
             <button
@@ -67,9 +52,6 @@ const Profile = () => {
             shadow-md rounded-lg p-6 border border-white/50 bg-white/5 backdrop-blur-md"
             >
               <MyInfo />
-              <Button variant="primary" size="full" onClick={handleLogout}>
-                Đăng xuất
-              </Button>
             </div>
             {/* Right */}
             <div className="w-full  lg:min-w-[732px]">

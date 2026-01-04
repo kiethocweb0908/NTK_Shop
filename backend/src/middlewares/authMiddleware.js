@@ -29,7 +29,13 @@ export const protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Get user from token
-    req.user = await User.findById(decoded.user.id).select("-password");
+    const user = await User.findById(decoded.user.id).select("-password");
+
+    if (!user) {
+      return res.status(401).json({ message: "User không tồn tại" });
+    }
+
+    req.user = user;
 
     next();
   } catch (error) {
@@ -46,14 +52,18 @@ export const protect = async (req, res, next) => {
   }
 };
 
-export const admin = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
-    next(); // Cho phép đi tiếp
-  } else {
-    res.status(403).json({
-      message: "Truy cập bị từ chối. Yêu cầu quyền admin.",
-    });
-  }
+export const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Chưa đăng nhập" });
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Không đủ quyền truy cập" });
+    }
+
+    next();
+  };
 };
 
 export const optionalAuth = async (req, res, next) => {

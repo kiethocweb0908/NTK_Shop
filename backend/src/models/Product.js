@@ -102,7 +102,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      required: true,
+      required: false,
     },
     variants: {
       type: [colorVariantSchema],
@@ -141,40 +141,45 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    rating: {
+    quantitySold: {
       type: Number,
       default: 0,
       min: 0,
-      max: 5,
     },
-    numReviews: {
-      type: Number,
-      default: 0,
-    },
-    tags: {
-      type: [String],
-      default: [],
-    },
+    // rating: {
+    //   type: Number,
+    //   default: 0,
+    //   min: 0,
+    //   max: 5,
+    // },
+    // numReviews: {
+    //   type: Number,
+    //   default: 0,
+    // },
+    // tags: {
+    //   type: [String],
+    //   default: [],
+    // },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    metaTitle: {
-      type: String,
-    },
-    metaDescription: {
-      type: String,
-    },
-    metaKeywords: {
-      type: String,
-    },
-    dimensions: {
-      length: Number,
-      width: Number,
-      height: Number,
-    },
-    weight: Number,
+    // metaTitle: {
+    //   type: String,
+    // },
+    // metaDescription: {
+    //   type: String,
+    // },
+    // metaKeywords: {
+    //   type: String,
+    // },
+    // dimensions: {
+    //   length: Number,
+    //   width: Number,
+    //   height: Number,
+    // },
+    // weight: Number,
   },
   { timestamps: true }
 );

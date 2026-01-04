@@ -31,7 +31,7 @@ const SortOptions = () => {
     setSearchParams(params);
   };
   return (
-    <div className="mb-4 flex items-center justify-end">
+    <div className="flex items-center justify-end">
       {/* <select
         id="sort"
         onChange={handleSortChange}
@@ -48,11 +48,11 @@ const SortOptions = () => {
         value={searchParams.get('sortBy') || 'newest'}
         onValueChange={handleSortChange}
       >
-        <SelectTrigger className="w-40 py-4">
+        <SelectTrigger className="w-40 py-4 border-gray-300 text-shadow-lg font-semibold shadow-lg">
           <ArrowUpDown className="mr-2 h-4 w-4" />
           <SelectValue placeholder="Sắp xếp" />
         </SelectTrigger>
-        <SelectContent className="bg-white w-40">
+        <SelectContent className="bg-white w-40 border-gray-300 text-shadow-lg  shadow-lg">
           {sortPublic.map((s) => (
             <SelectItem key={s.value} className={'hover:bg-gray-100'} value={s.value}>
               {s.name}

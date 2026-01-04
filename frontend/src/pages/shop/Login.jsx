@@ -1,12 +1,9 @@
 import { Button } from '@/components/ui/button';
 import React, { use, useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import login from '@/assets/login.webp';
 import { loginUser } from '@/redux/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import Result_ from 'postcss/lib/result';
 import { toast } from 'sonner';
-import { fetchCart } from '@/redux/slices/cartSlice';
 import { Input } from '@/components/ui/input';
 import { AlertCircle, LockOpen } from 'lucide-react';
 
@@ -87,7 +84,7 @@ const Login = () => {
       ).unwrap();
       toast.success(`Đăng nhập thành công. Chào mừng ${result.user.name}!`);
     } catch (error) {
-      toast.error(error?.message || 'Đăng nhập thất bại');
+      toast.error(error || 'Đăng nhập thất bại');
     }
 
     // Không cần navigate ở đây vì useEffect sẽ xử lý
@@ -105,7 +102,7 @@ const Login = () => {
         }}
       />
       {/* Your Content/Components */}
-      <div className="flex flex-col justify-center items-center py-11">
+      <div className="flex flex-col justify-center items-center pb-11 pt-41 px-3 xl:px-0">
         <div
           className="w-full max-w-lg grid grid-cols-2 
         text-center bg-white/5 
@@ -220,7 +217,7 @@ const Login = () => {
             Đăng nhập
           </Button>
           <p className="mt-6 text-center text-sm">
-            <Link to="/register" className="text-blue-500 text-shadow-sm">
+            <Link to="/forgot-password" className="text-blue-500 text-shadow-sm">
               Quên mật khẩu?
             </Link>
           </p>

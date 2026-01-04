@@ -69,16 +69,17 @@ export const fetchProductBestSeller = createAsyncThunk(
   }
 );
 
-// Async thunk to fetch update product
-export const updateProduct = createAsyncThunk(
-  'products/updateProduct',
-  async ({ id, productData }) => {
-    const response = await axiosInstance.put(`/api/products/${id}`, productData, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('userToken')}`,
-      },
-    });
-    return response.data;
+// Async thunk to fetch featured products
+export const fetchFeaturedProducts = createAsyncThunk(
+  'products/fetchFeaturedProducts',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/api/products/featured-products`);
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi gọi fetchProductBestSeller: ', error);
+      return rejectWithValue(error.response.data);
+    }
   }
 );
 
@@ -88,7 +89,9 @@ const productsSlice = createSlice({
     products: [],
     selectedProduct: null, // Store the details of the single product
     similarProducts: [],
-    loading: false,
+    featuredProducts: [],
+    loadingProducts: false,
+    loadingFeatured: false,
     error: null,
     pagination: {
       totalPages: 1,
@@ -180,23 +183,17 @@ const productsSlice = createSlice({
         state.error = action.error.message;
       })
 
-      // update product
-      .addCase(updateProduct.pending, (state) => {
-        state.loading = true;
+      // featured product
+      .addCase(fetchFeaturedProducts.pending, (state) => {
+        state.loadingFeatured = true;
         state.error = null;
       })
-      .addCase(updateProduct.fulfilled, (state, action) => {
-        state.loading = false;
-        const updatedProduct = action.payload;
-
-        const index = state.products.findIndex((p) => p._id === updatedProduct._id);
-        if (index != -1) state.products[index] = updatedProduct;
-
-        if (state.selectedProduct && state.selectedProduct === updatedProduct._id)
-          state.selectedProduct = updatedProduct;
+      .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
+        state.loadingFeatured = false;
+        state.featuredProducts = action.payload.featuredPrtoducts;
       })
-      .addCase(updateProduct.rejected, (state, action) => {
-        state.loading = false;
+      .addCase(fetchFeaturedProducts.rejected, (state, action) => {
+        state.loadingFeatured = false;
         state.error = action.error.message;
       });
   },

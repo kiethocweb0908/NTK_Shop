@@ -62,6 +62,10 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AlertDialogDemo from '@/components/Common/AlertDialog';
+import { fetchCategories } from '@/redux/slices/categorySlice';
+import { fetchCollections } from '@/redux/slices/collectionSlice';
+import { fetchAllCategoriesAdmin } from '@/redux/admin/slices/adminCategoriesSlice';
+import { fetchAllCollectionsAdmin } from '@/redux/admin/slices/adminCollectionsSlice';
 
 const ProductManagement = () => {
   const navigate = useNavigate();
@@ -70,6 +74,7 @@ const ProductManagement = () => {
     (state) => state.adminProducts
   );
   const { categories } = useSelector((state) => state.categories);
+  const { collections } = useSelector((state) => state.collections);
 
   // Sử dụng useSearchParams
   const [searchParams, setSearchParams] = useSearchParams();
@@ -90,6 +95,7 @@ const ProductManagement = () => {
     return {
       gender: params.gender || 'allGender',
       category: params.category || 'allCategories',
+      productCollection: params.productCollection || 'allCollections',
       status: params.status || 'all',
       sort: params.sort || 'newest',
       search: params.search || '',
@@ -109,6 +115,8 @@ const ProductManagement = () => {
     // Xóa param nếu giá trị mặc định hoặc rỗng
     if (newParams.gender === 'allGender') delete newParams.gender;
     if (newParams.category === 'allCategories' || '') delete newParams.category;
+    if (newParams.productCollection === 'allCollections' || '')
+      delete newParams.productCollection;
     if (newParams.status === 'all') delete newParams.status;
     if (!newParams.search) delete newParams.search;
     if (newParams.sort === 'newest') delete newParams.sort;
@@ -125,6 +133,11 @@ const ProductManagement = () => {
     dispatch(fetchAdminProducts(filterParams));
     dispatch(setAdminFilters(filterParams));
   }, [dispatch, searchParams]);
+
+  useEffect(() => {
+    dispatch(fetchAllCategoriesAdmin({ limit: 50 })).unwrap();
+    dispatch(fetchAllCollectionsAdmin({ limit: 50 })).unwrap();
+  }, [dispatch]);
 
   // Xử lý search với debounce
   const handleSearchChange = (e) => {
@@ -152,10 +165,20 @@ const ProductManagement = () => {
   const handleCategoryChange = (value) => {
     console.log(value);
 
-    if (value === 'allCategories') {
+    if (value === 'all') {
       updateFilterParams({ category: '' });
     } else {
       updateFilterParams({ category: value });
+    }
+  };
+
+  const handleCollectionChange = (value) => {
+    console.log(value);
+
+    if (value === 'all') {
+      updateFilterParams({ productCollection: '' });
+    } else {
+      updateFilterParams({ productCollection: value });
     }
   };
 
@@ -253,11 +276,12 @@ const ProductManagement = () => {
     const toastId = toast.loading('Đang xoá sản phẩm...', { duration: Infinity });
     try {
       const response = await dispatch(deleteProductThunk({ productId })).unwrap();
+
+      toast.dismiss(toastId);
       toast.success(response?.message || 'Xoá thành công!');
     } catch (error) {
-      toast.error(error || 'Lỗi', { id: toastId, duration: 3000 });
-    } finally {
       toast.dismiss(toastId);
+      toast.error(typeof error === 'string' ? error : error?.message || 'Xoá thất bại');
     }
   };
 
@@ -309,6 +333,9 @@ const ProductManagement = () => {
                 >
                   Tất cả danh mục
                 </SelectItem>
+                <SelectItem className={'hover:bg-gray-100'} key="none" value="none">
+                  Chưa phân loại
+                </SelectItem>
                 {categories.map((category, index) => (
                   <SelectItem
                     key={index}
@@ -323,25 +350,31 @@ const ProductManagement = () => {
           </div>
           {/* Bộ sưu tập */}
           <div>
-            <Select value={currentFilters.gender} onValueChange={handleGenderChange}>
+            <Select
+              value={currentFilters.collection}
+              onValueChange={handleCollectionChange}
+            >
               <SelectTrigger className="w-45 py-4">
                 <User2 className="mr-1 h-4 w-4" />
-                <SelectValue placeholder="Lọc theo trạng thái" />
+                <SelectValue placeholder="Lọc bộ sưu tập" />
               </SelectTrigger>
               <SelectContent className="bg-white w-45">
-                <SelectItem className={'hover:bg-gray-100'} key={0} value="allGender">
-                  Tất cả giới tính
+                <SelectItem
+                  className={'hover:bg-gray-100'}
+                  key={0}
+                  value="allCollections"
+                >
+                  Tất cả bộ sưu tập
                 </SelectItem>
-
-                <SelectItem className={'hover:bg-gray-100'} key={1} value="Men">
-                  Nam
-                </SelectItem>
-                <SelectItem className={'hover:bg-gray-100'} key={2} value="Women">
-                  Nữ
-                </SelectItem>
-                <SelectItem className={'hover:bg-gray-100'} key={3} value="Unisex">
-                  Unisex
-                </SelectItem>
+                {collections.map((collection, index) => (
+                  <SelectItem
+                    key={index}
+                    value={collection._id}
+                    className={'hover:bg-gray-100'}
+                  >
+                    {collection.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -369,7 +402,7 @@ const ProductManagement = () => {
             defaultValue={currentFilters.search}
             onChange={handleSearchChange}
             className={
-              'py-4 px-10 w-70 shadow-md rounded-lg border border-gray-300' +
+              'py-4 px-10 w-70 rounded-lg border border-gray-300' +
               'focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500'
             }
           />

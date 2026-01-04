@@ -72,16 +72,16 @@ const orderSchema = new mongoose.Schema(
     },
     name: {
       type: String,
-      required: true,
+      // required: true,
     },
     phone: {
       type: String,
-      required: true,
+      // required: true,
     },
     email: {
       type: String,
       match: [/^\S+@\S+\.\S+$/, "Email không hợp lệ"],
-      required: true,
+      // required: true,
     },
     totalPrice: {
       type: Number,
@@ -113,16 +113,20 @@ const orderSchema = new mongoose.Schema(
     paidAt: {
       type: Date,
     },
-    isDelivered: {
-      type: Boolean,
-      default: false,
-    },
-    deliveredAt: {
-      type: Date,
-    },
+    // isDelivered: {
+    //   type: Boolean,
+    //   default: false,
+    // },
     status: {
       type: String,
-      enum: ["processing", "confirmed", "shipping", "delivered", "cancelled"],
+      enum: [
+        "processing",
+        "confirmed",
+        "shipping",
+        "delivered",
+        "completed",
+        "cancelled",
+      ],
       default: "processing",
     },
     totalItems: {
@@ -139,6 +143,18 @@ const orderSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       index: true, // để query nhanh
+    },
+    shippingAt: {
+      type: Date,
+      index: true,
+    },
+    deliveredAt: {
+      type: Date,
+      index: true,
+    },
+    completedAt: {
+      type: Date,
+      index: true,
     },
   },
   { timestamps: true }
@@ -193,14 +209,14 @@ orderSchema.methods.updateStatus = function (newStatus) {
 
   this.status = newStatus;
 
-  if (newStatus === "delivered") {
-    this.isDelivered = true;
-    this.deliveredAt = new Date();
-  }
+  // if (newStatus === "delivered") {
+  //   this.isDelivered = true;
+  //   this.deliveredAt = new Date();
+  // }
 
-  if (newStatus === "cancelled") {
-    this.paymentStatus = "refunded";
-  }
+  // if (newStatus === "cancelled") {
+  //   this.paymentStatus = "refunded";
+  // }
 
   return this.save();
 };
