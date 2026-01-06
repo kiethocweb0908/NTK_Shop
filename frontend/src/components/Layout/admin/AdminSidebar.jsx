@@ -3,10 +3,14 @@ import { clearOrders } from '@/redux/slices/orderSlice';
 import React from 'react';
 import {
   FaBoxOpen,
+  FaChartBar,
+  FaChartPie,
   FaClipboardList,
   FaList,
   FaSignOutAlt,
   FaStore,
+  FaTachometerAlt,
+  FaTags,
   FaThLarge,
   FaTshirt,
   FaUser,
@@ -34,15 +38,28 @@ const AdminSidebar = () => {
   };
   return (
     <div className="p-6 sticky top-0 bottom-0">
-      <div className="mb-6">
+      <div className="mb-12 flex justify-center">
         <Link to="/admin" className="text-2xl font-bold">
           NTK Shop
         </Link>
       </div>
-      <h2 className="text-xl font-medium mb-6 text-center">
+      {/* <h2 className="text-xl font-medium mb-6 text-center">
         <Link to="/admin">Trang quản trị</Link>
-      </h2>
+      </h2> */}
       <nav className="flex flex-col space-y-2">
+        <NavLink
+          to="/admin?"
+          end
+          className={({ isActive }) =>
+            isActive
+              ? 'bg-gray-700 text-white py-3 px-4 rounded flex items-center space-x-2'
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white py-3 px-4 rounded flex items-center space-x-2'
+          }
+        >
+          <FaChartBar />
+          <span>Tổng quan</span>
+        </NavLink>
+
         {/* categories */}
         <NavLink
           to="/admin/categories"
@@ -52,11 +69,11 @@ const AdminSidebar = () => {
               : 'text-gray-300 hover:bg-gray-700 hover:text-white py-3 px-4 rounded flex items-center space-x-2'
           }
         >
-          <FaList />
+          <FaTags />
           <span>Danh mục</span>
         </NavLink>
 
-        {/* categories */}
+        {/* Collections */}
         <NavLink
           to="/admin/collections"
           className={({ isActive }) =>
@@ -121,7 +138,7 @@ const AdminSidebar = () => {
           <span>Cửa hàng</span>
         </NavLink>
       </nav>
-      <div className="mt-6">
+      <div className="mt-12">
         <button
           onClick={handleLogout}
           className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded flex items-center justify-center space-x-2"

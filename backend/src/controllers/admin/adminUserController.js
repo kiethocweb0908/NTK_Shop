@@ -1,4 +1,5 @@
 import User from "../../models/User.js";
+import * as userService from "../../services/userService.js";
 
 export const getAllUserAdmin = async (req, res) => {
   try {
@@ -71,5 +72,25 @@ export const getAllUserAdmin = async (req, res) => {
   } catch (error) {
     console.error("Lỗi khi gọi getAllUserAdmin: ", error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+// get details
+export const getUserDetailsAdmin = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { user, orders } = await userService.getUserDetails(userId);
+
+    res.json({
+      message: "Lấy thông tin người dùng thành công!",
+      userData: {
+        user,
+        orders,
+      },
+    });
+  } catch (error) {
+    console.error("Lỗi khi gọi getUserDetailsAdmin:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
   }
 };

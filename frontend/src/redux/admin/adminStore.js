@@ -6,13 +6,7 @@ import adminOrdersSlices from './slices/adminOrdersSlice';
 import collectionsSlices from './slices/adminCollectionsSlice.js';
 import adminUserSlices from './slices/adminUserSlice.js';
 const adminStore = configureStore({
-  reducer: {
-    adminProducts: adminProductsSlices,
-    categories: categoriesSlice,
-    collections: collectionsSlices,
-    adminOrders: adminOrdersSlices,
-    adminUsers: adminUserSlices,
-  },
+  reducer: {},
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {

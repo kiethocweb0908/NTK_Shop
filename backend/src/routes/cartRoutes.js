@@ -1,26 +1,18 @@
 import express from "express";
 import { optionalAuth } from "../middlewares/authMiddleware.js";
-import {
-  validateAndGetCart,
-  getCartMiddleware,
-} from "../middlewares/cartMiddleware.js";
+import { resolveCart } from "../middlewares/cartMiddleware.js";
 import {
   getCart,
   addProductToCart,
-  updateQuantityOfProductInCart,
-  removeProductFromCart,
+  updateQuantity,
+  removeItem,
 } from "../controllers/cartController.js";
 const router = express.Router();
 
 // Public
-router.get("/", optionalAuth, getCartMiddleware, getCart);
-router.post("/", optionalAuth, validateAndGetCart, addProductToCart);
-router.patch(
-  "/",
-  optionalAuth,
-  validateAndGetCart,
-  updateQuantityOfProductInCart
-);
-router.delete("/", optionalAuth, validateAndGetCart, removeProductFromCart);
+router.get("/", optionalAuth, resolveCart, getCart);
+router.post("/", optionalAuth, resolveCart, addProductToCart);
+router.patch("/", optionalAuth, resolveCart, updateQuantity);
+router.delete("/", optionalAuth, resolveCart, removeItem);
 
 export default router;

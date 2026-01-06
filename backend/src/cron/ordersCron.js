@@ -89,7 +89,7 @@ export const deliveredCron = () => {
 export const completedOrderCron = () => {
   cron.schedule("*/10 * * * *", async () => {
     try {
-      console.log("Kiểm tra các đơn hàng hoàn thành...");
+      console.log("Kiểm tra các đơn hàng cần hoàn thành...");
       const threeDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
 
       const orders = await Order.find({

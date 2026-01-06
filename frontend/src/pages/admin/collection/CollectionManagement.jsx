@@ -48,7 +48,7 @@ const CollectionManagement = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [debounceTimer, setDebounceTimer] = useState(null);
   const { collections, pagination, loading, error } = useSelector(
-    (state) => state.collections
+    (state) => state.admin.collections
   );
 
   // Lấy filter

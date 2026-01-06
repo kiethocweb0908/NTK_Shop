@@ -65,7 +65,7 @@ const OrderManagement = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { orders, pagination, loading, error } = useSelector(
-    (state) => state.adminOrders
+    (state) => state.admin.adminOrders
   );
   const [debounceTimer, setDebounceTimer] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState({

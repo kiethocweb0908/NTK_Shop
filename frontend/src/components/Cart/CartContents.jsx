@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 const CartContents = () => {
   const dispatch = useDispatch();
-  const { cart, loading, error } = useSelector((state) => state.cart);
+  const { cart, loading, error } = useSelector((state) => state.user.cart);
 
   // API -> cart
   useEffect(() => {
@@ -31,10 +31,10 @@ const CartContents = () => {
       let newQty = item.quantity;
       // minus
       if (type === 'minus') {
-        // if (newQty <= 1) {
-        //   toast.warning('số lượng không thể nhỏ hơn 1!');
-        //   return;
-        // }
+        if (newQty <= 1) {
+          toast.warning('số lượng không thể nhỏ hơn 1!');
+          return;
+        }
         newQty--;
       }
       // plus

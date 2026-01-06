@@ -35,6 +35,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 const UserManagement = () => {
   const dispatch = useDispatch();
@@ -42,7 +43,9 @@ const UserManagement = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const debounceRef = useRef(null);
 
-  const { users, pagination, loading, error } = useSelector((state) => state.adminUsers);
+  const { users, pagination, loading, error } = useSelector(
+    (state) => state.admin.adminUsers
+  );
 
   // Lấy filter
   const getFilterParams = () => {
@@ -117,6 +120,11 @@ const UserManagement = () => {
     return pages;
   };
 
+  //
+  const handleNewAccount = () => {
+    toast.warning('Chức này này đang được phát triển!');
+  };
+
   useEffect(() => {
     const filterParams = getFilterParams();
     dispatch(fetchAllUsersAdmin(filterParams));
@@ -133,7 +141,7 @@ const UserManagement = () => {
       {/* giữa */}
       <div className="mb-4 flex  items-end justify-between">
         {/* Thêm mới */}
-        <Link to={`/admin/products/add`} className="cursor-pointer">
+        <button onClick={handleNewAccount} className="cursor-pointer">
           <Badge
             variant="success"
             className="py-2 px-4 text-shadow-md font-bold rounded-lg"
@@ -141,7 +149,7 @@ const UserManagement = () => {
             <Plus />
             Thêm tài khoản
           </Badge>
-        </Link>
+        </button>
 
         {/* Tìm kiếm */}
         <div className="col-start-2 relative flex items-center">
@@ -238,9 +246,7 @@ const UserManagement = () => {
                   return (
                     <tr
                       key={user.email}
-                      onClick={() =>
-                        navigate(`/admin/products?productCollection=${user._id}`)
-                      }
+                      onClick={() => navigate(`/admin/users/${user._id}`)}
                       className={`border-b border-gray-300 text-sm text-black/80  cursor-pointer
                       `}
                     >

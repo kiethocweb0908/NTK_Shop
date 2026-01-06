@@ -22,7 +22,9 @@ const CollectionPage = () => {
   const { collection } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
-  const { products, pagination, loading, error } = useSelector((state) => state.products);
+  const { products, pagination, loading, error } = useSelector(
+    (state) => state.user.products
+  );
   // const queryParams = Object.fromEntries([...searchParams]);
 
   // const [products, setProducts] = useState([]);
@@ -131,7 +133,7 @@ const CollectionPage = () => {
           className="lg:w-3/4 xl:w-4/5 p-4 ml-3 lg:ml-0 mr-3 xl:mr-0
         border bg-white/85 shadow-lg backdrop-blur-3xl
         border-white/95
-        rounded-xl min-h-133 flex flex-col justify-between"
+        rounded-xl min-h-155 flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-shadow-sm uppercase ">Sản phẩm</h2>

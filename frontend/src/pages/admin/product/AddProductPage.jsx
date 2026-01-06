@@ -37,9 +37,8 @@ const AddProductPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { products } = useSelector((state) => state.adminProducts);
-  const { operationLoading, uploadProgress, operationError } = useSelector(
-    (state) => state.adminProducts
+  const { products, operationLoading, uploadProgress, operationError } = useSelector(
+    (state) => state.admin.adminProducts
   );
 
   const fileInputRefs = useRef({});

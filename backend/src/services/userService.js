@@ -1,5 +1,6 @@
 import Otp from "../models/Otp.js";
 import User from "../models/User.js";
+import Order from "../models/Order.js";
 import { sendOTPEmail, sendUrlResetPassword } from "../utils/email.js";
 import { generateOTP } from "../utils/generateOTP.js";
 import crypto from "crypto";
@@ -155,8 +156,20 @@ export const resetPass = async (token, password) => {
   if (!user) throw new Error("Lỗi! Token không hợp lệ hoặc hết hạn");
 
   user.password = password;
+  user.passwordChangedAt = Date.now();
   user.resetPasswordToken = undefined;
   user.resetPasswordExpires = undefined;
 
   await user.save();
+};
+
+//==============================
+// get details admin
+export const getUserDetails = async (userId) => {
+  const user = await User.findById(userId).select("-password");
+  if (!user) throw new Error("Lỗi! không tìm thấy user từ id");
+
+  const orders = await Order.find({ user: userId });
+
+  return { user, orders };
 };

@@ -1,11 +1,10 @@
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { toast, Toaster } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
 import store from './redux/store';
-import adminStore from './redux/admin/adminStore';
 import { Provider } from 'react-redux';
 
-import { fetchCurrentUser } from './redux/slices/authSlice';
+import { clearUser, fetchCurrentUser } from './redux/slices/authSlice';
 import { fetchCart } from './redux/slices/cartSlice';
 
 // Components
@@ -43,6 +42,7 @@ import AddCollectionPage from './pages/admin/collection/AddCollectionPage';
 import AddCategoryPage from './pages/admin/category/AddCategoryPage';
 import EditCollectionPage from './pages/admin/collection/EditCollectionPage';
 import EditCategoryPage from './pages/admin/category/EditCategoryPage';
+import UserDetailsPage from './pages/admin/user/UserDetailsPage';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -57,45 +57,22 @@ const ScrollToTop = () => {
 
 function AppContent() {
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <Toaster duration={2000} position="top-right" closeButton richColors />
+    <Provider store={store}>
+      <BrowserRouter>
+        <ScrollToTop />
+        <Toaster duration={2000} position="top-right" closeButton richColors />
 
-      <Routes>
-        {/* User Routes */}
-        <Route path="/*" element={<UserRoutesWithStore />} />
+        <Routes>
+          {/* User Routes */}
+          <Route path="/*" element={<UserRoutes />} />
 
-        {/* Admin Routes  */}
-        <Route path="/admin/*" element={<AdminRoutesWithStore />} />
+          {/* Admin Routes  */}
+          <Route path="/admin/*" element={<AdminRoutes />} />
 
-        {/* 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-function UserRoutesWithStore() {
-  return (
-    <PayPalScriptProvider
-      options={{
-        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
-        currency: 'USD',
-        intent: 'capture',
-        components: 'buttons',
-      }}
-    >
-      <Provider store={store}>
-        <UserRoutes />
-      </Provider>
-    </PayPalScriptProvider>
-  );
-}
-
-function AdminRoutesWithStore() {
-  return (
-    <Provider store={adminStore}>
-      <AdminRoutes />
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
     </Provider>
   );
 }
@@ -117,30 +94,56 @@ function UserRoutes() {
     dispatch(fetchCart());
   }, [user, dispatch]);
   return (
-    <Routes>
-      <Route path="/" element={<UserLayout />}>
-        <Route index element={<Home />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="shop" element={<CollectionPage />} />
-        <Route path="product/:id" element={<ProductDetails />} />
-        {/* <Route path="checkout" element={<Checkout />} /> */}
-        <Route path="order-confirmation" element={<OrderConfirmation />} />
-        <Route path="order/:id" element={<OrderDetailsPage />} />
-        <Route path="my-orders" element={<MyOrdersPage />} />
+    <PayPalScriptProvider
+      options={{
+        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
+        currency: 'USD',
+        intent: 'capture',
+        components: 'buttons',
+      }}
+    >
+      <Routes>
+        <Route path="/" element={<UserLayout />}>
+          <Route index element={<Home />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="shop" element={<CollectionPage />} />
+          <Route path="product/:id" element={<ProductDetails />} />
+          {/* <Route path="checkout" element={<Checkout />} /> */}
+          <Route path="order-confirmation" element={<OrderConfirmation />} />
+          <Route path="order/:id" element={<OrderDetailsPage />} />
+          {/* <Route path="my-orders" element={<MyOrdersPage />} /> */}
 
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="otp" element={<Otp />} />
-        <Route path="forgot-password" element={<ForgotPassword />} />
-        <Route path="reset-password" element={<ResetPassword />} />
-      </Route>
-      <Route path="checkout" element={<Checkout />} />
-    </Routes>
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="otp" element={<Otp />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
+        </Route>
+        <Route path="checkout" element={<Checkout />} />
+      </Routes>
+    </PayPalScriptProvider>
   );
 }
 
 // Admin
 function AdminRoutes() {
+  const { user, loading } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchCurrentUser());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (!user || !['admin', 'viewer'].includes(user.role)) {
+      navigate('/', { replace: true });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) return null;
   return (
     <Routes>
       <Route path="/" element={<AdminLayout />}>
@@ -163,6 +166,7 @@ function AdminRoutes() {
 
         {/* User */}
         <Route path="users" element={<UserManagement />} />
+        <Route path="users/:userId" element={<UserDetailsPage />} />
 
         {/* Order */}
         <Route path="orders" element={<OrderManagement />} />

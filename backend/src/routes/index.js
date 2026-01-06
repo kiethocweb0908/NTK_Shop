@@ -16,6 +16,7 @@ import adminOrderRoutes from "./admin/adminOrderRoutes.js";
 import adminCollectionsRoutes from "./admin/adminCollectionRoutes.js";
 import adminCategoryRoutes from "./admin/adminCategoryRoutes.js";
 import adminUserRoutes from "./admin/adminUserRoutes.js";
+import adminStatsRoutes from "./admin/adminStatsRoutes.js";
 import uploadRoutes from "./uploadRoutes.js";
 
 const router = express.Router();
@@ -38,6 +39,7 @@ adminCollectionsRoutes;
 router.use("/admin/collections", adminCollectionsRoutes);
 router.use("/admin/categories", adminCategoryRoutes);
 router.use("/admin/users", adminUserRoutes);
+router.use("/admin/stats", adminStatsRoutes);
 
 // ===== UPLOAD =====
 router.use("/upload", protect, authorize("admin"), uploadRoutes);

@@ -13,7 +13,7 @@ import Reveal from '@/components/animations/Reveal';
 const Home = () => {
   const dispatch = useDispatch();
   const { products, loading, loadingFeatured, error } = useSelector(
-    (state) => state.products
+    (state) => state.user.products
   );
   const [bestSellerProduct, setBestSellerProduct] = useState(null);
   const [newProducts, setNewProducts] = useState([]);

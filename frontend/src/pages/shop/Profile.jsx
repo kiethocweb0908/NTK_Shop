@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import MyOrdersPage from './MyOrdersPage';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import { logoutUser } from '@/redux/slices/authSlice';
+import { fetchCurrentUser, logoutUser } from '@/redux/slices/authSlice';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MyInfo from './MyInfo';
 import { clearOrders } from '@/redux/slices/orderSlice';
@@ -12,13 +12,22 @@ import { ArrowLeft } from 'lucide-react';
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { user, loading } = useSelector((state) => state.auth);
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
 
-  if (!user) {
-    return navigate('/login');
-  }
+  useEffect(() => {
+    if (loading) {
+      dispatch(fetchCurrentUser()).unwrap();
+    }
+  }, [dispatch, user]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      return navigate('/login');
+    }
+  }, [user, loading]);
 
   return (
     <div className="min-h-screen w-full relative">

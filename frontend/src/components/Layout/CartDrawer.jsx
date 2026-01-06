@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import CartContents from '../Cart/CartContents';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
+import { fetchCart } from '@/redux/slices/cartSlice';
+
+const CART_VALIDATE_INTERVAL = 2 * 60 * 1000; // 2 phút
 
 const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
-  const { cart, loading, error } = useSelector((state) => state.cart);
+  const { cart, lastValidatedAt, loading, error } = useSelector(
+    (state) => state.user.cart
+  );
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
   const handleCheckout = () => {
@@ -17,6 +23,17 @@ const CartDrawer = ({ cartDrawerOpen, tonggleCartDrawer }) => {
       toast.warning('Không thể tới trang thanh toán khi giỏ hàng trống!');
     }
   };
+
+  useEffect(() => {
+    if (!cartDrawerOpen) return;
+
+    const shouldValidate =
+      !cart || !lastValidatedAt || Date.now() - lastValidatedAt > CART_VALIDATE_INTERVAL;
+
+    if (shouldValidate) {
+      dispatch(fetchCart());
+    }
+  }, [cartDrawerOpen, cart, lastValidatedAt, dispatch]);
 
   return (
     <div

@@ -32,7 +32,7 @@ const MyOrdersPage = () => {
     },
     loading,
     error,
-  } = useSelector((state) => state.orders);
+  } = useSelector((state) => state.user.orders);
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page')) || 1;
 

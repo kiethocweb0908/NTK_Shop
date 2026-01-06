@@ -84,7 +84,7 @@ const Login = () => {
       ).unwrap();
       toast.success(`Đăng nhập thành công. Chào mừng ${result.user.name}!`);
     } catch (error) {
-      toast.error(error || 'Đăng nhập thất bại');
+      toast.warning('Tài khoản hoặc mật khẩu không đúng');
     }
 
     // Không cần navigate ở đây vì useEffect sẽ xử lý

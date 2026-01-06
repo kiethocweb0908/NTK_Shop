@@ -10,9 +10,9 @@ import { formatCurrency } from '@/lib/utils';
 const FilterSidebar = () => {
   // api
   const { categories, loading: categoriesLoading } = useSelector(
-    (state) => state.categories
+    (state) => state.user.categories
   );
-  const { collections } = useSelector((state) => state.collections);
+  const { collections } = useSelector((state) => state.user.collections);
 
   const dispatch = useDispatch();
 

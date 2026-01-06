@@ -9,7 +9,7 @@ import axiosInstance from '@/lib/axios';
 // Initial state
 const initialState = {
   user: null,
-  loading: false,
+  loading: true,
   error: null,
 };
 
@@ -178,8 +178,8 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
-        state.loading = false;
         state.user = action.payload;
+        state.loading = false;
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loading = false;

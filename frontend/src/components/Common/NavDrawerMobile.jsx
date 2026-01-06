@@ -17,8 +17,8 @@ import { logoutUser } from '@/redux/slices/authSlice';
 import { toast } from 'sonner';
 
 const NavDrawerMobile = ({ tongglNavDrawer, navDrawerOpen }) => {
-  const { categories } = useSelector((state) => state.categories);
-  const { collections } = useSelector((state) => state.collections);
+  const { categories } = useSelector((state) => state.user.categories);
+  const { collections } = useSelector((state) => state.user.collections);
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();

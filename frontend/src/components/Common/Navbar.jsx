@@ -1,9 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 
-import SearchBar from './SearchBar';
-import CartDrawer from '../Layout/CartDrawer';
-import { navType } from '../../lib/data/data';
 import { useDispatch, useSelector } from 'react-redux';
 
 // Icons
@@ -13,12 +10,11 @@ import {
   HiBars3BottomRight,
   HiMagnifyingGlass,
 } from 'react-icons/hi2';
-import { IoMdClose } from 'react-icons/io';
+
 import { Check, ChevronDown, UserCheck2, LogOut } from 'lucide-react';
 import Menu from './Menu';
 
 import { LayoutContext } from '../Layout/UserLayout';
-import { Button } from '../ui/button';
 import { clearOrders } from '@/redux/slices/orderSlice';
 import { toast } from 'sonner';
 import { logoutUser } from '@/redux/slices/authSlice';
@@ -26,7 +22,7 @@ import { logoutUser } from '@/redux/slices/authSlice';
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { cart } = useSelector((state) => state.cart);
+  const { cart } = useSelector((state) => state.user.cart);
   const { user } = useSelector((state) => state.auth);
   //active navbar
   const [navActive, setNavActive] = useState('');

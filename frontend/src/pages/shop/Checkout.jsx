@@ -28,14 +28,14 @@ import { toast } from 'sonner';
 import { placeOrderThunk } from '@/redux/slices/orderSlice';
 import PayPalButton from '@/components/payment/PayPalButton';
 import PayPalButtonWrapper from '@/components/payment/PayPalButtonWrapper';
+import { fetchCart } from '@/redux/slices/cartSlice';
 
 const Checkout = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
-  const { cart, loading, error } = useSelector((state) => state.cart);
-  // const product = cart.products;
   const navigate = useNavigate();
-
+  const { user } = useSelector((state) => state.auth);
+  const { cart, loading, error } = useSelector((state) => state.user.cart);
+  // const product = cart.products;
   const [checkoutId, setCheckoutId] = useState(null);
   const [activeTab, setActiveTab] = useState(user ? 'address' : 'addressOther');
   // State cho thông tin liên hệ
@@ -65,10 +65,16 @@ const Checkout = () => {
   const [addressError, setAddressError] = useState({});
 
   useEffect(() => {
-    if (cart && cart.products && cart.products.length === 0) {
+    if (!cart) {
+      dispatch(fetchCart()).unwrap();
+    }
+  }, [dispatch, cart]);
+
+  useEffect(() => {
+    if (!loading && cart && cart.products && cart.products.length === 0) {
       navigate('/');
     }
-  }, [cart, navigate]);
+  }, [loading, cart, navigate]);
 
   // lấy phí ship khi đổi phương thức
   useEffect(() => {
@@ -254,6 +260,8 @@ const Checkout = () => {
   const handleNewAddressChange = (address) => {
     setNewAddress(address);
   };
+
+  if (!loading && cart && cart.products && cart.products.length === 0) return null;
 
   return (
     <div className="w-full relative">

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import Cart from "../models/Cart.js";
 
 import * as userService from "../services/userService.js";
+import * as authService from "../services/authService.js";
 
 // Helper function to set token cookie
 const setTokenCookie = (res, token) => {
@@ -35,16 +36,7 @@ export const verifyRegisterOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    const user = await userService.verifyOTP(email, otp);
-
-    if (!process.env.JWT_SECRET)
-      throw new Error("Lỗi! JWT_SECRET chưa được định nghĩa");
-
-    const payload = { user: { id: user._id, role: user.role } };
-
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "40h",
-    });
+    const { user, token } = await authService.registerWithOTP(email, otp);
 
     setTokenCookie(res, token);
 
@@ -83,45 +75,15 @@ export const resendRegisterOTP = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    //Find the user by email
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({
-        message: "Email không đúng!",
-      });
-    }
-
-    const isMatch = await user.matchPassword(password);
-
-    if (!isMatch)
-      return res.status(400).json({ message: "Mật khẩu không đúng!" });
-
-    // 🎯 MERGE CARTS TRƯỚC KHI TẠO TOKEN
     const guestId = req.cookies?.guestId;
-    let mergedItems = 0;
-    let result = {};
 
-    if (guestId) {
-      try {
-        const mergeResult = await Cart.mergeCarts(guestId, user._id);
-        mergedItems = mergeResult.cart ? mergeResult.cart.products.length : 0;
-        result = { ...mergeResult };
-        res.clearCookie("guestId"); // Xóa guestId sau khi merge
-      } catch (mergeError) {
-        console.error("Merge cart error:", mergeError);
-        // Không throw error để không ảnh hưởng login
-      }
-    }
+    const { user, token, mergedItems, mergeResult } = await authService.login(
+      email,
+      password,
+      guestId
+    );
 
-    //Create JWT Payload
-    const payload = { user: { id: user._id, role: user.role } };
-
-    // Sign and return the token along with user data
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "40h",
-    });
+    if (guestId) res.clearCookie("guestId");
 
     setTokenCookie(res, token);
 
@@ -137,11 +99,12 @@ export const loginUser = async (req, res) => {
       },
       // token,
       mergedItems,
-      result,
+      result: mergeResult,
     });
   } catch (error) {
-    console.error("Lỗi khi gọi loginUser: ", error);
-    res.status(500).json("Server Error");
+    console.error("Lỗi khi gọi loginUser:", error);
+    const status = error.message.includes("Lỗi!") ? 400 : 500;
+    res.status(status).json({ message: error.message });
   }
 };
 

@@ -32,7 +32,7 @@ import { Button } from '@/components/ui/button';
 
 const ProductDetailPage = () => {
   const { productId } = useParams();
-  const { selectedProduct } = useSelector((state) => state.adminProducts);
+  const { selectedProduct } = useSelector((state) => state.admin.adminProducts);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const product = selectedProduct;

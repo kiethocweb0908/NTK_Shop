@@ -25,12 +25,24 @@ export const fetchAllUsersAdmin = createAsyncThunk(
   }
 );
 
+export const fetchUserDetailsAdmin = createAsyncThunk(
+  'admin/users/fetchUserDetailsAdmin',
+  async ({ userId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/api/admin/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data?.message || 'Lỗi fetchUserDetailsAdmin');
+    }
+  }
+);
+
 // Slice
 const adminUsers = createSlice({
   name: 'adminUsers',
   initialState: {
     users: [],
-    selectedUsers: null,
+    selectedUser: null,
     loading: false,
     error: null,
     updateLoading: false,
@@ -59,8 +71,8 @@ const adminUsers = createSlice({
       };
       state.pagination.currentPage = 1;
     },
-    clearSelectedUsers: (state) => {
-      state.selectedUsers = null;
+    clearselectedUser: (state) => {
+      state.selectedUser = null;
     },
     setPagination: (state, action) => {
       state.pagination = { ...state.pagination, ...action.payload.pagination };
@@ -87,10 +99,24 @@ const adminUsers = createSlice({
       .addCase(fetchAllUsersAdmin.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      //==========fetchUserDetailsAdmin==========
+      .addCase(fetchUserDetailsAdmin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserDetailsAdmin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedUser = action.payload.userData;
+      })
+      .addCase(fetchUserDetailsAdmin.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { setAdminFilters, clearAdminFilters, clearSelectedUsers, setPagination } =
+export const { setAdminFilters, clearAdminFilters, clearselectedUser, setPagination } =
   adminUsers.actions;
 export default adminUsers.reducer;

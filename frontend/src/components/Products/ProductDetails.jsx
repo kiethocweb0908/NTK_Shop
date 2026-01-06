@@ -37,7 +37,7 @@ const ProductDetails = ({ productId }) => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { selectedProduct, loading, error, similarProducts } = useSelector(
-    (state) => state.products
+    (state) => state.user.products
   );
   console.log(selectedProduct);
   // const { userId, guestId } = useSelector((state) => state.auth);
@@ -221,11 +221,11 @@ const ProductDetails = ({ productId }) => {
               </div>
 
               {/* main image */}
-              <div className="sm:col-span-6  max-h-[464px]">
+              <div className="sm:col-span-6  max-h-[464px] ">
                 <Carousel
                   setApi={setEmblaApi} // Nhận api
                   plugins={[plugin.current]}
-                  className="mb-4 sm:mb-0 rounded-xl overflow-hidden  border border-gray-200"
+                  className="mb-4 sm:mb-0 rounded-xl overflow-hidden  border border-gray-200 max-h-[464px]"
                   // onMouseEnter={plugin.current.stop}
                   onMouseLeave={plugin.current.reset}
                 >

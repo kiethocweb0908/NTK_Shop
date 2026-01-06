@@ -35,6 +35,18 @@ export const protect = async (req, res, next) => {
       return res.status(401).json({ message: "User không tồn tại" });
     }
 
+    if (user.passwordChangedAt) {
+      const changedTimestamp = Math.floor(
+        user.passwordChangedAt.getTime() / 1000
+      );
+
+      if (decoded.iat < changedTimestamp) {
+        return res.status(401).json({
+          message: "Mật khẩu đã được thay đổi, vui lòng đăng nhập lại",
+        });
+      }
+    }
+
     req.user = user;
 
     next();

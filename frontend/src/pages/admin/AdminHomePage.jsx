@@ -1,112 +1,104 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import StatsCard from '@/components/admin/StatsCard';
+import RevenueChart from '@/components/admin/RevenueChart';
+import OrderStatusPie from '@/components/admin/OrderStatusPie';
+import axiosInstance from '@/lib/axios';
+import { useEffect, useState } from 'react';
+import { formatCurrency } from '@/lib/utils';
+
+// shadcn
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+// icons
+import { FaClipboardList, FaTshirt, FaUser, FaDollarSign, FaCoins } from 'react-icons/fa';
+import { Clock } from 'lucide-react';
+import { timeFilter } from '@/lib/data/data';
+import { useSearchParams } from 'react-router-dom';
 
 const AdminHomePage = () => {
-  const orders = [
-    {
-      _id: 123123,
-      user: {
-        name: 'John Doe',
-      },
-      totalPrice: 350000,
-      status: 'Processing',
-    },
-    {
-      _id: 41223,
-      user: {
-        name: 'John Doe',
-      },
-      totalPrice: 350000,
-      status: 'Processing',
-    },
-    {
-      _id: 234123,
-      user: {
-        name: 'John Doe',
-      },
-      totalPrice: 350000,
-      status: 'Processing',
-    },
-    {
-      _id: 554234,
-      user: {
-        name: 'John Doe',
-      },
-      totalPrice: 250000,
-      status: 'Processing',
-    },
-    {
-      _id: 442341,
-      user: {
-        name: 'John Doe',
-      },
-      totalPrice: 550000,
-      status: 'Processing',
-    },
-  ];
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = searchParams.get('filter') || 'all';
+  const [stats, setStats] = useState({});
+
+  const handleFilterChange = (value) => {
+    setSearchParams(value === 'all' ? {} : { filter: value });
+  };
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const response = await axiosInstance.get(`/api/admin/stats?filter=${filter}`);
+
+      setStats(response.data);
+    };
+
+    fetchStats();
+  }, [filter]);
+
+  if (Object.keys(stats).length === 0)
+    return <p className="text-center">Đang tải dữ liệu...</p>;
+
   return (
-    <div className="max-w-7xl mx-auto p-6 select-none">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="p-4 shadow-md rounded-lg">
-          <h2 className="text-xl font-semibold">Revenue</h2>
-          <p className="text-2xl">5.000.000 đ</p>
-        </div>
-        <div className="p-4 shadow-md rounded-lg">
-          <h2 className="text-xl font-semibold">Total Orders</h2>
-          <p className="text-2xl">5.000.000 đ</p>
-          <Link to="/admin/orders" className="text-blue-500 hover:underline">
-            Manage Orders
-          </Link>
-        </div>
-        <div className="p-4 shadow-md rounded-lg">
-          <h2 className="text-xl font-semibold">Total Products</h2>
-          <p className="text-2xl">5.000.000 đ</p>
-          <Link to="/admin/products" className="text-blue-500 hover:underline">
-            Manage Products
-          </Link>
+    <div className="max-w-7xl mx-auto p-6 space-y-6 relative">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold uppercase">Tổng quan</h2>
+
+        {/* Thời gian */}
+        <div>
+          <Select value={filter} onValueChange={(value) => handleFilterChange(value)}>
+            <SelectTrigger className="w-50 py-4">
+              <Clock className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Lọc theo thời gian" />
+            </SelectTrigger>
+            <SelectContent className="bg-white w-50">
+              {timeFilter.map((f, index) => (
+                <SelectItem className={'hover:bg-gray-100'} key={index} value={f.value}>
+                  {f.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
-      <div className="mt-6">
-        <h2 className="text-2xl font-bold mb-4">Recent Orders</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-gray-500 select-none">
-            <thead className="bg-gray-100 text-xs uppercase text-gray-700">
-              <tr>
-                <th className="py-3 px-4">Orders ID</th>
-                <th className="py-3 px-4">User</th>
-                <th className="py-3 px-4">Total Price</th>
-                <th className="py-3 px-4">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.length > 0 ? (
-                orders.map((order) => (
-                  <tr
-                    key={order._id}
-                    className="border-b hover:bg-gray-50 cursor-pointer"
-                  >
-                    <td className="p-4">{order._id}</td>
-                    <td className="p-4">{order.user.name}</td>
-                    <td className="p-4">
-                      {order.totalPrice.toLocaleString('vi-VN', {
-                        style: 'currency',
-                        currency: 'VND',
-                      })}
-                    </td>
-                    <td className="p-4">{order.status}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="p-4 text-center text-gray-500">
-                    No recent order found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+
+      {/* CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 ">
+        <StatsCard
+          icon={FaUser}
+          cd="-translate-y-0.5 text-blue-500"
+          title="Tổng người dùng"
+          value={stats.summary?.totalUsers}
+        />
+        <StatsCard
+          icon={FaTshirt}
+          cd="text-green-500"
+          title="Tổng sản phẩm"
+          value={stats.summary?.totalProducts}
+        />
+        <StatsCard
+          icon={FaClipboardList}
+          cd="text-amber-500"
+          title="Tổng đơn hàng"
+          value={stats.summary?.totalOrders}
+        />
+        <StatsCard
+          icon={FaCoins}
+          cd="text-yellow-500"
+          title="Doanh thu"
+          value={formatCurrency(stats.summary?.totalRevenue)}
+        />
+      </div>
+
+      {/* CHARTS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <RevenueChart cd={'col-span-2'} data={stats?.revenueChart} />
+        <OrderStatusPie title={'sản phẩm'} data={stats?.productByCategory} />
+        <OrderStatusPie title={'đơn hàng'} data={stats?.orderStatusData} />
       </div>
     </div>
   );

@@ -31,7 +31,7 @@ import PayPalButton from '@/components/payment/PayPalButton';
 const OrderDetailsPage = () => {
   const { id } = useParams();
   // const [orderDetails, setOrderDetails] = useState(null);
-  const { selectedOrder } = useSelector((state) => state.orders);
+  const { selectedOrder } = useSelector((state) => state.user.orders);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isButtonDisabled, setIsButtonDisable] = useState(false);
@@ -80,6 +80,7 @@ const OrderDetailsPage = () => {
     try {
       const response = await dispatch(completedOrderThunk({ orderId })).unwrap();
       toast.success(response?.message || 'Thành công');
+      setReload((prev) => !prev);
       setIsButtonDisable(false);
     } catch (error) {
       toast.error(error);

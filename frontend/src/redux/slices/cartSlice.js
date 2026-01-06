@@ -3,8 +3,9 @@ import axiosInstance from '@/lib/axios';
 
 const initialState = {
   cart: { products: [], totalItems: 0, totalPrice: 0 },
-  loading: false,
+  loading: true,
   error: null,
+  lastValidatedAt: null,
 };
 
 // Fetch cart for a user or guest
@@ -97,6 +98,7 @@ const cartSlice = createSlice({
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.loading = false;
         state.cart = action.payload.cart;
+        state.lastValidatedAt = Date.now();
       })
       .addCase(fetchCart.rejected, (state, action) => {
         state.loading = false;

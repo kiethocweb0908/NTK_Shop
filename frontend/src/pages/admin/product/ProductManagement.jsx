@@ -71,10 +71,10 @@ const ProductManagement = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { products, pagination, loading, error, filters } = useSelector(
-    (state) => state.adminProducts
+    (state) => state.admin.adminProducts
   );
-  const { categories } = useSelector((state) => state.categories);
-  const { collections } = useSelector((state) => state.collections);
+  const { categories } = useSelector((state) => state.admin.categories);
+  const { collections } = useSelector((state) => state.admin.collections);
 
   // Sử dụng useSearchParams
   const [searchParams, setSearchParams] = useSearchParams();

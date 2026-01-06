@@ -49,7 +49,7 @@ const CategoryManagement = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const debounceRef = useRef(null);
   const { categories, pagination, loading, error, activeLoading } = useSelector(
-    (state) => state.categories
+    (state) => state.admin.categories
   );
 
   // Lấy filter

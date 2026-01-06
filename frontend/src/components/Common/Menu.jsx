@@ -10,14 +10,14 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from '@/components/ui/navigation-menu';
-import { genders, navType } from '@/lib/data/data';
+import { genders } from '@/lib/data/data';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { ChevronDown, Check } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 const Menu = () => {
-  const { categories } = useSelector((state) => state.categories);
-  const { collections } = useSelector((state) => state.collections);
+  const { categories } = useSelector((state) => state.user.categories);
+  const { collections } = useSelector((state) => state.user.collections);
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);

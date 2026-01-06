@@ -5,7 +5,7 @@ import { CheckCircle, XCircle, Upload, Info, AlertCircle, ListStart } from 'luci
 import { clearUploadLogs } from '@/redux/admin/slices/adminProductsSlice';
 const UploadProgressModal = ({ action }) => {
   const { operationLoading, uploadProgress, uploadLogs } = useSelector(
-    (state) => state.adminProducts
+    (state) => state.admin.adminProducts
   );
 
   useEffect(() => {

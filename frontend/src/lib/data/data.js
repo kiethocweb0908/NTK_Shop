@@ -20,7 +20,7 @@ export const colors = [
   { colorName: 'Xanh dương', colorHex: '#6EA8FF' },
   { colorName: 'Tím', colorHex: '#C39BE0' },
 ];
-export const sizes = ['S', 'M', 'L', 'XL'];
+export const sizes = ['XS', 'S', 'M', 'L', 'XL'];
 export const genders = [
   {
     value: 'Men',
@@ -316,3 +316,21 @@ export const roles = [
     name: 'Người tham quan',
   },
 ];
+
+export const ORDER_STATUS_COLOR = {
+  processing: '#FFD27A', // vàng
+  confirmed: '#9FE2BF', // xanh dương
+  shipping: '#6EA8FF', // xanh biển
+  delivered: '#9FE2BF',
+  completed: '#81dead', // xanh lá
+  cancelled: '#FF6666', // đỏ
+};
+
+export const ORDER_STATUS_LABEL = {
+  processing: 'Đang xử lý',
+  confirmed: 'Đã xác nhận',
+  shipping: 'Đang giao',
+  delivered: 'Đã giao',
+  completed: 'Hoàn thành',
+  cancelled: 'Đã huỷ',
+};

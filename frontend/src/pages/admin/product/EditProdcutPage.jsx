@@ -49,8 +49,7 @@ import axiosInstance from '@/lib/axios';
 const EditProdcutPage = () => {
   // lấy sản phẩm
   const { productId } = useParams();
-  const { selectedProduct } = useSelector((state) => state.adminProducts);
-  const { products } = useSelector((state) => state.adminProducts);
+  const { products, selectedProduct } = useSelector((state) => state.admin.adminProducts);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
